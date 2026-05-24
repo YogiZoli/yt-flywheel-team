@@ -1,0 +1,23 @@
+{
+    "name":  "yt-flywheel-team",
+    "version":  "1.3.0",
+    "description":  "YouTube Evergreen Flywheel — a 16-skill AI Agent Team with two-tier orchestration. Strategic Launch Orchestrator builds the full funnel (playlist concept, lead magnet PDF, landing page, GHL automation, permanent opt-in URL) before the first video. Video Production Orchestrator runs the full per-video pipeline (strategy, SEO, script, ElevenLabs audio, Shorts, thumbnail, publish) with opt-in URL auto-injected into every publishing artifact. All outputs saved to Google Drive. Supports multiple YouTube channels.",
+    "author":  {
+                   "name":  "Zoltan Gero",
+                   "email":  "humorketing@gmail.com"
+               },
+    "keywords":  [
+                     "youtube",
+                     "content-creation",
+                     "evergreen",
+                     "lead-generation",
+                     "multi-channel",
+                     "google-drive",
+                     "shorts",
+                     "pipeline-automation",
+                     "funnel",
+                     "lead-magnet",
+                     "ghl",
+                     "orchestration"
+                 ]
+}
