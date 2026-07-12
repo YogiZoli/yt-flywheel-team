@@ -39,7 +39,10 @@ Never >3 brand colours per unit | Never paragraphs >3 sentences | Never passive 
 **Phase:** Pre-Publishing (after confirmed title from Agent 02)
 **Playbook modules:** 7 (Thumbnail Strategy)
 
-## Pre-Flight: Active Channel Check
+## Context Block Protocol
+If invoked by an orchestrator with a `=== CONTEXT BLOCK v1 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs, confirmed title) and SKIP the Pre-Flight Drive reads below for every field the block provides — STANDING_RULES must still be read from Drive. Standalone invocation → run Pre-Flight as written.
+
+## Pre-Flight: Active Channel Check (standalone only)
 Use Drive MCP tools directly — do not ask the operator to provide these:
 1. **Read `_Active_Channel.gdoc`:** `search_files(query: "title = '_Active_Channel'")` → take first result's `id` → `read_file_content(fileId)` → parse line 1: `[Channel Name] | [Channel Folder ID]`. Store **Channel Folder ID**. If empty → invoke `channel-manager`.
 2. **Get confirmed title:** `search_files(query: "title = '02_SEO_Titles' and parentId = '[channelFolderID]'")` → subfolder ID → `search_files(query: "parentId = '[subfolderID]'")` → read most recent → extract title

@@ -40,7 +40,10 @@ Never >3 brand colours per unit | Never paragraphs >3 sentences | Never passive 
 **Method:** Ownership Framework — OPEN → TEACH → OWN
 **Primary style references:** Adam Erhart (simplicity, direct, numbered steps) · Ownership Method (email-first CTA philosophy, value-first delivery)
 
-## Pre-Flight: Active Channel Check + Inputs
+## Context Block Protocol
+If invoked by an orchestrator with a `=== CONTEXT BLOCK v1 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs, confirmed title, playlist info, lead magnet, avatar summary) and SKIP the Pre-Flight Drive reads below for every field the block provides. Standalone invocation → run Pre-Flight as written.
+
+## Pre-Flight: Active Channel Check + Inputs (standalone only)
 Use Drive MCP tools directly for all reads — do not ask the operator to paste these:
 1. **Read `_Active_Channel.gdoc`:** `search_files(query: "title = '_Active_Channel'")` → take first result's `id` → `read_file_content(fileId)` → parse line 1: `[Channel Name] | [Channel Folder ID]`. Store **Channel Folder ID**. If empty → invoke `channel-manager`.
 2. Fetch inputs from Drive automatically:
@@ -417,12 +420,12 @@ Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f0
    Script saved → [webViewLink]
 
    Review it. When approved, say "jóváhagyom" or "approved".
-   Next: Agent 03b (ElevenLabs audio generation).
+   Next: manual ElevenLabs audio (Gate 4 in the pipeline — paste script into ElevenLabs).
 
    CTA Slot active: PDF Lead Magnet.
    Coming soon: Mini Course · Survey (ASK Method) · GHL Affiliate + Snapshot.
 
-   Workflow: 03 Script → 03b Audio → 04 Thumbnail → 05 Publish + HeyGen prompt (last)
+   Workflow: 03 Script → [manual ElevenLabs audio] → 04 Thumbnail → 05 Publish + HeyGen prompt (last)
    ```
 
 ---

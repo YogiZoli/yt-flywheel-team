@@ -8,21 +8,30 @@ Built for Business Owners (not YouTubers). The email list is the asset. YouTube 
 
 ## What's Inside
 
-**11 Skills** (10 numbered agents + 1 channel manager):
+**13 Skills** (2 orchestrators + channel manager + 10 agents):
 
 | Skill | Phase | Trigger |
 |---|---|---|
-| `channel-manager` | Setup / switching | "set up Flywheel", "create new channel", "switch to channel X", "list channels" |
+| `strategic-launch-orchestrator` | Once per playlist | "playlist launch", "új playlist" |
+| `video-production-orchestrator` | Every video | "új videó", "new video cycle" |
+| `channel-manager` | Setup / switching | "create new channel", "switch to channel X" |
 | `agent-00-channel-foundation` | Once per channel | "set up my channel", "channel foundation" |
 | `agent-01-channel-strategist` | Pre | "what should I make next" |
 | `agent-02-seo-title` | Pre | "give me a title" |
 | `agent-03-script-writer` | Pre | "write my script" |
+| `agent-03c-shorts-producer` | Post | "shortokat is kérem" |
 | `agent-04-thumbnail` | Pre | "thumbnail brief" |
 | `agent-05-launch-publish` | Pre | "ready to upload" |
+| `agent-05b-multilingual-captions` | Post | "felirat fordítás" |
 | `agent-06-analytics-reviewer` | Post | "review my analytics" |
-| `agent-07-repurposing` | Post | "repurpose this video" |
-| `agent-08-community` | Post | "community post" |
-| `agent-09-conversion-bridge` | Post | "grow my email list" |
+| `agent-07-repurposing` | Post | "repurpose" [R] / "community post" [C] — two modes |
+| `agent-09-conversion-bridge` | Post | "conversion audit", "CTA copy" |
+
+**Architecture notes (v1.4):**
+- Orchestrators read Drive ONCE and pass a CONTEXT BLOCK to every agent (`references/conventions.md`).
+- Funnel building (lead magnet, landing page, GHL) is DELEGATED to the `email-list-building` plugin.
+- Agent 08 merged into Agent 07 (Community mode). Agent 03b merged into the video orchestrator
+  as an ElevenLabs API fallback. Legacy pipeline-orchestrator removed.
 
 ---
 
@@ -70,7 +79,7 @@ All agents read from the **YouTube Evergreen Flywheel Playbook v2.0** Google Doc
 
 **Every video — POST-publishing:**
 ```
-06 Analytics → 07 Repurposing → 08 Community → 09 Conversion → back to 01
+06 Analytics → 07 Post-Publish Content ([R]+[C]) → 09 Conversion Audit → back to 01
 ```
 
 ---
@@ -116,6 +125,6 @@ The channel-manager skill creates the YT_Flywheel master folder in your Drive, t
 
 ---
 
-**Version:** 1.0.0
+**Version:** 1.4.0
 **Author:** Zoltan Gero (humorketing@gmail.com)
 **License:** Personal use

@@ -7,7 +7,10 @@ description: Use this agent for all YouTube SEO and title work. Triggers when th
 **Phase:** Pre-Publishing (runs BEFORE Script Writer — Agent 03)
 **Playbook modules:** 6 (SEO, Title & Optimization)
 
-## Pre-Flight: Active Channel Check
+## Context Block Protocol
+If invoked by an orchestrator with a `=== CONTEXT BLOCK v1 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs, confirmed topic) and SKIP the Pre-Flight Drive reads below for every field the block provides. Standalone invocation → run Pre-Flight as written.
+
+## Pre-Flight: Active Channel Check (standalone only)
 Before doing anything else — use Drive MCP tools directly, do not ask the operator to provide these:
 1. **Read `_Active_Channel.gdoc`:** `search_files(query: "title = '_Active_Channel'")` → take first result's `id` → `read_file_content(fileId)` → parse line 1: `[Channel Name] | [Channel Folder ID]`. Store **Channel Folder ID**.
 2. If empty or missing → invoke `channel-manager` skill

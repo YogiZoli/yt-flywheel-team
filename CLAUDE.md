@@ -25,8 +25,8 @@ YT_Flywheel/                          ← master folder (Google Drive root)
     ├── 04_Thumbnail_Briefs/          ← Agent 04 briefs + A/B rules
     ├── 05_Publish_Checklists/        ← Agent 05 upload checklists
     ├── 06_Analytics_Reviews/         ← Agent 06 weekly reports
-    ├── 07_Repurposing_Briefs/        ← Agent 07 short-form briefs
-    ├── 08_Community/                 ← Agent 08 posts + comment logs
+    ├── 07_Repurposing_Briefs/        ← Agent 07 Repurposing-mode briefs
+    ├── 08_Community/                 ← Agent 07 Community-mode posts + comment logs
     └── 09_Lead_Magnets/              ← Agent 09 opt-in copy + audits
 ```
 
@@ -40,6 +40,12 @@ Before any agent does work:
 
 Never guess the active channel. Never write outputs to a wrong channel folder.
 
+### Context Block Handoff (Drive read optimization)
+When an orchestrator runs, it reads Drive ONCE at startup and passes a `=== CONTEXT BLOCK v1 ===`
+(schema: plugin `references/conventions.md` §1) to every agent it invokes. Agents receiving the
+block MUST NOT re-read `_Active_Channel`, the Foundation doc, or subfolder IDs. Agents invoked
+standalone run their own Pre-Flight as written.
+
 ## Core Frame — Non-Negotiable
 - The owner is a BUSINESS OWNER, not a YouTuber
 - YouTube is a traffic engine → the email list is the real business asset
@@ -49,8 +55,13 @@ Never guess the active channel. Never write outputs to a wrong channel folder.
 
 ## Workflow Sequence (every video)
 - **Setup (per channel, once):** `channel-manager` → Agent 00 (Foundation)
-- **PRE-publishing:** Agent 01 → Agent 02 → Agent 03 → Agent 04 → Agent 05
-- **POST-publishing:** Agent 06 → Agent 07 → Agent 08 → Agent 09 → feedback to Agent 01
+- **Playlist launch (once per playlist):** `strategic-launch-orchestrator` → Agent 01 (Playlist Mode)
+  → funnel build DELEGATED to `email-list-building:list-building-orchestrator` → Agent 09 stores opt-in URL
+- **PRE-publishing (per video):** `video-production-orchestrator`: [Agent 01 only if no PlaylistStrategy]
+  → Agent 02 → Agent 03 → [manual ElevenLabs audio] → Agent 04 → Agent 05
+- **POST-publishing (optional menu):** 03c Shorts · Agent 07 (Repurposing [R] + Community [C] modes)
+  · Agent 09 (conversion audit) · 05b Captions · Agent 06 weekly → feedback to Agent 01
+- **Funnel building is NEVER done in this plugin** — always the email-list-building plugin.
 
 ## Output Format Rules
 - All outputs go to Google Drive (Google Docs, Sheets where appropriate)

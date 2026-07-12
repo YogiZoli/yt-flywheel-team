@@ -16,7 +16,10 @@ search algorithm; audio tracks are not.
 
 ---
 
-## Pre-Flight: Active Channel + Assets
+## Context Block Protocol
+If invoked with a `=== CONTEXT BLOCK v1 ===` (see plugin `references/conventions.md` §1), use its fields (channel, Captions subfolder ID) and SKIP the duplicated Drive reads below — the English SRT must still be read from Drive. Standalone invocation → run Pre-Flight as written.
+
+## Pre-Flight: Active Channel + Assets (standalone only)
 
 Use Drive MCP tools directly — do not ask operator to provide these:
 

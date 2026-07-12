@@ -7,7 +7,10 @@ description: Use this agent to review YouTube analytics, identify what's working
 **Phase:** Post-Publishing (weekly review cycle)
 **Playbook modules:** 8 (Metrics & Analytics)
 
-## Pre-Flight: Active Channel Check
+## Context Block Protocol
+If invoked by an orchestrator with a `=== CONTEXT BLOCK v1 ===` (see plugin `references/conventions.md` §1), use its fields and SKIP the duplicated Pre-Flight Drive reads below. Standalone invocation → run Pre-Flight as written.
+
+## Pre-Flight: Active Channel Check (standalone only)
 Use Drive MCP tools directly — do not ask the operator to provide these:
 1. **Read `_Active_Channel.gdoc`:** `search_files(query: "title = '_Active_Channel'")` → take first result's `id` → `read_file_content(fileId)` → parse line 1: `[Channel Name] | [Channel Folder ID]`. Store **Channel Folder ID**. If empty → invoke `channel-manager`.
 2. **Check previous review:** `search_files(query: "title = '06_Analytics_Reviews' and parentId = '[channelFolderID]'")` → subfolder ID → `search_files(query: "parentId = '[subfolderID]'")` → read most recent review for period-over-period comparison

@@ -1,12 +1,19 @@
 ---
 name: strategic-launch-orchestrator
-description: Channel-level launch controller — runs ONCE per playlist before any video is published. Defines the full playlist concept, builds the lead magnet PDF, creates the landing page, sets up GHL automation, and stores the permanent opt-in URL so every video description has a live link from day one. Triggers when the user says "playlist launch", "channel launch", "new playlist", "playlist setup", "indítsuk el a playlistet", "launch strategy", "funnel setup", "build the funnel", "lead magnet előbb", "funnel először", "opt-in URL kell", "email rendszer setup", "playlist concept", "teljes launch", "indítsuk el a rendszert", or "before the first video".
+description: Channel-level launch controller — runs ONCE per playlist before any video is published. Defines the full playlist concept, then delegates funnel building (lead magnet, landing page, GHL automation) to the email-list-building plugin's list-building-orchestrator, and stores the permanent opt-in URL so every video description has a live link from day one. Triggers ONLY when the user says "playlist launch", "channel launch", "new playlist", "playlist setup", "indítsuk el a playlistet", "playlist concept", "teljes launch", or "before the first video". (Funnel/lead-magnet-only requests belong to the email-list-building plugin, not here.)
 ---
 
 # Strategic Launch Orchestrator
 **Role:** Channel-level master controller. Runs ONCE per playlist, before video 1 is published.
-**Chains:** Agent 01 (Playlist Mode) → Agent 09 (Conversion Bridge) — full funnel built in one session.
+**Chains:** Agent 01 (Playlist Mode) → `email-list-building:list-building-orchestrator` (funnel build)
+→ Agent 09 (YouTube-side bridge: description CTAs + opt-in URL storage).
 **Output:** Permanent opt-in URL stored in Drive → Video Production Orchestrator reads it automatically.
+
+## SHARED CONVENTIONS — READ FIRST
+At startup, read `../../references/conventions.md` (plugin root `references/conventions.md`).
+It defines: the CONTEXT BLOCK schema (§1), the shared status artifact HTML base (§2),
+gate block format (§3), global commands (§4), resume logic (§5), and error handling (§6).
+Build the CONTEXT BLOCK at Step 0 and pass it to every skill invoked.
 
 ---
 
@@ -36,16 +43,9 @@ START
 [S1] Agent 01 — Playlist Strategy Mode    ← GATE 1: Confirm playlist concept
   │
   ▼
-[S2] Agent 09 Phase 1 — Lead Magnet PDF   ← GATE 2: Approve content
-  │
-  ▼
-[S3] Agent 09 Phase 2 — PDF Design (Canva) ← GATE 3: Approve design
-  │
-  ▼
-[S4] Agent 09 Phase 3 — Landing Page HTML
-  │
-  ▼
-[S5] Agent 09 Phase 4 — GHL Automation    ← GATE 4: Confirm GHL live + URL
+[S2–S5] Funnel Build — DELEGATED to email-list-building plugin
+  │      (list-building-orchestrator: lead magnet → design → landing page → GHL)
+  │      ← its own gates run inside the T2 team; GATE 4 here: Confirm GHL live + URL
   │
   ▼
 [S6] Store opt-in URL → Drive (_OptinURL file)
@@ -90,30 +90,10 @@ Update it after every completed step using `mcp__cowork__update_artifact`.
 
 ## LAUNCH STATUS ARTIFACT (HTML)
 
+Use the shared HTML base from `references/conventions.md` §2 (CSS + skeleton).
+Header: `🚀 Strategic Launch`. Step rows for this orchestrator:
+
 ```html
-<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-background:#0f0f0f;color:#e0e0e0;padding:24px;max-width:540px;margin:0 auto}
-h2{color:#fff;font-size:18px;margin-bottom:4px}
-.ch{color:#888;font-size:13px;margin-bottom:20px}
-.step{display:flex;align-items:center;gap:12px;padding:10px 14px;
-border-radius:8px;margin-bottom:6px;background:#1a1a1a}
-.step.done{background:#0d2b1a;border-left:3px solid #22c55e}
-.step.active{background:#1a1a2e;border-left:3px solid #818cf8}
-.step.waiting{background:#2b1a0d;border-left:3px solid #f59e0b}
-.step.pending{opacity:.4;border-left:3px solid #333}
-.icon{font-size:18px;width:24px;text-align:center}
-.label{flex:1;font-size:14px;font-weight:500}
-.status{font-size:12px;color:#666}
-.step.done .status{color:#22c55e}.step.active .status{color:#818cf8}
-.step.waiting .status{color:#f59e0b}
-.gate{font-size:11px;color:#444;margin-left:36px;margin-bottom:8px;margin-top:-2px}
-.urlbox{background:#0d2b1a;border:1px solid #22c55e;border-radius:8px;
-padding:12px 16px;margin-top:16px;font-size:13px;display:none}
-.urlbox.visible{display:block}
-.urllabel{color:#22c55e;font-weight:600;margin-bottom:4px}
-.urlval{color:#fff;word-break:break-all}
-</style></head><body>
 <h2>🚀 Strategic Launch</h2>
 <div class="ch"><!-- CHANNEL_NAME --> · <!-- DATE --></div>
 <div class="step <!-- S1 -->"><span class="icon">🧠</span>
@@ -183,92 +163,36 @@ This is the foundation document — all downstream content derives from it.
 
 ---
 
-## STEP S2 — Agent 09 Phase 1: Lead Magnet Content
+## STEP S2–S5 — Funnel Build (DELEGATED — single source of truth)
 
-Invoke `agent-09-conversion-bridge` skill, Phase 1 only (content writing — no design yet).
+**Do NOT build the funnel here.** Invoke the `email-list-building:list-building-orchestrator`
+skill (T2 team) — it owns lead magnet content, PDF design, landing page, and GHL automation,
+with its own internal approval gates.
 
-Pass as context:
-- Full playlist strategy (Drive doc from S1)
-- Avatar Card (from 00_Foundation)
-- Series name and lead magnet transformation promise (from S1)
+Pass as context (CONTEXT BLOCK + these fields):
+- Full playlist strategy (Drive doc from S1) + series name + lead magnet transformation promise
+- Avatar Card summary (from 00_Foundation)
+- Target Drive folder for outputs: this channel's `09_Lead_Magnets/` subfolder ID
+- Required return values: permanent opt-in URL + hosted PDF URL + tag names
 
-Agent 09 Phase 1 writes `LeadMagnet_[SeriesName]_RAW` to `09_Lead_Magnets/` in Drive.
-Update artifact: S2 → `waiting`. Then present:
+Requirements the T2 team must honour (state them explicitly in the handoff):
+- One playlist = one lead magnet = one permanent opt-in URL (never changes)
+- Contacts tagged `lead_magnet_[series_slug]` + `source_youtube`
+- Automated test before confirming live
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 2 — Lead Magnet tartalom jóváhagyás
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Lead Magnet RAW mentve → [webViewLink]
-Nézd át: tartalom, struktúra, fejezetcímek.
-Jóváhagyás → "jóváhagyom" / "ok" / "mehet"
-Fejezet módosítás → "módosítsd [N]. fejezet: [változtatás]"
-Teljes újraírás → "újra"
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+**If the email-list-building plugin is NOT installed:** tell the operator, and output the full
+funnel spec (lead magnet outline, landing page copy, GHL workflow config) as a manual brief
+instead — never silently skip.
 
-**Do NOT proceed to S3 until content is approved.**
-Design is built from this content — changes after design = wasted Canva credits.
+While T2 runs, keep this launch artifact updated: S2–S5 → `active`, then `done` per T2 progress.
 
 
 ---
 
-## STEP S3 — Agent 09 Phase 2: PDF Design (Canva)
+## GATE 4 — GHL Live Confirmation (after the T2 team returns)
 
-Invoke `agent-09-conversion-bridge` skill, Phase 2 only (Canva MCP design + export).
-
-Agent 09 Phase 2 designs the PDF in Canva and exports it as
-`LeadMagnet_[SeriesName]_designed.pdf` to `09_Lead_Magnets/` in Drive.
-
-Update artifact: S3 → `waiting`. Then present:
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 3 — PDF design jóváhagyás
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Canva design exportálva → [webViewLink]
-Nézd át: brandszínek, tipográfia, layout.
-Jóváhagyás → "jóváhagyom" / "ok" / "mehet"
-Design módosítás → "módosítsd: [mi változzon]"
-Manuális alternatíva → "manuálisan csinálom"
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-If "manuálisan csinálom": output full design brief (per-page colour/layout/typography spec)
-for manual Canva execution. Continue to S4 after operator confirms PDF is ready.
-
----
-
-## STEP S4 — Agent 09 Phase 3: Landing Page HTML
-
-Runs automatically after Gate 3 approval — no additional gate.
-
-Invoke `agent-09-conversion-bridge` skill, Phase 3 (HTML write + GHL publish).
-
-Agent 09 Phase 3:
-1. Writes production-ready `LandingPage_[SeriesName].html` to `09_Lead_Magnets/` in Drive
-2. Publishes to GHL via Claude in Chrome (automated), OR outputs manual GHL steps if
-   Chrome MCP is unavailable
-
-If Claude in Chrome available → fully automated GHL page creation and publish.
-If NOT available → output full HTML + step-by-step manual GHL UI instructions.
-
-Update artifact: S4 → `done`. Proceed immediately to S5.
-
----
-
-## STEP S5 — Agent 09 Phase 4: GHL Automation
-
-Invoke `agent-09-conversion-bridge` skill, Phase 4 (GHL MCP automation setup).
-
-Agent 09 Phase 4 executes via GHL MCP:
-1. Upload designed PDF to GHL Media Library → retrieve hosted PDF URL
-2. Create opt-in form (First Name, Email required; Phone optional)
-3. Create delivery workflow: form submit → tag contact → immediate PDF delivery email
-4. Run automated test (test@test.com)
-5. Retrieve the permanent landing page URL
-
-After GHL confirms live, update artifact: S5 → `waiting`. Then present:
+When the list-building-orchestrator reports the funnel live (opt-in URL + hosted PDF URL + tags),
+update artifact: S5 → `waiting`. Then present:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -306,6 +230,9 @@ create_file(
 
 Update artifact: S6 → `done`, show the URL box (add `visible` class to `.urlbox`).
 
+Then invoke `agent-09-conversion-bridge` (CTA mode) with the CONTEXT BLOCK + confirmed opt-in URL
+to generate `CTA_Descriptions_[SeriesName]` for every video in the playlist.
+
 ---
 
 ## LAUNCH READY OUTPUT
@@ -339,24 +266,10 @@ KÖVETKEZŐ LÉPÉS:
 
 ---
 
-## GLOBAL COMMANDS
+## GLOBAL COMMANDS · ERROR HANDLING
 
-| Command | Action |
-|---------|--------|
-| `"skip S[N]"` | Skip step (e.g. "skip S3" if PDF designed manually) |
-| `"újra S[N]"` | Re-run specific step |
-| `"hol tartunk"` | Show launch status artifact |
-| `"állj meg"` | Pause, note current position |
-| `"manuális S[N]"` | Output manual instructions instead of automating |
-
----
-
-## ERROR HANDLING
-
-- GHL MCP fails → output workflow config as structured brief + manual GHL UI steps.
-- Canva MCP fails → output full per-page design brief for manual Canva execution.
-- Chrome MCP unavailable → output full HTML file + manual GHL publish steps.
-- Never block on tool failure. Surface errors explicitly — never skip silently.
+Per `references/conventions.md` §4 and §6. Additional rule: if the email-list-building plugin
+is missing, degrade to manual funnel brief (see Step S2–S5) — never block the playlist launch.
 
 ---
 

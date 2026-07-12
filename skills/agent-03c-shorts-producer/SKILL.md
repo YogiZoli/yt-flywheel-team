@@ -10,7 +10,10 @@ description: Use this agent to produce YouTube Shorts from an approved HeyGen lo
 
 ---
 
-## Pre-Flight: Active Channel + Source Data
+## Context Block Protocol
+If invoked with a `=== CONTEXT BLOCK v1 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs) and SKIP the duplicated Drive reads below — the full script text and SEO data must still be read from Drive. Standalone invocation → run Pre-Flight as written.
+
+## Pre-Flight: Active Channel + Source Data (standalone only)
 
 Use Drive MCP tools directly — do not ask the operator to provide these:
 
@@ -376,8 +379,8 @@ S03: [YouTube Shorts URL] — "[title]"
 - Pin a comment on each Short: "Full tutorial → [parent video URL]"
 - Reply to early comments within 2 hours (first-hour signals matter for Shorts)
 - Publish Shorts 1–2 days apart — not all at once
-- Pass to Agent 08 (Community) for comment strategy
-- Pass to Agent 07 (Repurposing) to cross-post to Instagram Reels / LinkedIn
+- Pass to Agent 07 Community mode for comment strategy
+- Pass to Agent 07 Repurposing mode to cross-post to Instagram Reels / LinkedIn
 ```
 
 ---

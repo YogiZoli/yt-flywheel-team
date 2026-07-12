@@ -1,11 +1,11 @@
 ---
 name: video-production-orchestrator
-description: Video-level pipeline controller — runs for EVERY video, end-to-end from topic to published YouTube upload. Automatically reads the permanent opt-in URL from Drive and passes it to all publishing artifacts. Triggers when the user says "start new video", "új videó", "indítsuk el", "start pipeline", "pipeline", "kezdjük a videót", "run the pipeline", "full pipeline", "start workflow", or "new video cycle". Core chain: 02 → 03 → [manual ElevenLabs audio] → 04 thumbnail brief → 05 publish. Agent 01 Strategy only runs when no PlaylistStrategy doc exists. Agent 03b (ElevenLabs API) is replaced by manual audio gate. Shorts, Repurposing, Community = post-publish only, never part of core pipeline. Replaces the legacy pipeline-orchestrator.
+description: Video-level pipeline controller — runs for EVERY video, end-to-end from topic to published YouTube upload. Reads Drive state ONCE at startup, builds a CONTEXT BLOCK, and passes it to every agent (no repeated Drive reads). Automatically injects the permanent opt-in URL into all publishing artifacts. Triggers ONLY when the user says "új videó", "start new video", "video pipeline", "kezdjük a videót", "run the video pipeline", or "new video cycle". Core chain: 02 → 03 → [manual ElevenLabs audio gate, API fallback built in] → 04 thumbnail brief → 05 publish. Agent 01 Strategy only runs when no PlaylistStrategy doc exists. Shorts, Repurposing, Community = post-publish only, never part of core pipeline.
 ---
 
 # Video Production Orchestrator
 **Role:** Video-level pipeline controller. Runs for every single video.
-**Key upgrade vs pipeline-orchestrator:** Reads the opt-in URL from Drive automatically
+**Key behaviours:** Reads Drive state ONCE (context block), reads the opt-in URL automatically
 and injects it into Agent 05 publishing artifacts — zero manual coordination.
 **Core chain:** 02 → 03 → [Manual Audio Gate] → 04 → 05 (5 gates)
 **Agent 01 Strategy:** Conditional — only if no PlaylistStrategy doc exists for the active playlist.
@@ -55,6 +55,14 @@ POST-PUBLISH MENU (all optional, never blocking)
 
 ---
 
+## SHARED CONVENTIONS — READ FIRST
+At startup, read `../../references/conventions.md` (plugin root `references/conventions.md`).
+It defines: the CONTEXT BLOCK schema (§1), the shared status artifact HTML base (§2),
+gate block format (§3), global commands (§4), resume logic (§5), and error handling (§6).
+All of those apply to this orchestrator — they are not repeated below.
+
+---
+
 ## STEP 0 — STARTUP: Read Channel + Drive State + Opt-In URL
 
 ### 0a. Verify active channel
@@ -87,33 +95,26 @@ Check what's already done for the active channel this cycle:
 Use `search_files(query: "parentId = '[folderID]'")` for each, sort by `createdTime` descending.
 Mark completed steps as DONE in artifact, offer skip with `"újra [N]"` to re-run.
 
-### 0d. Create Pipeline Status Artifact
+### 0d. Build the CONTEXT BLOCK (one Drive scan — no repeated reads later)
+Resolve ALL subfolder IDs in one call: `search_files(query: "parentId = '[channelFolderID]'")`.
+Read the Foundation doc once, extract a 2-3 sentence avatar summary.
+Assemble the CONTEXT BLOCK per conventions.md §1 (channel name + folder ID, all subfolder IDs,
+opt-in URL, playlist info, lead magnet, avatar summary, confirmed title/topic as they become known).
+
+**Pass the CONTEXT BLOCK at the top of EVERY agent invocation (Steps 1, 2, 3, 5, 6).**
+Agents receiving it skip their own Pre-Flight Drive reads. Update the block's
+CONFIRMED_TITLE / CONFIRMED_TOPIC fields as gates are passed.
+
+### 0e. Create Pipeline Status Artifact
 Create immediately via `mcp__cowork__create_artifact`. Update after every step.
 
 
 ## PIPELINE STATUS ARTIFACT (HTML)
 
+Use the shared HTML base from `references/conventions.md` §2 (CSS + skeleton).
+Header: `🎬 YT Pipeline`. Step rows for this orchestrator:
+
 ```html
-<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-background:#0f0f0f;color:#e0e0e0;padding:24px;max-width:520px;margin:0 auto}
-h2{color:#fff;font-size:18px;margin-bottom:4px}
-.ch{color:#888;font-size:13px;margin-bottom:6px}
-.optin{color:#00C4FF;font-size:12px;margin-bottom:16px;word-break:break-all}
-.step{display:flex;align-items:center;gap:12px;padding:10px 14px;
-border-radius:8px;margin-bottom:6px;background:#1a1a1a}
-.step.done{background:#0d2b1a;border-left:3px solid #22c55e}
-.step.active{background:#1a1a2e;border-left:3px solid #818cf8}
-.step.waiting{background:#2b1a0d;border-left:3px solid #f59e0b}
-.step.skipped{background:#1a1a1a;border-left:3px solid #555;opacity:.6}
-.step.pending{opacity:.4;border-left:3px solid #333}
-.icon{font-size:18px;width:24px;text-align:center}
-.label{flex:1;font-size:14px;font-weight:500}
-.status{font-size:12px;color:#666}
-.step.done .status{color:#22c55e}.step.active .status{color:#818cf8}
-.step.waiting .status{color:#f59e0b}
-.gate{font-size:11px;color:#444;margin-left:36px;margin-bottom:8px;margin-top:-2px}
-</style></head><body>
 <h2>🎬 YT Pipeline</h2>
 <div class="ch"><!-- CHANNEL_NAME --> · <!-- DATE --></div>
 <div class="optin">🔗 Opt-In URL: <!-- OPTIN_URL --></div>
@@ -137,10 +138,8 @@ border-radius:8px;margin-bottom:6px;background:#1a1a1a}
 <div class="gate">▸ Gate 6: HeyGen render → "HeyGen jóváhagyva"</div>
 <div class="step <!-- S05b -->"><span class="icon">⏱️</span>
 <span class="label">05b — Chapter Timestamps</span><span class="status"><!-- S05bS --></span></div>
-</body></html>
 ```
 
-Step classes: `done` / `active` / `waiting` / `skipped` / `pending`
 Note the `<!-- OPTIN_URL -->` slot — populate from `ACTIVE_OPTIN_URL` found in Step 0b.
 
 
@@ -212,7 +211,7 @@ Teljes újragenerálás → "újra"
 
 ## STEP 4 — Manual Audio Gate (ElevenLabs by operator)
 
-**Do NOT invoke Agent 03b automatically.** Audio is generated manually by the operator in ElevenLabs.
+**Audio is generated manually by the operator in ElevenLabs.** (No separate audio agent exists — the API fallback below is built into this orchestrator.)
 
 Display this gate to operator immediately after script approval:
 
@@ -230,7 +229,23 @@ Ha ElevenLabs API-t akarsz helyette → "11labs api"
 ```
 
 Update artifact (03b → `waiting`). Wait for operator confirmation.
-If operator says "11labs api": then invoke `agent-03b-audio-generator` skill as fallback.
+
+**If operator says "11labs api" — inline API fallback (former Agent 03b, now built in):**
+1. Read the approved script from `03_Scripts/` (or use CONTEXT BLOCK if already loaded).
+2. Extract clean spoken text: strip `[SECTION]`/`[HOOK]`/`[B-ROLL:]`/`[RECORDING:]` markers,
+   everything from `[THUMBNAIL CAPTURE NOTE]` onward, and gesture notes. Replace colons/em
+   dashes/double hyphens with commas; "I am" → "I'm".
+3. Generate via ElevenLabs API (`mcp__Desktop_Commander__start_process`, PowerShell):
+   endpoint `https://api.elevenlabs.io/v1/text-to-speech/[VOICE_ID]/with-timestamps`,
+   Voice ID `6cr2WtfrqWUvTgXGIdDB` (Zoltan BD 03 instant), model `eleven_turbo_v2_5`,
+   API key from `C:\Users\gdp\Documents\Claude\Projects\YouTube\.config\elevenlabs.env`.
+   Save MP3 + `_align.json` to `C:\Users\gdp\Documents\Claude\Projects\YouTube\Audio\`,
+   naming: `[YYYY-MM-DD]_Audio_[title-slug]_BD03.mp3`.
+4. Generate SRT: run `C:\Users\gdp\Documents\Claude\Projects\YouTube\Scripts\generate_srt.py`
+   with the align file (offset 0; for >2500-char scripts split at sentence boundaries and
+   chain offsets from each part's "Last seconds" value).
+5. Present MP3 + SRT `computer://` links for approval, then continue to Gate 4 confirmation.
+
 Do NOT proceed to Agent 04 until audio is confirmed.
 
 
@@ -331,11 +346,11 @@ Then present the **Post-Publish Menu**:
 writes scripts + HeyGen briefs, saves to Drive, uploads finished Shorts to YouTube via Chrome.
 Operator generates HeyGen Shorts manually, then says "Shorts kész, töltsd fel" to trigger upload.
 
-**[R] Repurposing — Agent 07:** Invoke `agent-07-repurposing`. Outputs email snippet brief,
-LinkedIn post brief, Shorts clip brief — all saved to `07_Repurposing_Briefs/`.
+**[R] Repurposing — Agent 07:** Invoke `agent-07-repurposing` in Repurposing mode. Outputs email
+snippet brief + LinkedIn post brief to `07_Repurposing_Briefs/`. (Shorts belong exclusively to 03c.)
 
-**[C] Community — Agent 08:** Invoke `agent-08-community`. Outputs pinned comment template,
-Community tab post schedule, niche engagement routine.
+**[C] Community — Agent 07:** Invoke `agent-07-repurposing` in Community mode. Outputs pinned
+comment template, Community tab post schedule, topic mining log — saved to `08_Community/`.
 
 **[E] Conversion — Agent 09:** Invoke `agent-09-conversion-bridge` in audit mode.
 Checks CTA alignment with current video. Runs conversion audit if lead magnet exists.
@@ -347,40 +362,9 @@ SEO impact: video indexed in 25 languages. Cost: $0.00. Runtime: ~3 minutes.
 
 ---
 
-## RESUME LOGIC
+## RESUME LOGIC · GLOBAL COMMANDS · ERROR HANDLING
 
-If started and Drive scan finds partial completion:
-
-```
-Folytatás a következő hiányzó lépéstől? → "igen"
-Elölről kezdés → "újrakezdem"
-Adott lépés újrafuttatása → "újra [N]"
-```
-
-Skip already-completed steps by default. Always show what is being skipped.
-
----
-
-## GLOBAL COMMANDS
-
-| Command | Action |
-|---------|--------|
-| `"skip"` | Skip current step, keep existing Drive output |
-| `"újra"` | Re-run current step from scratch |
-| `"újra [N]"` | Re-run specific step (e.g. "újra 03" = new script) |
-| `"hol tartunk"` | Show pipeline status artifact |
-| `"mi van még"` | List remaining steps |
-| `"állj meg"` | Pause pipeline |
-
----
-
-## ERROR HANDLING
-
-If any step fails:
-1. Surface the error explicitly — never skip silently
-2. Present: `"[Step N] hibát jelzett: [error]. Próbáljuk újra? → 'igen' / 'átugrás'"`
-3. On retry: re-invoke the same agent skill from its start
-4. On skip: mark step as SKIPPED (not DONE) in artifact, continue with existing Drive output
+Per `references/conventions.md` §4–§6. No orchestrator-specific deviations.
 
 ---
 

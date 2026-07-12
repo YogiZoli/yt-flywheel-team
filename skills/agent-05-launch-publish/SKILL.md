@@ -7,7 +7,10 @@ description: Use this agent when ready to upload a video to YouTube. Triggers wh
 **Phase:** Pre-Publishing + HeyGen Production (two-phase workflow)
 **Playbook modules:** 6.3 (Captions), 9 (Launch Plan)
 
-## Pre-Flight: Active Channel Check
+## Context Block Protocol
+If invoked by an orchestrator with a `=== CONTEXT BLOCK v1 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs, opt-in URL, confirmed title, lead magnet) and SKIP the Pre-Flight Drive reads below for every field the block provides — the full script text must still be read from Drive. Standalone invocation → run Pre-Flight as written.
+
+## Pre-Flight: Active Channel Check (standalone only)
 Use Drive MCP tools directly — do not ask the operator to provide these:
 1. **Read `_Active_Channel.gdoc`:** `search_files(query: "title = '_Active_Channel'")` → take first result's `id` → `read_file_content(fileId)` → parse line 1: `[Channel Name] | [Channel Folder ID]`. Store **Channel Folder ID**. If empty → invoke `channel-manager`.
 2. **Pull latest assets automatically:**
@@ -298,7 +301,7 @@ Steps:
 ### After publishing:
 1. Copy video URL and share with known ideal viewers (personal message, not broadcast)
 2. Add video link to email signature if not already present
-3. Pass video URL to Agent 07 (Repurposing) and Agent 08 (Community)
+3. Pass video URL to Agent 07 (Post-Publish Content — Repurposing [R] + Community [C] modes)
 4. **Multilingual captions (SEO boost):** Say "felirat fordítás" or "M" to trigger Agent 05b.
    Translates English SRT to 25 languages, uploads to YouTube. Free, ~3 min. Zero storage impact.
 
