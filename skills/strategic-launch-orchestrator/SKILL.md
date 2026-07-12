@@ -141,6 +141,9 @@ Invoke `agent-01-channel-strategist` skill with the following modified brief:
 > - Umbrella keyword for the playlist
 > - 8–12 video topics in order (Evergreen-first sequence)
 > - Video type for each (Evergreen / Viral / Depth — target ratio: 65% / 25% / 10%)
+> - `default_video_type:` for the playlist (talking_head / heygen_avatar / screen_recording)
+>   plus a per-video `video_type:` where a video deviates from the default —
+>   the Video Production Orchestrator reads these at Step 0c (no need to ask per video)
 > - Lead magnet concept: the ONE transformation the companion guide delivers
 > - Recommended CTA language (consistent across all videos in the series)"
 

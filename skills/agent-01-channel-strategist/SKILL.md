@@ -111,6 +111,9 @@ VIDEO BRIEF — [DATE]
 Channel: [active channel name]
 Topic: [topic]
 Type: [Evergreen / Viral / Depth]
+video_type: [talking_head / heygen_avatar / screen_recording]
+  ← choose by content fit: software tutorial → screen_recording ·
+    personal story/authority → talking_head · evergreen scalable teaching → heygen_avatar
 Target keyword: [keyword]
 Why this now: [1-2 sentences]
 Ideal viewer intent: [what are they searching for / feeling]

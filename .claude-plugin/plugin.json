@@ -1,6 +1,6 @@
 {
     "name": "yt-flywheel-team",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "description": "YouTube Evergreen Flywheel — 13-skill AI Agent Team with two-tier orchestration and context-block handoff. Strategic Launch Orchestrator defines the playlist concept, delegates funnel building to the email-list-building plugin, and stores the permanent opt-in URL. Video Production Orchestrator runs the per-video pipeline (SEO, script, audio, thumbnail, publish). Post-publish: Shorts, repurposing+community, 25-language captions, conversion audit. Multi-channel, outputs in Google Drive.",
     "author": {
         "name": "Zoltan Gero",

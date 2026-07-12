@@ -4,9 +4,18 @@ description: Use this agent to produce YouTube Shorts from an approved HeyGen lo
 ---
 
 # Agent 03c — Shorts Producer
+
+## VIDEO_TYPE Awareness (v2)
+Read VIDEO_TYPE from the CONTEXT BLOCK (or the Video Brief Card if standalone):
+- `heygen_avatar` → produce HeyGen 9:16 production briefs per Short (the flow below, unchanged).
+- `talking_head` / `screen_recording` → produce **timestamped clip-cut briefs** instead:
+  same segment identification and Shorts Ownership Formula, but output = per-Short cut list
+  (source timecode [start]→[end] from the published video, hook rewrite for text overlay,
+  caption style, 9:16 crop guidance). Skip HeyGen prompt generation entirely; the operator
+  cuts clips in their editor. Upload Pack and YouTube upload steps are identical.
 **Phase:** POST-PUBLISH ONLY — runs exclusively from the post-publish menu after main video is live on YouTube.
 **⚠️ NEVER auto-trigger from "HeyGen jóváhagyva" or any main pipeline gate.**
-**Position in Flywheel:** YouTube published ✅ → [operator chooses "S" from post-publish menu] → **[03c Shorts Producer]** → Agent 07 Repurposing → Agent 08 Community
+**Position in Flywheel:** YouTube published ✅ → [operator chooses "S" from post-publish menu] → **[03c Shorts Producer]** → Agent 07 (Repurposing / Community modes)
 
 ---
 
