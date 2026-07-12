@@ -58,10 +58,15 @@ LAUNCH READY — Video Production Orchestrator can now start
 
 ## STEP 0 — STARTUP: Read Channel + Foundation
 
-### 0a. Verify active channel
-1. `search_files(query: "title = '_Active_Channel'")` → first result → `read_file_content(fileId)`
-2. Parse line 1: `[Channel Name] | [Channel Folder ID]`
-3. If missing or empty → invoke `channel-manager` skill before proceeding.
+### 0a. Resolve channel — CHANNEL PIN FIRST (conventions.md §7)
+1. **Pin file:** look for `_Channel_Pin.txt` in the connected working folder. If found, parse
+   `[Channel Name] | [LANG] | [Channel Folder ID]` → session is HARD-BOUND: use these values,
+   write all public copy (lead magnet, landing page, CTAs) in [LANG], REFUSE "switch" commands,
+   do NOT read `_Active_Channel`.
+2. **Explicit channel in trigger** ("playlist launch @VoxFlow") → resolve that channel's folder ID.
+3. **Legacy fallback:** `search_files(query: "title = '_Active_Channel'")` → read → parse line 1.
+   Display a prominent channel badge (name + language) in the artifact AND at Gate 1.
+4. If nothing resolves → invoke `channel-manager` skill before proceeding.
 
 
 ### 0b. Read Foundation

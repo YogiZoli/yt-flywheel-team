@@ -30,13 +30,15 @@ YT_Flywheel/                          ← master folder (Google Drive root)
     └── 09_Lead_Magnets/              ← Agent 09 opt-in copy + audits
 ```
 
-### Active Channel Detection — RUN BEFORE EVERY AGENT TASK
-Before any agent does work:
-1. Read the `_Active_Channel.gdoc` from the YT_Flywheel master folder in Google Drive
-2. The first line contains the active channel folder ID and name
-3. Save all outputs to that channel's relevant subfolder
-4. If `_Active_Channel.gdoc` is missing OR the YT_Flywheel master folder doesn't exist → invoke the `channel-manager` skill to set it up
-5. If the user's request mentions a different channel by name → suggest they run "switch to [channel name]" first
+### Channel Detection — CHANNEL PIN FIRST (see plugin references/conventions.md §7)
+Resolution order before any agent does work:
+1. **`_Channel_Pin.txt` in the connected working folder** → session HARD-BOUND to that channel
+   (`[Channel] | [LANG] | [Folder ID]`). All outputs to that channel, all public copy in [LANG].
+   "switch" commands refused. Never read `_Active_Channel`.
+2. **Explicit channel in the message** ("@VoxFlow") → use for this run.
+3. **Legacy fallback:** read `_Active_Channel.gdoc` from YT_Flywheel; display a prominent
+   channel badge (name + language) so the operator always sees which channel is live.
+4. If nothing resolves OR YT_Flywheel is missing → invoke `channel-manager`.
 
 Never guess the active channel. Never write outputs to a wrong channel folder.
 

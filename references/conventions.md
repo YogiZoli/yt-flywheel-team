@@ -15,6 +15,7 @@ Agents invoked standalone (no context block) run their own Pre-Flight as written
 ```
 === CONTEXT BLOCK v1 ===
 CHANNEL_NAME: [name]
+CHANNEL_LANG: [HU | EN | ... — from _Channel_Pin.txt; drives ALL public-facing copy language]
 CHANNEL_FOLDER_ID: [Drive folder ID]
 SUBFOLDER_IDS: 00=[id] | 01=[id] | 02=[id] | 03=[id] | 04=[id] | 05=[id] | 06=[id] | 07=[id] | 08=[id] | 09=[id] | Captions=[id]
 ACTIVE_OPTIN_URL: [URL or null]
@@ -120,3 +121,32 @@ Skip already-completed steps by default. Always show what is being skipped.
    Canva MCP fails → per-page design brief for manual execution.
    Chrome MCP unavailable → full HTML file + manual publish steps.
    Never block the pipeline on an optional tool failure.
+
+## 7. CHANNEL PIN RESOLUTION (switch-free multi-channel)
+
+Goal: the operator NEVER has to remember or switch the active channel. Resolution order —
+first hit wins, run at Step 0a of every orchestrator and in every standalone agent Pre-Flight:
+
+1. **Pin file in the connected working folder** (HIGHEST priority):
+   look for `_Channel_Pin.txt` in the Cowork session's connected folder (and its root).
+   Format, line 1: `[Channel Name] | [LANG] | [Channel Drive Folder ID]`
+   Example: `VoxFlow | HU | 1AbC...xyz`
+   If found → the session is HARD-BOUND to this channel:
+   - All outputs go to this channel's Drive folder. All copy is written in [LANG].
+   - `"switch to ..."` commands are REFUSED in this session with:
+     "Ez a munkamappa a(z) [Channel] csatornához van rögzítve. Másik csatornához nyisd meg annak mappáját."
+   - Do NOT read `_Active_Channel` at all.
+2. **Explicit channel in the trigger message** (e.g. "új videó @VoxFlow") → use it for this run.
+3. **`_Active_Channel` pointer on Drive** (legacy fallback) → allowed, but the orchestrator MUST
+   display a prominent channel badge (name + language) in the status artifact AND in the first
+   gate message, so the operator always sees which channel is live.
+
+Language rule: the pin's [LANG] (HU/EN/...) drives ALL public-facing output language
+(scripts, titles, descriptions, CTAs, community posts) for that channel — no per-task language
+questions, ever. Internal chat with the operator follows the operator's language as usual.
+
+Per-channel setup (one-time, channel-manager does it on "create new channel"):
+- Drive: `YT_Flywheel/[Channel]/` structure (as before)
+- Local: `C:\Users\gdp\Documents\Claude\Projects\YouTube\[Channel]\` working folder
+  containing `_Channel_Pin.txt` — the operator connects THIS folder in Cowork sessions
+  dedicated to that channel.

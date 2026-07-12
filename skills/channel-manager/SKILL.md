@@ -53,6 +53,12 @@ Execute with Drive MCP:
 4. `create_file(title: "_Active_Channel", textContent: "NO_ACTIVE_CHANNEL — run 'create new channel' to begin", contentMimeType: "text/plain", parentId: "[masterFolderID]")`
 5. Confirm: "✅ YT_Flywheel initialized → [webViewLink]. Run 'create new channel' next."
 
+## Channel Pin — Switch-Free Mode (conventions.md §7)
+If the connected working folder contains `_Channel_Pin.txt` (`[Channel] | [LANG] | [Folder ID]`),
+the session is HARD-BOUND to that channel. In pinned sessions REFUSE "switch to ..." with:
+"Ez a munkamappa a(z) [Channel] csatornához van rögzítve. Másik csatornához nyisd meg annak mappáját."
+The `_Active_Channel` pointer is legacy fallback only — pinned sessions never read or write it.
+
 ### 2. "Create new channel" / "Add channel [name]"
 Execute with Drive MCP:
 1. Ask for channel name if not provided.
@@ -61,7 +67,13 @@ Execute with Drive MCP:
 4. Create all 10 subfolders (one create_file call each, parentId = channel folder ID):
    - `00_Foundation`, `01_Strategy`, `02_SEO_Titles`, `03_Scripts`, `04_Thumbnail_Briefs`, `05_Publish_Checklists`, `06_Analytics_Reviews`, `07_Repurposing_Briefs`, `08_Community`, `09_Lead_Magnets`
 5. `create_file(title: "_Active_Channel", textContent: "[Channel Name] | [channelFolderID]", contentMimeType: "text/plain", parentId: "[masterFolderID]")` → new file = new active channel
-6. Confirm: "✅ Channel '[name]' created → [webViewLink]. Active channel set. Run Agent 00 (Channel Foundation) next."
+6. **Create the local pin folder** (ask for the channel language first — HU/EN/...):
+   via `mcp__Desktop_Commander__write_file` create
+   `C:\Users\gdp\Documents\Claude\Projects\YouTube\[Channel Name]\_Channel_Pin.txt`
+   with content: `[Channel Name] | [LANG] | [channelFolderID]`
+   Tell the operator: "Ehhez a csatornához mindig ezt a mappát kösd be Coworkben —
+   akkor soha nem kell csatornát váltanod."
+7. Confirm: "✅ Channel '[name]' created → [webViewLink]. Pin folder ready. Run Agent 00 (Channel Foundation) next."
 
 ### 3. "Switch to channel [name]" / "Activate channel X"
 Execute with Drive MCP:

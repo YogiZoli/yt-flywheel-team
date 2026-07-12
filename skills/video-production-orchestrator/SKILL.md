@@ -81,10 +81,16 @@ All of those apply to this orchestrator — they are not repeated below.
 
 ## STEP 0 — STARTUP: Channel + Drive State + Opt-In URL + VIDEO_TYPE
 
-### 0a. Verify active channel
-1. `search_files(query: "title = '_Active_Channel'")` → first result → `read_file_content(fileId)`
-2. Parse line 1: `[Channel Name] | [Channel Folder ID]`
-3. If missing or empty → invoke `channel-manager` skill before proceeding.
+### 0a. Resolve channel — CHANNEL PIN FIRST (conventions.md §7)
+1. **Pin file:** look for `_Channel_Pin.txt` in the connected working folder. If found, parse
+   `[Channel Name] | [LANG] | [Channel Folder ID]` → session is HARD-BOUND: use these values,
+   write all public copy in [LANG], REFUSE "switch" commands, do NOT read `_Active_Channel`.
+2. **Explicit channel in trigger** ("új videó @VoxFlow") → resolve that channel's folder ID from
+   `YT_Flywheel/` and use it for this run.
+3. **Legacy fallback:** `search_files(query: "title = '_Active_Channel'")` → read → parse line 1
+   `[Channel Name] | [Channel Folder ID]`. Display a prominent channel badge (name + language)
+   in the artifact AND in the Gate 1 message.
+4. If nothing resolves → invoke `channel-manager` skill before proceeding.
 
 ### 0b. Read opt-in URL (CRITICAL)
 `search_files(query: "title contains '_OptinURL' and parentId = '[channelFolderID]'")` → read content.
