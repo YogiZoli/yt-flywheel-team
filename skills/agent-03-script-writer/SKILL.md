@@ -1,6 +1,6 @@
 ---
 name: agent-03-script-writer
-description: Use this agent to write YouTube video scripts using the Ownership Framework (OPEN → TEACH → OWN). Triggers when the user says "write my script", "script for my video", "Ownership Framework", "write the video", or provides a confirmed title and asks for the full script. Requires confirmed title from Agent 02 before starting. PHASE 1 outputs structure + chapters for operator approval. PHASE 2 writes the full script only after approval. Outputs save to the active channel's 03_Scripts/ folder in Google Drive.
+description: Use this agent to write YouTube video scripts using the Ownership Framework (OPEN → TEACH → OWN). Triggers when the user says "write my script", "script for my video", "Ownership Framework", "write the video", or provides a confirmed title and asks for the full script. Requires confirmed title from Agent 02 before starting. PHASE 1 outputs structure + chapters for operator approval. PHASE 2 writes the full script only after approval. Includes the Handraiser CTA Layer (GUIDE/ACTION keyword comment CTAs, default ON). Outputs save to the active channel's 03_Scripts/ folder in Google Drive.
 ---
 
 ## BRAND GUIDE DIGEST — Zoltan Gero
@@ -97,13 +97,27 @@ These labels are no longer used in this system. Videos are categorized by playli
 ---
 
 ## Optional Inputs Check
-After Drive reads, ask the operator exactly this — one message, two questions:
+After Drive reads, ask the operator exactly this — one message:
 
 > "Do you have any of the following to add before I write the script?
 > 1. Research doc (from Gemini / ChatGPT) — Yes / No
-> 2. Raw voice notes or transcript — Yes / No"
+> 2. Raw voice notes or transcript — Yes / No
+>
+> HANDRAISER — default plan for this video (reply OK to keep, or edit):
+> • CTA 1 (opening, ~60–90s): 'comment GUIDE' → free guide, email list
+> • CTA 2 (~66% of runtime): 'comment ACTION and I'll send you the link
+>   to buy [Offer Name] and implement it into your business' → sales
+>   page, transparent purchase CTA
+> • CTA 3 (closing): GUIDE or ACTION — chosen by arc position, reason
+>   stated in a script comment
+> Keywords: GUIDE / ACTION. Offer: [last known offer name or ASK ONCE]."
 
-Wait for the answer. If both are No, go straight to Phase 1.
+Wait for the answer. If both research/voice answers are No and the operator says OK, go straight to Phase 1 with the Handraiser default plan active.
+
+**Handraiser intake rules:**
+- Handraiser is DEFAULT ON. The block above is a reminder, not a questionnaire — "OK" / "jóváhagyom" / no objection → execute the default plan exactly, no further handraiser questions.
+- Operator edits (keywords, offer name, slots, or "no handraiser") → apply and proceed. "No handraiser" → standard single conversion CTA system, everything below unchanged.
+- Offer name persists between scripts (read from the previous script's handraiser metadata block or 09_Lead_Magnets). Ask only if none exists — NEVER invent one. Without a confirmed offer name, all ACTION slots are omitted (Slot 2 dropped, Slot 3 forced to GUIDE) and the operator is told why in the delivery message.
 
 **If research doc provided:**
 - Factual and structural backbone. Extract: hook-worthy facts, key steps, real examples, surprising angles.
@@ -132,6 +146,10 @@ VIDEO STRUCTURE — [Video Title]
 
 Playlist: [Playlist Name] | Position: EP.[X] of [Y] | Arc: [Opening / Middle / Closing]
 Lead Magnet active: [LM1a / LM1b / LM2 / LM3 — name it]
+Handraiser: [ON — cold: GUIDE / hot: ACTION / offer: [Offer Name] | OFF]
+  Slot 1 (OPEN, ~60–90s): cold GUIDE line after hook/promise
+  Slot 2 (~66%): hot ACTION line after Section [X] — [or: skipped, video <5 min]
+  Slot 3 (OWN): [GUIDE / ACTION] — reason: [arc-based choice]
 Next episode topic: [name of EP.X+1 — for playlist-aware OWN close]
 
 ━━━ OPEN ━━━
@@ -147,10 +165,12 @@ Section 3: [Name] → Payoff: [what the viewer walks away knowing]
 
 ★ Ownership CTA placement: after Section [X]
    Reason: [this is the highest-value payoff — viewer is most receptive here]
+   (Handraiser ON → this is Slot 2, the hot ACTION line)
 
 ━━━ OWN ━━━
 Recap angle: [the main message in one sentence]
 Lead Magnet CTA: [active slot — must match playlist's designated LM]
+   (Handraiser ON → this is Slot 3: GUIDE or ACTION by arc)
 Next video: [specific EP.X+1 topic — not generic; this is the playlist continuation hook]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -229,6 +249,7 @@ Rules for the Ownership CTA:
 - Feels like a natural extension of the value just delivered, not a break from it.
 - The lead magnet name comes from the Drive 09_Lead_Magnets read.
 - Never: "Like and subscribe" / "Hit the bell" / "Leave a comment below" as CTA.
+- **Handraiser ON → the Handraiser Slot 2 line REPLACES this CTA at the ★ position. See Handraiser CTA Layer.**
 
 ---
 
@@ -242,6 +263,7 @@ Banned openers: "In conclusion" / "To summarize" / "As we've seen today" / "Ulti
 **Lead Magnet CTA — final**
 Direct. Active verb first. Specific. Use the active CTA slot.
 > "Download [Lead Magnet Name] — link in the description below."
+**Handraiser ON → the Handraiser Slot 3 line REPLACES this CTA. See Handraiser CTA Layer.**
 
 **Next Video — Playlist-Aware**
 One sentence. Names the specific next episode in the playlist sequence — not a generic topic suggestion.
@@ -303,6 +325,56 @@ When active, this CTA can run alongside the lead magnet CTA or replace it per vi
 
 ---
 
+## HANDRAISER CTA LAYER (DEFAULT ON — see Optional Inputs Check)
+
+Lead-temperature CTA system. Keyword comments trigger an automated reply with a link
+(handled downstream by the Comment-to-Client system — never named in spoken lines):
+- COLD keyword (default GUIDE) → opt-in page, lead magnet, email list.
+- HOT keyword (default ACTION) → short sales page, personal video + one buy button, immediate purchase.
+
+**When ON, the Handraiser slots REPLACE the standard Ownership CTA (★ position) and the
+OWN Lead Magnet CTA. Never more than 3 CTAs total per video. Nothing stacks on top.**
+
+### The three fixed slots
+
+**SLOT 1 — OPENING (within the first 60–90 seconds, immediately after the hook/promise):**
+Soft cold CTA. One sentence, no pitch, curiosity-preserving. Pattern:
+> "If you want to go deeper on [specific topic just promised], comment GUIDE and I'll send it to you."
+
+**SLOT 2 — TWO-THIRDS POINT (~66% of estimated runtime):**
+Hot CTA. Placed at a natural value peak — after a completed section payoff, never
+mid-explanation or mid-tension. Confident, direct, max 2 sentences, no hype words. Pattern:
+> "If you want this implemented in your business, comment ACTION and I'll send you the link to get [Offer Name]."
+Transparent purchase CTA — the viewer must understand it leads to a buy page.
+AUTO-SKIP: videos under 5 minutes estimated runtime get opening + closing slots only (2 CTAs).
+
+**SLOT 3 — CLOSING (in OWN, before the end screen):**
+One final CTA. Choose GUIDE or ACTION by arc position:
+- Opening/Middle arc (EP 1–7) → GUIDE default (viewer still warming up, list-building priority)
+- Closing arc (EP 8+) → ACTION allowed (viewer is warm, conversion-forward episodes)
+State the reason in a script comment on its own line:
+`[HANDRAISER SLOT 3 CHOICE: GUIDE/ACTION — reason]`
+
+### Writing rules (all Handraiser CTAs)
+- Platform-agnostic. Never name any CRM, app, or tool in spoken lines.
+- Brand voice rules apply. CTA lines max 8 words where possible, active verb first.
+  No hack / trick / easy / hustle.
+- Each CTA references the SPECIFIC value just delivered — contextual, never a generic
+  "check the link below."
+- The keyword is always spoken AND appears in an on-screen text suggestion at that moment:
+  `[SCREEN TEXT: Comment "GUIDE"]` / `[SCREEN TEXT: Comment "ACTION"]`
+- Spoken punctuation rules (commas and periods only, "I'm" not "I am") apply to
+  Handraiser lines too.
+
+### Guardrails
+- Max 3 CTAs total per video, no exceptions. (2 if video <5 min.)
+- The skill NEVER invents an offer name. If no confirmed offer name exists, all ACTION
+  slots are omitted (Slot 2 dropped, Slot 3 forced to GUIDE) and the operator is told why
+  in the delivery message.
+- Handraiser OFF → standard single conversion CTA system runs exactly as written above.
+
+---
+
 ## Thumbnail Capture Note
 Add at the end of every script without exception:
 > "THUMBNAIL CAPTURE: After filming, record 30-60 seconds of varied expressions reacting
@@ -334,6 +406,7 @@ pauses or rendering artefacts in the final video.
 [OPEN]
 [Problem Sentence]
 [Promise Sentence]
+[HANDRAISER SLOT 1 — if ON: cold GUIDE line + [SCREEN TEXT: Comment "GUIDE"]]
 [Credibility Bridge — only if needed, otherwise omit entirely]
 
 [SECTION 1: Name]
@@ -344,8 +417,8 @@ pauses or rendering artefacts in the final video.
 [SECTION 2: Name]
 [spoken text]
 
-[OWNERSHIP CTA — after highest-value section marked with star in Phase 1]
-[one sentence lead magnet CTA]
+[OWNERSHIP CTA — Handraiser OFF | HANDRAISER SLOT 2 — Handraiser ON:
+ hot ACTION line + [SCREEN TEXT: Comment "ACTION"] — after ★ section, ~66%]
 
 [SECTION 3: Name]
 [spoken text]
@@ -355,7 +428,8 @@ pauses or rendering artefacts in the final video.
 
 [OWN]
 [Recap — one sentence]
-[Lead Magnet CTA — final]
+[Lead Magnet CTA — Handraiser OFF | HANDRAISER SLOT 3 — Handraiser ON:
+ GUIDE or ACTION line + [SCREEN TEXT] + [HANDRAISER SLOT 3 CHOICE: ... — reason]]
 [Next Video — one sentence + gesture direction]
 
 [THUMBNAIL CAPTURE NOTE]
@@ -370,12 +444,18 @@ pauses or rendering artefacts in the final video.
 - Is the CTA placement marked at the genuine highest-value payoff moment?
 - Are section names clear and scannable?
 - Is the credibility bridge decision (YES/NO) explicitly stated and justified?
+- Is the Handraiser line present (ON with slots, or OFF) in the structure block?
 
 **Phase 2 check:**
 - Does the first sentence name the exact problem the right viewer is already experiencing?
 - Is every section genuinely useful — zero padding, zero filler sentences?
-- Is the Ownership CTA placed after a completed payoff, not mid-explanation?
-- Are both CTAs present: mid-video Ownership CTA + OWN final CTA?
+- Is the Ownership CTA / Slot 2 placed after a completed payoff, not mid-explanation?
+- Handraiser OFF: are both CTAs present — mid-video Ownership CTA + OWN final CTA?
+- Handraiser ON: exactly 3 CTAs (or 2 if <5 min)? Standard LM CTAs fully replaced, nothing stacked?
+- Handraiser ON: every keyword spoken AND cued with [SCREEN TEXT]? No CRM/app/tool named in
+  spoken lines? Every CTA contextual to the value just delivered — no generic link lines?
+- Handraiser ON: offer name confirmed, or ACTION slots omitted with explanation? Slot 3 choice
+  comment present with arc-based reason?
 - Is the end screen cued with a gesture direction in brackets?
 - Is the script free of colons, semicolons, em dashes, separator hyphens in all spoken lines?
 - Is "I'm" used instead of "I am" throughout the entire script?
@@ -385,6 +465,7 @@ pauses or rendering artefacts in the final video.
 - If a research doc was provided: are real facts and examples from it present in the script?
 - If voice notes were provided: is Zoltan's personal language and perspective present?
 - Is the credibility bridge skipped when the topic does not genuinely require it?
+- Is the handraiser metadata block appended to the script document?
 
 ---
 
@@ -409,6 +490,21 @@ Do not prompt for this loop after individual scripts. Monthly only.
 
 **MANDATORY: Do NOT print the script content into chat. Write to Drive first, share only the link.**
 
+**MANDATORY: Append this handraiser metadata block to the END of every script document**
+(the Publishing pipeline and the Comment-to-Client configuration read this without
+re-parsing the script):
+
+```
+=== HANDRAISER METADATA ===
+handraiser: {
+  enabled: true | false,
+  cold_keyword: "GUIDE",
+  hot_keyword: "ACTION",
+  offer_name: "[Offer Name]" | null,
+  slot_timestamps: ["~M:SS", "~M:SS", "~M:SS"]   // estimated, in slot order; omit skipped slots
+}
+```
+
 Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`):
 
 1. **Find subfolder:**
@@ -419,7 +515,7 @@ Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f0
    ```
    create_file(
      title: "[YYYY-MM-DD]_Agent03_Script_[title-slug]",
-     textContent: "[complete formatted script]",
+     textContent: "[complete formatted script + handraiser metadata block]",
      contentMimeType: "text/plain",
      parentId: "[03_Scripts subfolder ID]"
    )
@@ -433,6 +529,7 @@ Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f0
    Next: manual ElevenLabs audio (Gate 4 in the pipeline — paste script into ElevenLabs).
 
    CTA Slot active: PDF Lead Magnet.
+   Handraiser: [ON — GUIDE / ACTION / offer: [Offer Name] | OFF | ON, ACTION slots omitted — no offer name confirmed]
    Coming soon: Mini Course · Survey (ASK Method) · GHL Affiliate + Snapshot.
 
    Workflow: 03 Script → [manual ElevenLabs audio] → 04 Thumbnail → 05 Publish + HeyGen prompt (last)
