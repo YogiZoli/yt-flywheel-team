@@ -47,7 +47,7 @@ h2{color:#fff;font-size:18px;margin-bottom:4px}
 .step{display:flex;align-items:center;gap:12px;padding:10px 14px;
 border-radius:8px;margin-bottom:6px;background:#1a1a1a}
 .step.done{background:#0d2b1a;border-left:3px solid #22c55e}
-.step.active{background:#1a1a2e;border-left:3px solid #818cf8}
+.step.active{background:#15355F;border-left:3px solid #818cf8}
 .step.waiting{background:#2b1a0d;border-left:3px solid #f59e0b}
 .step.skipped{background:#1a1a1a;border-left:3px solid #555;opacity:.6}
 .step.pending{opacity:.4;border-left:3px solid #333}
