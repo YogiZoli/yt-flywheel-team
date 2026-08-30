@@ -43,7 +43,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 background:#0f0f0f;color:#e0e0e0;padding:24px;max-width:540px;margin:0 auto}
 h2{color:#fff;font-size:18px;margin-bottom:4px}
 .ch{color:#888;font-size:13px;margin-bottom:6px}
-.optin{color:#00C4FF;font-size:12px;margin-bottom:16px;word-break:break-all}
+.optin{color:#82B0F7;font-size:12px;margin-bottom:16px;word-break:break-all}
 .step{display:flex;align-items:center;gap:12px;padding:10px 14px;
 border-radius:8px;margin-bottom:6px;background:#1a1a1a}
 .step.done{background:#0d2b1a;border-left:3px solid #22c55e}

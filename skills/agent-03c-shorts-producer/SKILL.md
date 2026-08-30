@@ -298,7 +298,7 @@ After all Drive saves succeed, use `mcp__cowork__create_artifact` to create a pe
 — the operator's single reference during HeyGen production and YouTube upload.
 
 **HTML requirements:**
-- Dark background (#0f0f0f), white/yellow text (Shorts aesthetic)
+- Dark background (`#0E2038`), white or `#82B0F7` text, green `#24A957` pop (Shorts / Reels brand aesthetic, see BRAND-GUIDE.md)
 - Page header: "🎬 Shorts Production Pack — [parent-slug]"
 - One card per Short (S01, S02, S03...)
 - Each card contains:
