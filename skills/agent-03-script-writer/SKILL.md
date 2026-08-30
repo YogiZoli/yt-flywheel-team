@@ -3,35 +3,35 @@ name: agent-03-script-writer
 description: Use this agent to write YouTube video scripts using the Ownership Framework (OPEN → TEACH → OWN). Triggers when the user says "write my script", "script for my video", "Ownership Framework", "write the video", or provides a confirmed title and asks for the full script. Requires confirmed title from Agent 02 before starting. PHASE 1 outputs structure + chapters for operator approval. PHASE 2 writes the full script only after approval. Includes the Handraiser CTA Layer (GUIDE/ACTION keyword comment CTAs, default ON). Outputs save to the active channel's 03_Scripts/ folder in Google Drive.
 ---
 
-## BRAND GUIDE DIGEST — Zoltan Gero
-*(Full guide: Google Drive → YT_Flywheel → Zoltan Gero → 00_Foundation)*
-*Apply to all visual and copy output without exception.*
+## BRAND GUIDE DIGEST — Zoltan Gero (v2)
+Brand: lásd BRAND-GUIDE.md, gép-értékek tokens.css. Kánon: git@github.com:YogiZoli/design-system.git (helyi: C:/Users/gdp/projects/design-system).
+Apply to all visual and copy output without exception.
 
 **COLOURS**
-Default (80% of touchpoints): `#00C4FF` Zoltan Blue — CTAs, accents, highlights.
-Dark bg A: `#21231D` | Dark bg B: `#163300` | Win accent: `#9FE870` | Calm accent: `#A0E1E1` | White: `#FFFFFF`
-
-Approved pairs: Default Digital (`#00C4FF` + `#21231D`) · Authority (`#9FE870` + `#163300`) · Calm Expertise (`#A0E1E1` + `#21231D`) · Clean Digital (`#00C4FF` + `#FFFFFF`)
-
-Per touchpoint: Thumbnails → dark bg + `#00C4FF`/white headline + optional `#9FE870` pop | Slides/PLCs → white bg + `#00C4FF` H1 + `#21231D` body | Shorts/Reels → high contrast | Landing/Opt-in → white dominant + `#00C4FF` CTAs + `#21231D` body
-
-Rules: Never >3 brand colours per design unit. `#9FE870` and `#A0E1E1` never on white for body text.
+Brand azure `#1E7CE8`: links, header, logo mark, dark-section headings, focus ring.
+Primary CTA: green `#0E8542` solid fill, white text (about 4.7:1), slow green pulse. The CTA is the only place green is used.
+Secondary button: azure `#1663C6` solid fill, white text (about 5.8:1).
+Page background `#F6F8FC` · surface or card `#FFFFFF` · body text `#1E2733` · muted text `#6A7688` · border `#E0E6F0`.
+Dark section or footer `#0E2038`, text on it `#FFFFFF` or `#82B0F7`.
+Thumbnails, Shorts, Reels: dark `#0E2038` or `#15355F` background, white or `#82B0F7` headline, green `#24A957` pop, max 5 words.
+Status only, kept off the brand hues: success `#0B7A3E` · warning `#E5A400` · danger `#E5484D`.
+Rules: every button is a solid fill with white text at 4.5:1 or better. Never dark text on a mid-tone fill. Never more than 3 brand colours per design unit. Never invent a colour, use the tokens.
 
 **TYPOGRAPHY**
-Font: Inter (Google Fonts). Fallback: Helvetica Neue, Arial.
-Display: Bold 700, 56-72px (max 5 words) | H1: SemiBold 600, 40px | H2: SemiBold 600, 30px | Body: Regular 400, 16px | CTA: SemiBold 600, 16-18px
-Rules: Max 2 weights per unit. No ALL CAPS except labels (max 3 words). No justified text. Min 12px.
+Font: Open Sans (Google Fonts, wght 400;500;600;700;800). Fallback: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif. Data and code: Geist Mono. Base 18px.
+Display: 800, 62px (max 5 words) | H1: 700, 40px | H2: 700, 32px | H3: 700, 22px | Body: 400, 18px | CTA label: 600, 16 to 18px, white on solid.
+Rules: max 2 weights per design unit. No ALL CAPS beyond a 3-word label. No justified text. Nothing below 13px.
 
 **TONE OF VOICE**
 Pillars: Clear · Concise · Empowering · Forward-thinking · Warm but Direct.
-Sentence: 12-18 words avg. Paragraphs: max 3 sentences. CTA: max 8 words, active verb first.
-DO: "AI agents can run your whole content system automatically."
+Sentence: 12 to 18 words avg. Paragraphs: max 3 sentences. CTA: max 8 words, active verb first.
+DO: "AI agents can run your whole content system, automatically."
 DON'T: "Leverage agentic workflows to optimise throughput." / "Just hustle harder."
 Use: AI agents · evergreen income · free traffic · flywheel · Purposeful/Peaceful/Profitable/Abundant
 Avoid: hack · trick · easy · hustle · revolutionary · very/really/basically/actually
 
 **DON'TS**
-Never >3 brand colours per unit | Never paragraphs >3 sentences | Never passive voice in headlines/CTAs | Never ALL CAPS beyond 3-word labels | Never machine-translate Hungarian — re-voice
+Never dark text on a mid-tone button (white on solid, 4.5:1 or better) | Never more than 3 brand colours per unit | Never paragraphs longer than 3 sentences | Never passive voice in headlines or CTAs | Never ALL CAPS beyond a 3-word label | Never a font other than Open Sans without an explicit request | Never machine-translate Hungarian, re-voice it | Never an emoji, never a horizontal dash between words
 
 ---
 

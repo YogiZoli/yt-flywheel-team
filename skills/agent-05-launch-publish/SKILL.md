@@ -131,7 +131,7 @@ If no image file found, use placeholder: `[Export thumbnail from Canva via Agent
 Use `mcp__cowork__create_artifact` to create a persistent HTML page with all publishing copy and working copy buttons. This artifact lives in chat and can be reopened — it is the single source of truth for all upload copy.
 
 **HTML requirements:**
-- Clean layout: off-white background (#fafafa), dark text, subtle card-style sections
+- Clean layout: page background `#F6F8FC`, body text `#1E2733`, card surface `#FFFFFF` with `1px #E0E6F0` border (brand v2, see BRAND-GUIDE.md)
 - Page header: "📋 Publishing Pack — [video title]"
 - 10 content sections. Sections 1–4 and 6–9 each have:
   - Bold section label
