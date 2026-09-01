@@ -8,7 +8,7 @@ description: Use this agent to review YouTube analytics, identify what's working
 **Playbook modules:** 8 (Metrics & Analytics)
 
 ## Context Block Protocol
-If invoked by an orchestrator with a `=== CONTEXT BLOCK v1 ===` (see plugin `references/conventions.md` §1), use its fields and SKIP the duplicated Pre-Flight Drive reads below. Standalone invocation → run Pre-Flight as written.
+If invoked by an orchestrator with a `=== CONTEXT BLOCK v1/v2 ===` (see plugin `references/conventions.md` §1), use its fields and SKIP the duplicated Pre-Flight Drive reads below. Standalone invocation → run Pre-Flight as written.
 
 ## Pre-Flight: Active Channel Check (standalone only)
 Use Drive MCP tools directly — do not ask the operator to provide these:

@@ -19,7 +19,7 @@ YT_Flywheel/                          ← master folder (Google Drive root)
 ├── _Channels_Registry.gsheet         ← Google Sheet, lists all channels (name, folder ID, status, created)
 └── [Channel Name]/                   ← one folder per channel
     ├── 00_Foundation/                ← Agent 00 outputs (one-time)
-    ├── 01_Strategy/                  ← Agent 01 video briefs
+    ├── 01_Strategy/                  ← Layer A: PlaylistStrategy_[Series] + Brief_[slug]_EP## cards
     ├── 02_SEO_Titles/                ← Agent 02 keyword + title docs
     ├── 03_Scripts/                   ← Agent 03 video scripts
     ├── 04_Thumbnail_Briefs/          ← Agent 04 briefs + A/B rules
@@ -43,10 +43,11 @@ Resolution order before any agent does work:
 Never guess the active channel. Never write outputs to a wrong channel folder.
 
 ### Context Block Handoff (Drive read optimization)
-When an orchestrator runs, it reads Drive ONCE at startup and passes a `=== CONTEXT BLOCK v1 ===`
-(schema: plugin `references/conventions.md` §1) to every agent it invokes. Agents receiving the
-block MUST NOT re-read `_Active_Channel`, the Foundation doc, or subfolder IDs. Agents invoked
-standalone run their own Pre-Flight as written.
+When an orchestrator runs, it reads Drive ONCE at startup and passes a `=== CONTEXT BLOCK v2 ===`
+(schema: plugin `references/conventions.md` §1) to every agent it invokes. The v2 block carries
+`BRIEF_ID`; when set, the named Video Brief Card is read-only truth for topic / keyword /
+video_type / angle / lead magnet. Agents receiving the block MUST NOT re-read `_Active_Channel`,
+the Foundation doc, or subfolder IDs. Agents invoked standalone run their own Pre-Flight.
 
 ## Core Frame — Non-Negotiable
 - The owner is a BUSINESS OWNER, not a YouTuber
@@ -55,14 +56,26 @@ standalone run their own Pre-Flight as written.
 - No fake scarcity, no hustle culture, no viral chasing
 - Goal: evergreen, consistent, qualified leads — not views, subscribers, or fame
 
-## Workflow Sequence (every video)
+## Two Layers — read `references/layer-interface.md`
+- **LAYER A — Playlist Strategy** (`skills/strategy/`, once per playlist): decides concept,
+  umbrella keyword, the video sequence, and per-video keyword/angle/video_type. Emits the
+  `PlaylistStrategy` doc + one **Video Brief Card** per planned video (`status: planned`).
+- **LAYER B — Per-Video Execution** (`skills/execution/`, once per video): consumes ONE Brief
+  Card and runs title/desc → script → production core → thumbnail → publish. It never decides
+  strategy. A missing card → run Layer A, or `"ad-hoc videó"` for a playlist-less one-off.
+- The **Video Brief Card** is the only thing that crosses the boundary. Layer B may change its
+  `status` and nothing else.
+
+## Workflow Sequence
 - **Setup (per channel, once):** `channel-manager` → Agent 00 (Foundation)
-- **Playlist launch (once per playlist):** `strategic-launch-orchestrator` → Agent 01 (Playlist Mode)
-  → funnel build DELEGATED to `email-list-building:list-building-orchestrator` → Agent 09 stores opt-in URL
-- **PRE-publishing (per video):** `video-production-orchestrator`: [Agent 01 only if no PlaylistStrategy]
-  → Agent 02 → Agent 03 → [manual ElevenLabs audio] → Agent 04 → Agent 05
-- **POST-publishing (optional menu):** 03c Shorts · Agent 07 (Repurposing [R] + Community [C] modes)
-  · Agent 09 (conversion audit) · 05b Captions · Agent 06 weekly → feedback to Agent 01
+- **Playlist launch (once per playlist):** `strategic-launch-orchestrator` (thin wrapper) →
+  `playlist-strategy-orchestrator` (Layer A) → funnel build DELEGATED to
+  `email-list-building:list-building-orchestrator` → Agent 09 stores opt-in URL
+- **Playlist strategy only (no funnel):** `playlist-strategy-orchestrator` directly.
+- **PRE-publishing (per video):** `video-production-orchestrator`: load Brief Card →
+  Agent 02 (Execution Mode) → Agent 03 → [production core] → Agent 04 → Agent 05
+- **POST-publishing (optional menu):** 03c Shorts · Agent 07 (Repurposing [R] + Community [C])
+  · Agent 09 (conversion audit) · 05b Captions · Agent 06 weekly → feeds Layer A re-plan
 - **Funnel building is NEVER done in this plugin** — always the email-list-building plugin.
 
 ## Output Format Rules

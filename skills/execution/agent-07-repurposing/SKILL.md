@@ -20,7 +20,7 @@ Colours (if a visual brief is needed): brand azure `#1E7CE8`, primary CTA green 
 **Playbook modules:** 11.1 (Repurposing Brief), 11.3 (Community Strategy)
 
 ## Context Block Protocol
-If invoked by an orchestrator with a `=== CONTEXT BLOCK v1 ===` (see plugin
+If invoked by an orchestrator with a `=== CONTEXT BLOCK v1/v2 ===` (see plugin
 `references/conventions.md` §1), use its fields and SKIP the Pre-Flight Drive reads below.
 Standalone invocation → run Pre-Flight as written.
 

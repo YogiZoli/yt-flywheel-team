@@ -8,12 +8,13 @@ description: Use this agent when ready to upload a video to YouTube. Triggers wh
 **Playbook modules:** 6.3 (Captions), 9 (Launch Plan)
 
 ## Context Block Protocol
-If invoked by an orchestrator with a `=== CONTEXT BLOCK v1 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs, opt-in URL, confirmed title, lead magnet) and SKIP the Pre-Flight Drive reads below for every field the block provides — the full script text must still be read from Drive. Standalone invocation → run Pre-Flight as written.
+If invoked by an orchestrator with a `=== CONTEXT BLOCK v1/v2 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs, opt-in URL, confirmed title, lead magnet) and SKIP the Pre-Flight Drive reads below for every field the block provides — the full script text must still be read from Drive. Standalone invocation → run Pre-Flight as written.
 
 ## Pre-Flight: Active Channel Check (standalone only)
 Use Drive MCP tools directly — do not ask the operator to provide these:
 1. **Read `_Active_Channel.gdoc`:** `search_files(query: "title = '_Active_Channel'")` → take first result's `id` → `read_file_content(fileId)` → parse line 1: `[Channel Name] | [Channel Folder ID]`. Store **Channel Folder ID**. If empty → invoke `channel-manager`.
 2. **Pull latest assets automatically:**
+   - Video Brief Card: `search_files(query: "title = '01_Strategy' and parentId = '[channelFolderID]'")` → read the `Brief_*` card that is `status: in_production` → playlist, arc, `next_episode_topic`, `cta_lead_magnet` (`layer-interface.md` §1)
    - Title + SEO data: `search_files(query: "title = '02_SEO_Titles' and parentId = '[channelFolderID]'")` → subfolder → read most recent (extract title, tags, hashtags, description hook)
    - **Script (CRITICAL — read full text):** `search_files(query: "title = '03_Scripts' and parentId = '[channelFolderID]'")` → subfolder ID → `search_files(query: "parentId = '[subfolderID]'")` → read most recent → **store complete script text for chapter generation and HeyGen conversion**
    - Thumbnail brief: `search_files(query: "title = '04_Thumbnail_Briefs' and parentId = '[channelFolderID]'")` → read most recent
@@ -101,19 +102,19 @@ Derive chapter timestamps directly from the script sections:
 - [ ] Do NOT manually edit auto-generated captions — HeyGen SRT replaces them
 
 **Playlist**
-- [ ] Video added to correct playlist (from Agent 01 brief)
+- [ ] Video added to correct playlist (from the Video Brief Card)
 - [ ] Playlist order checked (newest near top)
 
 ### Step 5: Gather Card, End Screen & Thumbnail Data
 
 Before creating the artifact, collect the following — do NOT ask the operator for this data, derive it automatically:
 
-**Playlist name:** read from Agent 01 brief (already loaded in Pre-Flight).
+**Playlist name:** the `playlist` field of the Video Brief Card (already loaded in Pre-Flight). For an `AD-HOC` card there is no playlist — skip the playlist card.
 
 **Estimated video length:** total script word count ÷ 130 wpm = total minutes. Convert to mm:ss.
 
 **Cards — two cards required:**
-- Card 1: Playlist card — target = the playlist this video belongs to (from Agent 01 brief). Timestamp = ~20% of estimated video length.
+- Card 1: Playlist card — target = the playlist this video belongs to (from the Video Brief Card). Timestamp = ~20% of estimated video length.
 - Card 2: Video card — target = most recently published video on the channel. Use `mcp__bab7487b-ef77-4f71-a988-c5cfd8566b9a__vidiq_channel_videos` to get the channel's latest video title and URL. If this is the first video on the channel, set Card 2 target to BLANK and note it in the artifact.
 
 **End Screen — two elements (last 20 seconds of video):**

@@ -20,7 +20,7 @@ Read VIDEO_TYPE from the CONTEXT BLOCK (or the Video Brief Card if standalone):
 ---
 
 ## Context Block Protocol
-If invoked with a `=== CONTEXT BLOCK v1 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs) and SKIP the duplicated Drive reads below — the full script text and SEO data must still be read from Drive. Standalone invocation → run Pre-Flight as written.
+If invoked with a `=== CONTEXT BLOCK v1/v2 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs) and SKIP the duplicated Drive reads below — the full script text and SEO data must still be read from Drive. Standalone invocation → run Pre-Flight as written.
 
 ## Pre-Flight: Active Channel + Source Data (standalone only)
 
