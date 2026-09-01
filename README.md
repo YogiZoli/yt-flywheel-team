@@ -6,32 +6,57 @@ Built for Business Owners (not YouTubers). The email list is the asset. YouTube 
 
 ---
 
+## Two Layers (v1.6)
+
+The plugin is split into two layers with a formal interface between them. This is the whole
+point of the v1.6 architecture: playlist strategy is decided once, per playlist; video
+production runs many times, always inside that frame, and never re-decides strategy.
+
+```
+LAYER A — PLAYLIST STRATEGY                     LAYER B — PER-VIDEO EXECUTION
+(runs once per playlist, + re-plans)            (runs once per video)
+skills/strategy/ + skills/shared/               skills/execution/ + skills/shared/
+
+  playlist-strategy-orchestrator                  video-production-orchestrator
+    → agent-01 (Playlist Mode)          Video      → agent-02 (Execution Mode)
+    → agent-02 (Playlist Keyword Mode)  Brief      → agent-03 → PRODUCTION CORE
+    → emits PlaylistStrategy doc        Card       → agent-04 → agent-05
+      + one Brief Card per video   ───────────►    → post-publish: 03c / 05b / 06 / 07 / 09
+```
+
+**The interface is the Video Brief Card** (`references/layer-interface.md`). Layer A writes it;
+Layer B reads it and only ever advances its `status`. If Layer B would need to decide a keyword,
+topic, angle, video type or lead magnet at video time, that is a bug — the fix is to run
+Layer A, or use the `"ad-hoc videó"` escape hatch for a one-off video with no playlist.
+
 ## What's Inside
 
-**13 Skills** (2 orchestrators + channel manager + 10 agents):
+**14 Skills**, grouped by layer under `skills/`:
 
-| Skill | Phase | Trigger |
-|---|---|---|
-| `strategic-launch-orchestrator` | Once per playlist | "playlist launch", "új playlist" |
-| `video-production-orchestrator` | Every video | "új videó", "new video cycle" |
-| `channel-manager` | Setup / switching | "create new channel", "switch to channel X" |
-| `agent-00-channel-foundation` | Once per channel | "set up my channel", "channel foundation" |
-| `agent-01-channel-strategist` | Pre | "what should I make next" |
-| `agent-02-seo-title` | Pre | "give me a title" |
-| `agent-03-script-writer` | Pre | "write my script" |
-| `agent-03c-shorts-producer` | Post | "shortokat is kérem" |
-| `agent-04-thumbnail` | Pre | "thumbnail brief" |
-| `agent-05-launch-publish` | Pre | "ready to upload" |
-| `agent-05b-multilingual-captions` | Post | "felirat fordítás" |
-| `agent-06-analytics-reviewer` | Post | "review my analytics" |
-| `agent-07-repurposing` | Post | "repurpose" [R] / "community post" [C] — two modes |
-| `agent-09-conversion-bridge` | Post | "conversion audit", "CTA copy" |
+| Skill | Group | Layer | Trigger |
+|---|---|---|---|
+| `playlist-strategy-orchestrator` | strategy | A | "playlist stratégia", "tervezd meg a playlistet", "playlist újratervezés" |
+| `agent-01-channel-strategist` | strategy | A | "what should I make next", "give me video ideas" |
+| `agent-02-seo-title` | shared | A + B | "playlist kulcsszavak" (A) · "give me a title" (B) |
+| `video-production-orchestrator` | execution | B | "új videó", "new video cycle", "ad-hoc videó" |
+| `agent-03-script-writer` | execution | B | "write my script" |
+| `agent-03c-shorts-producer` | execution | B (post) | "shortokat is kérem" |
+| `agent-04-thumbnail` | execution | B | "thumbnail brief" |
+| `agent-05-launch-publish` | execution | B | "ready to upload" |
+| `agent-05b-multilingual-captions` | execution | B (post) | "felirat fordítás" |
+| `agent-06-analytics-reviewer` | execution | B (post) → feeds A | "review my analytics" |
+| `agent-07-repurposing` | execution | B (post) | "repurpose" [R] / "community post" [C] |
+| `strategic-launch-orchestrator` | launch | wrapper | "teljes launch", "playlist launch" |
+| `agent-09-conversion-bridge` | launch | — | "conversion audit", "CTA copy" |
+| `channel-manager` | setup | — | "create new channel", "switch to channel X" |
+| `agent-00-channel-foundation` | setup | — | "set up my channel", "channel foundation" |
 
-**Architecture notes (v1.4):**
-- Orchestrators read Drive ONCE and pass a CONTEXT BLOCK to every agent (`references/conventions.md`).
+**Architecture notes (v1.6):**
+- Two layers, one plugin. The layer group dirs are registered via the `skills` array in `.claude-plugin/plugin.json`.
+- The Video Brief Card is the contract — schema and rules in `references/layer-interface.md`.
+- Orchestrators read Drive ONCE and pass a CONTEXT BLOCK v2 (with `BRIEF_ID`) to every agent (`references/conventions.md`).
+- `strategic-launch-orchestrator` is now a thin wrapper: playlist strategy (delegated to Layer A) → funnel build (delegated to `email-list-building`) → opt-in URL storage.
 - Funnel building (lead magnet, landing page, GHL) is DELEGATED to the `email-list-building` plugin.
-- Agent 08 merged into Agent 07 (Community mode). Agent 03b merged into the video orchestrator
-  as an ElevenLabs API fallback. Legacy pipeline-orchestrator removed.
 
 ---
 
@@ -72,14 +97,25 @@ All agents read from the **YouTube Evergreen Flywheel Playbook v2.0** Google Doc
 "set up my channel"                  →  Agent 00 builds Foundation doc
 ```
 
-**Every video — PRE-publishing:**
+**Playlist launch (once per playlist):**
 ```
-01 Strategy → 02 SEO/Title → 03 Script → 04 Thumbnail → 05 Publish
+"teljes launch"  →  strategic-launch-orchestrator:
+   playlist-strategy-orchestrator (Layer A) → PlaylistStrategy doc + N Brief Cards
+   → email-list-building plugin (funnel) → opt-in URL stored
 ```
+Or just the strategy layer, no funnel: `"playlist stratégia"`.
+
+**Every video — Layer B (PRE-publishing):**
+```
+"új videó"  →  load next planned Brief Card → 02 Title/Desc → 03 Script → 04 Thumbnail → 05 Publish
+```
+No strategy step. The Brief Card already carries topic, keyword, angle, video type, CTA.
+One-off video with no playlist: `"ad-hoc videó"`.
 
 **Every video — POST-publishing:**
 ```
-06 Analytics → 07 Post-Publish Content ([R]+[C]) → 09 Conversion Audit → back to 01
+06 Analytics → 07 Post-Publish Content ([R]+[C]) → 09 Conversion Audit
+06's CONTENT DIRECTION UPDATE feeds Layer A → "playlist újratervezés" regenerates the planned Brief Cards
 ```
 
 ---
@@ -87,10 +123,12 @@ All agents read from the **YouTube Evergreen Flywheel Playbook v2.0** Google Doc
 ## Installation
 
 ### Cowork
-Drop the `.plugin` file into Cowork's plugin install dialog. All 11 skills register automatically.
+Drop the `.plugin` file into Cowork's plugin install dialog. All 14 skills register
+automatically (the `skills` array in `.claude-plugin/plugin.json` registers the layer group
+dirs — `skills/strategy`, `skills/shared`, `skills/execution`, `skills/launch`, `skills/setup`).
 
 ### Manual (alternative)
-Copy the `skills/` directory contents to your Cowork skills folder:
+Copy the contents of each `skills/<group>/` directory into your Cowork skills folder:
 - Mac: `~/Library/Application Support/Claude/skills/`
 - Windows: `%APPDATA%\Claude\skills\`
 
@@ -125,6 +163,6 @@ The channel-manager skill creates the YT_Flywheel master folder in your Drive, t
 
 ---
 
-**Version:** 1.4.0
+**Version:** 1.6.0
 **Author:** Zoltan Gero (humorketing@gmail.com)
 **License:** Personal use
