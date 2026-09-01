@@ -1,8 +1,12 @@
 # Shared Conventions — YT Flywheel Orchestrators
 Single source of truth for status artifacts, gate formats, context block schema,
-global commands, resume logic, and error handling. Both orchestrators
-(video-production-orchestrator, strategic-launch-orchestrator) read this file at startup:
-`references/conventions.md` at the plugin root (relative to the skill: `../../references/conventions.md`).
+global commands, resume logic, and error handling. All three orchestrators
+(playlist-strategy-orchestrator, video-production-orchestrator, strategic-launch-orchestrator)
+read this file at startup: `references/conventions.md` at the plugin root
+(relative to a grouped skill: `../../../references/conventions.md`).
+
+**Layer boundary:** the Strategy layer and the Execution layer are separated by the
+Video Brief Card. Their contract lives in `references/layer-interface.md` — read it too.
 
 ---
 
@@ -13,18 +17,19 @@ Agents that receive a CONTEXT BLOCK MUST skip their own Pre-Flight Drive reads f
 Agents invoked standalone (no context block) run their own Pre-Flight as written in their SKILL.md.
 
 ```
-=== CONTEXT BLOCK v1 ===
+=== CONTEXT BLOCK v2 ===
 CHANNEL_NAME: [name]
 CHANNEL_LANG: [HU | EN | ... — from _Channel_Pin.txt; drives ALL public-facing copy language]
 CHANNEL_FOLDER_ID: [Drive folder ID]
 SUBFOLDER_IDS: 00=[id] | 01=[id] | 02=[id] | 03=[id] | 04=[id] | 05=[id] | 06=[id] | 07=[id] | 08=[id] | 09=[id] | Captions=[id]
 ACTIVE_OPTIN_URL: [URL or null]
-VIDEO_TYPE: [talking_head | heygen_avatar | screen_recording | n/a]
-PLAYLIST: [SeriesName] | EP.[X] of [Y] | Arc: [Opening/Middle/Closing]
+BRIEF_ID: [brief_id of the Video Brief Card this run executes | n/a for Layer A / ad-hoc]
+VIDEO_TYPE: [talking_head | heygen_avatar | screen_recording | n/a]   ← sourced from the Brief Card
+PLAYLIST: [SeriesName] | EP.[X] of [Y] | Arc: [Opening/Middle/Closing]  ← sourced from the Brief Card
 LEAD_MAGNET: [name] | [hosted URL or pending]
 AVATAR_SUMMARY: [2-3 sentence extract from Foundation doc]
 CONFIRMED_TITLE: [title or n/a]
-CONFIRMED_TOPIC: [topic or n/a]
+CONFIRMED_TOPIC: [topic or n/a — for a video run this is the Brief Card topic]
 === END CONTEXT BLOCK ===
 ```
 
@@ -32,6 +37,10 @@ Rules:
 - Orchestrator resolves ALL subfolder IDs in one scan at Step 0 (one `search_files(parentId=channel)` call).
 - Fields not yet known at handoff time are passed as `n/a` — the agent may read only those from Drive.
 - Agents never re-read `_Active_Channel`, the Foundation doc, or subfolder IDs when the block provides them.
+- **When `BRIEF_ID` is set**, the named Video Brief Card in `01_Strategy/` is read-only truth for
+  topic / primary_keyword / angle / video_type / lead magnet / playlist position. An agent that
+  thinks one of those is wrong STOPS and reports — it does not edit the card. See `layer-interface.md`.
+- v1 blocks (no `BRIEF_ID`) are still accepted: an agent that receives one runs as before.
 
 ## 2. STATUS ARTIFACT — SHARED HTML BASE
 
