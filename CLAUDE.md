@@ -66,6 +66,14 @@ the Foundation doc, or subfolder IDs. Agents invoked standalone run their own Pr
 - The **Video Brief Card** is the only thing that crosses the boundary. Layer B may change its
   `status` and nothing else.
 
+## Video types (enum, priority order most→least used)
+`avatar_local` (primary), `avatar_native` (short-form / Shorts only, <2.5 min),
+`screen_recording`, `talking_head` (real selfie recording, standalone or B-roll),
+`faceless_generated` (no avatar / no voice required). The pipeline is avatar-and-voice agnostic:
+the avatar (own / standard HeyGen / client upload) and voice (cloned / standard / none) come
+from the channel Foundation doc, never hardcoded to one person. `avatar_local` is the renamed
+old `heygen_avatar` — same gate logic.
+
 ## Workflow Sequence
 - **Setup (per channel, once):** `channel-manager` → Agent 00 (Foundation)
 - **Playlist launch = TWO separate jobs, not chained:**

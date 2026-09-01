@@ -33,7 +33,7 @@ A one-off video with no playlist uses the `"ad-hoc videó"` escape hatch.
 
 ## What's Inside
 
-**14 Skills**, grouped by layer under `skills/`:
+**15 Skills**, grouped by layer under `skills/`:
 
 | Skill | Group | Layer | Trigger |
 |---|---|---|---|
@@ -53,7 +53,7 @@ A one-off video with no playlist uses the `"ad-hoc videó"` escape hatch.
 | `channel-manager` | setup | — | "create new channel", "switch to channel X" |
 | `agent-00-channel-foundation` | setup | — | "set up my channel", "channel foundation" |
 
-**Architecture notes (v1.7):**
+**Architecture notes (v1.8):**
 - Two layers, one plugin. The layer group dirs are registered via the `skills` array in `.claude-plugin/plugin.json`.
 - The Video Brief Card is the interface between the two layers — schema and rules in `references/layer-interface.md`.
 - Orchestrators read Drive ONCE and pass a CONTEXT BLOCK v2 (with `BRIEF_ID`) to every agent (`references/conventions.md`).
@@ -115,6 +115,12 @@ Job 2 — FUNNEL:   "start" / "lead magnet"  →  CMO orchestrator (email-list-b
 ```
 No strategy step. The Brief Card carries topic, angle, video type, CTA and a broad anchor
 keyword; Agent 02 adds the tight video-specific keyword.
+
+**Five video types** (priority order, most→least used): `avatar_local` (primary — local build +
+avatar clip), `avatar_native` (short-form / Shorts only, <2.5 min), `screen_recording`,
+`talking_head` (real selfie recording, standalone or B-roll), `faceless_generated` (no avatar or
+voice required). The avatar and voice are agnostic — the channel's own, a standard HeyGen
+avatar, or a client's uploaded one — read from the Foundation doc, never hardcoded.
 One-off video with no playlist: `"ad-hoc videó"`.
 
 **Every video — POST-publishing:**
@@ -128,7 +134,7 @@ One-off video with no playlist: `"ad-hoc videó"`.
 ## Installation
 
 ### Cowork
-Drop the `.plugin` file into Cowork's plugin install dialog. All 14 skills register
+Drop the `.plugin` file into Cowork's plugin install dialog. All 15 skills register
 automatically (the `skills` array in `.claude-plugin/plugin.json` registers the layer group
 dirs — `skills/strategy`, `skills/shared`, `skills/execution`, `skills/launch`, `skills/setup`).
 
@@ -168,6 +174,6 @@ The channel-manager skill creates the YT_Flywheel master folder in your Drive, t
 
 ---
 
-**Version:** 1.7.0
+**Version:** 1.8.0
 **Author:** Zoltan Gero (humorketing@gmail.com)
 **License:** Personal use

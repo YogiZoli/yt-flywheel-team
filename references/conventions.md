@@ -25,7 +25,7 @@ CHANNEL_FOLDER_ID: [Drive folder ID]
 SUBFOLDER_IDS: 00=[id] | 01=[id] | 02=[id] | 03=[id] | 04=[id] | 05=[id] | 06=[id] | 07=[id] | 08=[id] | 09=[id] | Captions=[id]
 ACTIVE_OPTIN_URL: [URL or null]
 BRIEF_ID: [brief_id of the Video Brief Card this run executes | n/a for Layer A / ad-hoc]
-VIDEO_TYPE: [talking_head | heygen_avatar | screen_recording | n/a]   ← sourced from the Brief Card
+VIDEO_TYPE: [avatar_local | avatar_native | screen_recording | talking_head | faceless_generated | n/a]   ← sourced from the Brief Card, priority order most→least used
 PLAYLIST: [SeriesName] | EP.[X] of [Y] | Arc: [Opening/Middle/Closing]  ← sourced from the Brief Card
 LEAD_MAGNET: [name] | [hosted URL or pending]
 AVATAR_SUMMARY: [2-3 sentence extract from Foundation doc]

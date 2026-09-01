@@ -183,15 +183,17 @@ After the Publishing Artifact is live, convert the script (fetched in Pre-Flight
 #### Standing HeyGen Settings (v4 — Zoltan Gero)
 
 **Avatar:**
-- Avatar ID: `bfcee432248442539191df03f922f575`
+- Avatar ID: from the channel Foundation doc `heygen_avatar_id` (the channel's own avatar, a
+  standard HeyGen avatar, or a client's uploaded avatar — never hardcode a person). Current
+  channel default / example: `bfcee432248442539191df03f922f575`.
 - Frame: Circle Frame applied throughout
 - Engine: Motion Engine Avatar III, Unlimited Engine
 - Fallback: Do NOT substitute silently. Flag immediately and wait for instruction.
 
 **Voice:**
-- Voice ID: `99b6f9eca33e474483987860185fdc43`
+- Voice ID: from Foundation `heygen_voice_id` (cloned or standard). Example: `99b6f9eca33e474483987860185fdc43`.
 - Speed: Minimum +25% faster than default, recommended +50% faster. Mandatory, entire video, no exceptions.
-- Fallback: substitute free young male voice, flag which.
+- Fallback: substitute free voice matching the channel's voice profile, flag which.
 
 **Recording Rules:**
 - Every recording clip used ONCE only per video. No repeats, no loops, no "continued" markers.
@@ -233,14 +235,14 @@ Estimate total video credits before generating.
 - Voice Speed: FASTER than default. Minimum +25% faster, recommended +50% faster. Mandatory, entire video.
 ---
 ## SECTION 2, AVATAR
-- Avatar ID: bfcee432248442539191df03f922f575
+- Avatar ID: from Foundation `heygen_avatar_id` (own / standard HeyGen / client upload). Example: bfcee432248442539191df03f922f575
 - Frame: Circle Frame applied throughout every avatar appearance
 - Engine: Motion Engine Avatar III, Unlimited Engine
 - Fallback rule: Do NOT substitute silently. Flag immediately.
 ## SECTION 3, VOICE
-- Voice ID: 99b6f9eca33e474483987860185fdc43
+- Voice ID: from Foundation `heygen_voice_id`. Example: 99b6f9eca33e474483987860185fdc43
 - Speed: +50% faster than default (minimum +25%). Applies to entire video. No exceptions.
-- Fallback rule: substitute free young male voice, flag which one was used.
+- Fallback rule: substitute free voice matching the channel's voice profile, flag which one was used.
 ```
 
 ```
