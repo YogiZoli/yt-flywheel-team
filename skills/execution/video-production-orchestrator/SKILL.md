@@ -1,12 +1,19 @@
 ---
 name: video-production-orchestrator
-description: Video-level pipeline controller — runs for EVERY video, end-to-end from topic to published YouTube upload. Reads Drive state ONCE at startup, builds a CONTEXT BLOCK (including VIDEO_TYPE), and passes it to every agent. Supports THREE video types via Production Core adapters — talking_head, heygen_avatar, screen_recording — with a shared PRE phase (strategy, SEO, master script) and shared POST phase (thumbnail, publish, chapters, post-publish menu). Triggers ONLY when the user says "új videó", "start new video", "video pipeline", "kezdjük a videót", "run the video pipeline", or "new video cycle". Core chain: 02 → 03 (master script + type adapter) → [PRODUCTION CORE — type-dependent gates] → 04 thumbnail brief → 05 publish. Agent 01 Strategy only runs when no PlaylistStrategy doc exists. Shorts, Repurposing, Community = post-publish only.
+description: LAYER B controller — runs the per-video pipeline end to end from an already-decided Video Brief Card to published YouTube upload. Consumes exactly ONE Brief Card (produced earlier by Layer A / playlist-strategy-orchestrator); does NO strategy, keyword, topic, angle or video-type decision at video time. Reads Drive state ONCE, builds a CONTEXT BLOCK (with BRIEF_ID), passes it to every agent. THREE video types via Production Core adapters — talking_head, heygen_avatar, screen_recording — shared PRE phase (load card, SEO title/description, master script) and shared POST phase (thumbnail, publish, chapters, post-publish menu). Triggers ONLY when the user says "új videó", "start new video", "video pipeline", "kezdjük a videót", "run the video pipeline", "new video cycle", or "ad-hoc videó" (playlist-less single video). Core chain: load Brief Card → 02 title/desc → 03 master script + type adapter → [PRODUCTION CORE] → 04 thumbnail → 05 publish. Shorts, Repurposing, Community = post-publish only.
 ---
 
-# Video Production Orchestrator (v2 — Video Type Branching)
-**Role:** Video-level pipeline controller. Runs for every single video.
-**Key behaviours:** Reads Drive state ONCE (context block incl. VIDEO_TYPE), reads the opt-in URL
-automatically and injects it into Agent 05 publishing artifacts — zero manual coordination.
+# Video Production Orchestrator (v3 — Layer B, Brief-Card driven)
+**Role:** Per-video pipeline controller (LAYER B). Runs for every single video, always inside
+the frame a Video Brief Card already set.
+**Key behaviours:** Resolves ONE Brief Card at Step 0, reads Drive state ONCE (context block
+incl. `BRIEF_ID` + `VIDEO_TYPE`), reads the opt-in URL automatically and injects it into
+Agent 05 publishing artifacts — zero manual coordination, zero strategy work.
+
+**Layer boundary (see `references/layer-interface.md`):** this orchestrator NEVER invokes
+Agent 01 and NEVER decides topic / keyword / angle / video_type / lead magnet. Those live on
+the Brief Card. If no card exists, it stops and points the operator at
+`playlist-strategy-orchestrator`, or runs the `"ad-hoc videó"` escape hatch.
 
 **Architecture principle:**
 ```
@@ -26,7 +33,7 @@ into PRE or POST.
 | heygen_avatar | HeyGen Production Prompt | ElevenLabs clone (manual/API) | HeyGen render approval |
 | screen_recording | Shot list / screen script | ElevenLabs VO OR live narration | Recording + edit approval |
 
-**Agent 01 Strategy:** Conditional — only if no PlaylistStrategy doc exists for the active playlist.
+**Strategy:** never happens here. The Brief Card is the input. Missing card → stop or go ad-hoc.
 **Thumbnail (04):** Brief + Nano Banana 2 prompt only. Canva MCP = optional, operator-triggered.
 **Shorts / Repurposing / Community:** Post-publish menu ONLY. Never part of core pipeline.
 
@@ -37,14 +44,14 @@ into PRE or POST.
 ```
 START
   ▼
-[00] Read active channel + scan Drive state + read opt-in URL + resolve VIDEO_TYPE
+[00] Resolve Brief Card + channel + scan Drive state + read opt-in URL (VIDEO_TYPE comes from the card)
   ▼
 ════════════════ COMMON PRE (type-independent) ════════════════
-[01] Agent 01 — Video Strategy          ← CONDITIONAL: only if no PlaylistStrategy doc
+[01] Load Brief Card (read-only)        ← no Agent 01, no strategy. Missing card → stop / ad-hoc
   ▼
-GATE 1: Confirm topic + VIDEO_TYPE (if not already set by Video Brief Card)
+GATE 1: Confirm this is the card to run (topic + VIDEO_TYPE already on it)
   ▼
-[02] Agent 02 — SEO + Title             ← GATE 2: Confirm title
+[02] Agent 02 — Execution Mode (title/desc/tags on the card's keyword)  ← GATE 2: Confirm title
   ▼
 [03] Agent 03 — MASTER SCRIPT           ← GATE 3: Approve master script
   ▼
@@ -72,14 +79,16 @@ POST-PUBLISH MENU (all optional, never blocking)
 ---
 
 ## SHARED CONVENTIONS — READ FIRST
-At startup, read `../../references/conventions.md` (plugin root `references/conventions.md`).
-It defines: the CONTEXT BLOCK schema (§1, incl. VIDEO_TYPE), the shared status artifact HTML base
-(§2), gate block format (§3), global commands (§4), resume logic (§5), and error handling (§6).
+At startup, read BOTH:
+- `../../../references/conventions.md` — CONTEXT BLOCK schema (§1, incl. `BRIEF_ID` + VIDEO_TYPE),
+  status artifact HTML base (§2), gate format (§3), global commands (§4), resume (§5), errors (§6).
+- `../../../references/layer-interface.md` — the Brief Card v1 schema, Brief Card resolution
+  order (§3), and the ad-hoc escape hatch (§4).
 All of those apply to this orchestrator — they are not repeated below.
 
 ---
 
-## STEP 0 — STARTUP: Channel + Drive State + Opt-In URL + VIDEO_TYPE
+## STEP 0 — STARTUP: Brief Card + Channel + Drive State + Opt-In URL
 
 ### 0a. Resolve channel — CHANNEL PIN FIRST (conventions.md §7)
 1. **Pin file:** look for `_Channel_Pin.txt` in the connected working folder. If found, parse
@@ -105,14 +114,29 @@ If NOT found → display warning:
 ```
 If operator says "igen, folytatom" → proceed with `ACTIVE_OPTIN_URL = null` (placeholder in descriptions).
 
-### 0c. Resolve VIDEO_TYPE (new in v2)
-Resolution order — first hit wins:
-1. **Video Brief Card** (`01_Strategy/`, current cycle) — `video_type:` field (Agent 01 sets per video).
-2. **PlaylistStrategy doc** — `default_video_type:` field (playlist-level default).
-3. **Operator statement** in the trigger message (e.g. "új videó, screen recording").
-4. **None found** → ask at Gate 1 (see Step 1).
+### 0c. Resolve the Brief Card (the input — layer-interface.md §3)
+First hit wins:
+1. **Explicit in the trigger** — `"új videó EP04"` / `"új videó brief: youtube-ownership-ep04"`.
+2. **Next `planned` card** — read `PlaylistStrategy_[Series]` in `01_Strategy/`, take the lowest-EP
+   `Brief_*` card with `status: planned`. `search_files(parentId='[01_Strategy id]')`, read candidates.
+3. **`"ad-hoc videó"` in the trigger** → §0c-adhoc below.
+4. **No PlaylistStrategy doc, no card, not ad-hoc** → STOP:
+   ```
+   Nincs Video Brief Card ehhez a csatornához.
+   → Playlist tervezés:  "playlist stratégia"
+   → Egyszeri videó:     "ad-hoc videó"
+   ```
 
-Store as `VIDEO_TYPE` ∈ {`talking_head`, `heygen_avatar`, `screen_recording`} in the CONTEXT BLOCK.
+Read the resolved card. `VIDEO_TYPE` = its `video_type`. Store `BRIEF_ID` = its `brief_id`.
+`PLAYLIST` / arc / lead magnet / `next_episode_topic` all come from the card — do not re-derive.
+Set the card `status: in_production` (new file, same title).
+
+### 0c-adhoc. Ad-hoc single video (escape hatch — layer-interface.md §4)
+Ask the operator exactly three things: topic, primary keyword (or `"kutasd ki"` → Agent 02 runs
+its §C one-off research pass), video_type (T/H/S). Build a minimal Brief Card:
+`playlist: AD-HOC`, `arc: n/a`, `cta_lead_magnet` = the channel's current `_OptinURL` lead magnet
+if present else generic `email_optin`. Save as `Brief_ADHOC_[YYYY-MM-DD]_[slug]` with
+`status: in_production`. Set `BRIEF_ID` accordingly. Continue the pipeline normally from Step 1.
 
 ### 0d. Scan current pipeline state
 Check what's already done for the active channel this cycle:
@@ -126,14 +150,15 @@ Check what's already done for the active channel this cycle:
 Use `search_files(query: "parentId = '[folderID]'")` per folder, sort by `createdTime` descending.
 Mark completed steps DONE in artifact, offer skip with `"újra [N]"`.
 
-### 0e. Build the CONTEXT BLOCK (one Drive scan — no repeated reads later)
+### 0e. Build the CONTEXT BLOCK v2 (one Drive scan — no repeated reads later)
 Resolve ALL subfolder IDs in one call: `search_files(query: "parentId = '[channelFolderID]'")`.
 Read the Foundation doc once, extract a 2-3 sentence avatar summary. Assemble the CONTEXT BLOCK
-per conventions.md §1, **plus**: `VIDEO_TYPE: talking_head | heygen_avatar | screen_recording`.
+per conventions.md §1, **including** `BRIEF_ID` (from Step 0c), `VIDEO_TYPE`, `PLAYLIST`, and
+`CONFIRMED_TOPIC` — all sourced from the Brief Card.
 
-**Pass the CONTEXT BLOCK at the top of EVERY agent invocation (Steps 1, 2, 3, 5, 6).**
-Agents receiving it skip their own Pre-Flight Drive reads and adapt output to VIDEO_TYPE.
-Update CONFIRMED_TITLE / CONFIRMED_TOPIC / VIDEO_TYPE fields as gates are passed.
+**Pass the CONTEXT BLOCK at the top of EVERY agent invocation (Steps 2, 3, 5, 6).**
+Agents receiving it treat the `BRIEF_ID` card as read-only truth, skip their own Pre-Flight
+Drive reads, and adapt output to `VIDEO_TYPE`. Update `CONFIRMED_TITLE` as Gate 2 is passed.
 
 ### 0f. Create Pipeline Status Artifact
 Create immediately via `mcp__cowork__create_artifact`. Update after every step.
@@ -147,11 +172,11 @@ render per VIDEO_TYPE (table below). Step rows:
 <h2>🎬 YT Pipeline</h2>
 <div class="ch"><!-- CHANNEL_NAME --> · <!-- DATE --> · 🎞 <!-- VIDEO_TYPE_LABEL --></div>
 <div class="optin">🔗 Opt-In URL: <!-- OPTIN_URL --></div>
-<div class="step <!-- S01 -->"><span class="icon">🧠</span>
-<span class="label">01 — Strategy</span><span class="status"><!-- S01S --></span></div>
-<div class="gate">▸ Gate 1: Confirm topic + video type</div>
+<div class="step <!-- S01 -->"><span class="icon">🗂️</span>
+<span class="label">01 — Brief Card betöltve</span><span class="status"><!-- S01S --></span></div>
+<div class="gate">▸ Gate 1: Confirm this Brief Card (topic + video type already on it)</div>
 <div class="step <!-- S02 -->"><span class="icon">🔍</span>
-<span class="label">02 — SEO + Title</span><span class="status"><!-- S02S --></span></div>
+<span class="label">02 — Title + Description (Execution Mode)</span><span class="status"><!-- S02S --></span></div>
 <div class="gate">▸ Gate 2: Confirm title</div>
 <div class="step <!-- S03 -->"><span class="icon">📝</span>
 <span class="label">03 — Master Script</span><span class="status"><!-- S03S --></span></div>
@@ -183,39 +208,41 @@ Note the `<!-- OPTIN_URL -->` slot — populate from `ACTIVE_OPTIN_URL` found in
 
 # ═══════════ COMMON PRE PHASE (type-independent) ═══════════
 
-## STEP 1 — Agent 01: Video Strategy (CONDITIONAL)
-**Check first:** Does a `PlaylistStrategy_[SeriesName]` doc already exist in `01_Strategy/`?
-- `search_files(query: "title contains 'PlaylistStrategy' and parentId = '[01_Strategy subfolderID]'")`
+## STEP 1 — Load the Brief Card (read-only, no strategy)
+The card was already resolved and read at Step 0c. Nothing is decided here. Display its key
+fields for confirmation:
+```
+📋 Brief Card: [brief_id]
+   Playlist: [playlist] · [EP X of Y] · [arc]
+   Téma: [topic]
+   Keyword: [primary_keyword] ([search_intent]) · szög: [angle]
+   Videó típus: [video_type]
+   CTA lead magnet: [cta_lead_magnet]
+```
 
-**If PlaylistStrategy EXISTS:** Skip Agent 01. Read the next video in sequence from the strategy doc.
-Display: "📋 Playlist strategy found — next video: [topic] · type: [video_type]. Confirm → 'ok'."
-Go directly to Gate 1 confirmation. Do NOT invoke Agent 01.
-
-**If PlaylistStrategy does NOT exist:** Invoke `agent-01-channel-strategist` in full.
-**Instruct Agent 01 to include a `video_type` field in every Video Brief Card**
-(talking_head / heygen_avatar / screen_recording), chosen by content fit:
-software tutorial → screen_recording, personal story/authority → talking_head,
-evergreen scalable teaching → heygen_avatar.
-
-After topic is ready, update artifact (01 → `waiting`):
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 1 — Téma + videó típus megerősítése
+⏸ GATE 1 — Ez a Brief Card fusson?
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Téma: → sorszám / "téma: [leírás]" / "skip" (1. opció)
-Videó típus: [VIDEO_TYPE, ha ismert — megerősítés]
-Ha nincs beállítva, válassz:
-  [T] TalkingHead   [H] HeyGen avatar   [S] Screen recording
-Váltás → "típus: T/H/S"
+Jóváhagyás → "jóváhagyom" / "ok" / "mehet"
+Másik kártya → "brief: [brief_id]" / "EP[NN]"
+Ez stratégiai hiba (rossz téma/keyword/típus) → "újratervezés"
+   → megnyitod: playlist-strategy-orchestrator, ez a pipeline áll
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
-Do NOT proceed to Agent 02 until topic AND video type are confirmed. Write the confirmed
-`video_type` back into the Video Brief Card and the CONTEXT BLOCK.
+The card's `topic` / `primary_keyword` / `angle` / `video_type` are NOT editable here. A wrong
+card is a Layer A problem: send the operator to `playlist-strategy-orchestrator` ("playlist
+újratervezés"). The only exception is the ad-hoc card built at Step 0c-adhoc, which the operator
+just defined. Do NOT proceed to Agent 02 until Gate 1 is confirmed.
 
 ---
 
-## STEP 2 — Agent 02: SEO + Title
-Pass confirmed topic to Agent 02. Invoke `agent-02-seo-title` in full. (Type-independent.)
+## STEP 2 — Agent 02: Title + Description (EXECUTION MODE)
+Invoke `agent-02-seo-title` with the CONTEXT BLOCK (`BRIEF_ID` set). It runs its §B Execution
+Mode: reads the card's `primary_keyword` / `secondary_keywords` / `search_intent` / `angle` /
+`authority_hook` verbatim and produces ONLY 3 title variants + description skeleton + tags +
+hashtags + chapters placeholder. It does NOT research or change the keyword. (Ad-hoc card with
+`primary_keyword: [PENDING]` → Agent 02 runs its §C one-off research pass instead.)
 After the SEO doc is on Drive, update artifact (02 → `waiting`):
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -275,8 +302,8 @@ Immediately after Gate 3 approval, convert the master script to the production f
 **Adapter: screen_recording → Shot list + VO script**
 - Two-column production doc: LEFT = screen action (from `[SCREEN:]` + `[VISUAL:]` cues, numbered
   shots, app/URL/zoom notes), RIGHT = voiceover text aligned per shot.
-- Ask (one-time, or read from PlaylistStrategy `sr_audio_mode:` field): live narration while
-  recording OR ElevenLabs VO post-sync. Store as `SR_AUDIO_MODE`.
+- Read `sr_audio_mode` from the Brief Card (live | elevenlabs_vo). Only if the card says `n/a`,
+  ask the operator once. Store as `SR_AUDIO_MODE`.
 
 ---
 
@@ -416,6 +443,8 @@ Publishing Artifact kész. Editing checklist mentve Drive-ra.
 ## STEP 7 — Agent 05 Phase 2: Chapter Timestamps
 Trigger: Gate 6 confirmation (type-appropriate phrase). Invoke Agent 05 Phase 2 in full.
 Finalizes chapter timestamps, updates Publishing Artifact. Update artifact: 05b → `done`.
+**Flip the Brief Card `status: published`** (new file, same title) and, if it belongs to a
+playlist, tick its row `brief: published` in `PlaylistStrategy_[Series]`.
 
 Then present the **Post-Publish Menu**:
 ```
@@ -467,21 +496,21 @@ Per `references/conventions.md` §4–§6. One v2 addition:
 
 ---
 
-## BATCH MODE (enabled by the PRE/CORE split)
-Because PRE is fully type-independent and gated only by operator text replies, it can be batched:
-`"batch pre: 3"` → run Steps 1–3 for the next 3 videos in the playlist sequence back-to-back
-(Gates 1–3 asked per video, grouped). Adapted production docs pile up in `03_Scripts/`, then the
-operator (or a VA) works through the Production Cores asynchronously. Each video resumes
-independently at its own Gate 4 via standard resume logic.
+## BATCH MODE (safe because strategy is already done in Layer A)
+Every `planned` Brief Card is a complete production order, so PRE needs no strategy input:
+`"batch pre: 3"` → take the next 3 `planned` cards in the playlist sequence and run Steps 1–3
+for each back-to-back (Gates 1–3 asked per video, grouped). Adapted production docs pile up in
+`03_Scripts/`, each card flips to `status: in_production`, then the operator (or a VA) works
+through the Production Cores asynchronously. Each video resumes independently at its own Gate 4.
 
 ---
 
 ## OPERATOR EXPERIENCE SUMMARY
 ```
-"új videó" (± "típus: H")
-→ Artifact megjelenik · opt-in URL: ✓ · típus badge
-→ [01 Strategy csak ha nincs PlaylistStrategy doc] → Gate 1: "2" + típus megerősítés
-→ Agent 02 fut → Gate 2: "B" (cím)
+"új videó"  (vagy "új videó EP04" / "ad-hoc videó")
+→ Artifact megjelenik · opt-in URL: ✓ · típus badge (a Brief Cardból)
+→ 01 Brief Card betöltve → Gate 1: "jóváhagyom" (a téma + típus már a kártyán van)
+→ Agent 02 Execution Mode fut → Gate 2: "B" (cím)
 → Agent 03 fut → Gate 3: "jóváhagyom" (master script) → adapter automatikusan fut
 → PRODUCTION CORE:
    TH: teleprompter → "felvétel kész"
