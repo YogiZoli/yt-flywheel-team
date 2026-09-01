@@ -206,14 +206,15 @@ Canonical: `github.com/YogiZoli/freedomOS` → `docs/architecture.md`.
 | File | Writer | Reader | Contains | This plugin |
 |---|---|---|---|---|
 | `playlist_brief.json` | **T1** | T2 | `playlist_id`, `playlist_topic`, `primary_keyword`, `avatar_pain_point`, `script_summary`, `video_count` | `playlist-strategy-orchestrator` writes it at S3c, then stops |
-| `optin_registry.json` | T2 | **T1** | `playlist_id`, `opt_in_url`, `lead_magnet_type`, `lead_magnet_title`, entry tag, landing page id, `confirmed_date` | `video-production-orchestrator` reads it at Step 0b (per `playlist_id`) |
-| `campaign_brief.json` | T2 | T3 | segment tags, entry workflow id | not touched here |
+| `optin_registry.json` | T2 | **T1** | `playlist_id`, `opt_in_url`, `lead_magnet_type`, `lead_magnet_title`, `entry_tag`, `platform`, `platform_meta{}`, `confirmed_date` | `video-production-orchestrator` reads **only `opt_in_url`** at Step 0b (per `playlist_id`) |
+| `campaign_brief.json` | T2 | T3 | `entry_tag`, `entry_workflow_id`, segment tags, `platform` | not touched here |
 
 Rules:
 - **T1 never invokes a T2 skill.** It writes `playlist_brief.json` and stops. T2 (the CMO
   orchestrator in `email-list-building`) picks it up on its own.
-- **Platform-agnostic:** the contract carries an opt-in URL, a tag name and a lead-magnet type.
-  It does NOT name GHL, Canva, SuperAgent or any tool. T2 chooses the platform internally.
+- **Platform-agnostic:** T1 reads only the neutral top-level fields (`opt_in_url`, and for display
+  `lead_magnet_title`). `platform` (default `gohighlevel`) names T2's tool; `platform_meta` holds
+  tool-specific IDs and is T2/T3 only. Swapping GHL for another tool changes nothing in T1.
 - If `optin_registry.json` is missing when a video is produced, T1 uses a placeholder in the
   description and does not block — the funnel can come later and the operator can re-run publish.
 - `strategic-launch-orchestrator` is a pointer only. It chains nothing.
