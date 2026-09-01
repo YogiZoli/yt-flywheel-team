@@ -25,9 +25,11 @@ skills/strategy/ + skills/shared/               skills/execution/ + skills/share
 ```
 
 **The interface is the Video Brief Card** (`references/layer-interface.md`). Layer A writes it;
-Layer B reads it and only ever advances its `status`. If Layer B would need to decide a keyword,
-topic, angle, video type or lead magnet at video time, that is a bug — the fix is to run
-Layer A, or use the `"ad-hoc videó"` escape hatch for a one-off video with no playlist.
+Layer B reads it and never changes its `topic`, `angle`, `video_type` or `cta_lead_magnet` (only
+advances `status`). The one exception is the keyword: the card's `primary_keyword` is a broad
+playlist anchor, and Layer B always runs its own tighter video-specific keyword pass on top —
+deliberate duplicate work, because the umbrella keyword is wide and the video keyword is narrow.
+A one-off video with no playlist uses the `"ad-hoc videó"` escape hatch.
 
 ## What's Inside
 
@@ -109,7 +111,8 @@ Or just the strategy layer, no funnel: `"playlist stratégia"`.
 ```
 "új videó"  →  load next planned Brief Card → 02 Title/Desc → 03 Script → 04 Thumbnail → 05 Publish
 ```
-No strategy step. The Brief Card already carries topic, keyword, angle, video type, CTA.
+No strategy step. The Brief Card carries topic, angle, video type, CTA and a broad anchor
+keyword; Agent 02 adds the tight video-specific keyword.
 One-off video with no playlist: `"ad-hoc videó"`.
 
 **Every video — POST-publishing:**

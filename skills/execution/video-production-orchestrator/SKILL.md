@@ -132,8 +132,8 @@ Read the resolved card. `VIDEO_TYPE` = its `video_type`. Store `BRIEF_ID` = its 
 Set the card `status: in_production` (new file, same title).
 
 ### 0c-adhoc. Ad-hoc single video (escape hatch — layer-interface.md §4)
-Ask the operator exactly three things: topic, primary keyword (or `"kutasd ki"` → Agent 02 runs
-its §C one-off research pass), video_type (T/H/S). Build a minimal Brief Card:
+Ask the operator two things: topic and video_type (T/H/S). Leave `primary_keyword` blank —
+Agent 02 §B0 researches it at Step 2. Build a minimal Brief Card:
 `playlist: AD-HOC`, `arc: n/a`, `cta_lead_magnet` = the channel's current `_OptinURL` lead magnet
 if present else generic `email_optin`. Save as `Brief_ADHOC_[YYYY-MM-DD]_[slug]` with
 `status: in_production`. Set `BRIEF_ID` accordingly. Continue the pipeline normally from Step 1.
@@ -215,7 +215,8 @@ fields for confirmation:
 📋 Brief Card: [brief_id]
    Playlist: [playlist] · [EP X of Y] · [arc]
    Téma: [topic]
-   Keyword: [primary_keyword] ([search_intent]) · szög: [angle]
+   Keyword (playlist anchor): [primary_keyword] ([search_intent]) · szög: [angle]
+   (a 02 lépés ezen felül futtat egy videó-specifikus, szűkebb kulcsszókutatást)
    Videó típus: [video_type]
    CTA lead magnet: [cta_lead_magnet]
 ```
@@ -226,7 +227,7 @@ fields for confirmation:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Jóváhagyás → "jóváhagyom" / "ok" / "mehet"
 Másik kártya → "brief: [brief_id]" / "EP[NN]"
-Ez stratégiai hiba (rossz téma/keyword/típus) → "újratervezés"
+Ez stratégiai hiba (rossz téma/szög/típus/lead magnet) → "újratervezés"
    → megnyitod: playlist-strategy-orchestrator, ez a pipeline áll
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -239,10 +240,11 @@ just defined. Do NOT proceed to Agent 02 until Gate 1 is confirmed.
 
 ## STEP 2 — Agent 02: Title + Description (EXECUTION MODE)
 Invoke `agent-02-seo-title` with the CONTEXT BLOCK (`BRIEF_ID` set). It runs its §B Execution
-Mode: reads the card's `primary_keyword` / `secondary_keywords` / `search_intent` / `angle` /
-`authority_hook` verbatim and produces ONLY 3 title variants + description skeleton + tags +
-hashtags + chapters placeholder. It does NOT research or change the keyword. (Ad-hoc card with
-`primary_keyword: [PENDING]` → Agent 02 runs its §C one-off research pass instead.)
+Mode: takes the card's `primary_keyword` as a broad anchor, runs its own **tighter
+video-specific keyword pass** on top (B0 — deliberate duplicate work: umbrella vs specific),
+then produces 3 title variants + description skeleton + tags + hashtags + chapters placeholder.
+If the card has no keyword it researches from scratch and continues — it never stops. It does
+not touch `topic` / `angle` / `video_type` / `cta_lead_magnet`.
 After the SEO doc is on Drive, update artifact (02 → `waiting`):
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

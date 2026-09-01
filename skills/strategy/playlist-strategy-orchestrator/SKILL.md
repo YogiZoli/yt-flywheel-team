@@ -131,19 +131,14 @@ Do NOT proceed to S2 until the concept and sequence are locked. This is the foun
 Invoke `agent-02-seo-title` with the CONTEXT BLOCK and this brief:
 
 > "Run in **Playlist Keyword Mode**. Input: the locked video sequence from S1. For ALL [N]
-> videos at once, produce a keyword map: per video — `primary_keyword`, `search_intent`
-> (informational/commercial/transactional), 2–3 `secondary_keywords`, `angle` (the specific
-> take, one sentence), and `authority_hook` (a known name/tool to borrow search volume, or
-> none). Use vidIQ MCP if available for real volume/competition scores.
-> **Cannibalization check (mandatory):** no two videos may share a `primary_keyword` or target
-> the same search. If the sequence forces an overlap, flag it and propose a split. Output one
-> `keyword_map_check` line confirming the map is clean.
-> Do NOT write titles here — titles are Layer B, per video, at production time."
+> videos at once, produce a broad keyword map: per video — `primary_keyword` (playlist-level
+> anchor), `search_intent`, 2–3 `secondary_keywords`, `angle` (the specific take, one sentence),
+> and `authority_hook` (a known name/tool, or none). Use vidIQ MCP if available.
+> Overlap between videos is fine — do NOT dedupe or run a cannibalization check. Layer B refines
+> each keyword per video at production time.
+> Do NOT write titles here — titles are Layer B, per video."
 
 No gate here — the keyword map is folded into the Gate 1 concept the operator already approved.
-If the cannibalization check fails, surface it as a mini-gate:
-`"Kulcsszó-ütközés: EP0X és EP0Y ugyanarra megy. Javaslat: [split]. → 'ok' / 'módosítsd: ...'"`
-
 Update artifact S2 → `done`.
 
 ---
