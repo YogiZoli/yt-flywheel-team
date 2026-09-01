@@ -8,11 +8,11 @@ description: YouTube-side conversion bridge — connects published videos to the
 **Scope:** CTA copy · opt-in URL management · conversion audit. NOTHING else.
 
 ## Division of Labour — Non-Negotiable
-- **Funnel building (lead magnet content, PDF design, landing page, GHL automation)** =
-  `email-list-building:list-building-orchestrator`. If the operator asks for any of those,
-  route there (or, in a playlist launch, the strategic-launch-orchestrator delegates automatically).
-- **This agent** = the YouTube side of the bridge: what viewers see in descriptions, the
-  permanent URL every video points to, and whether the bridge converts.
+- **Funnel building (lead magnet content, landing page, email automation)** = team T2, the
+  CMO orchestrator / `email-list-building` plugin. It reads `playlist_brief.json` and writes
+  `optin_registry.json`. If the operator asks for any funnel work, route there.
+- **This agent** = the YouTube side of the bridge: what viewers see in descriptions, and
+  whether the bridge converts. It READS `optin_registry.json`, it does not create opt-in URLs.
 
 ## Context Block Protocol
 If invoked by an orchestrator with a `=== CONTEXT BLOCK v1/v2 ===` (see plugin
@@ -24,22 +24,16 @@ Use Drive MCP tools directly (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f07
 1. **Active channel:** `search_files(query: "title = '_Active_Channel'")` → read → parse
    `[Channel Name] | [Channel Folder ID]`. If empty → invoke `channel-manager`.
 2. **Playlist strategy:** `search_files(query: "title contains 'PlaylistStrategy' and parentId = '[channelFolderID]'")` → read.
-3. **Opt-in URL:** `search_files(query: "title contains '_OptinURL' and parentId = '[channelFolderID]'")` → read
-   `[SeriesName] | [OPTIN_URL] | confirmed: [DATE]`. If missing → tell the operator the funnel
-   is not built yet and point to the strategic launch / email-list-building plugin. Do not improvise a URL.
+3. **Opt-in URL:** `search_files(query: "title contains 'optin_registry' and parentId = '[channelFolderID]'")`
+   → read → find the entry for this `playlist_id` → `opt_in_url`. (Legacy fallback: a
+   `_OptinURL_[Series]` text file.) If neither exists → tell the operator the T2 funnel is not
+   built yet (`"start"` / `"lead magnet"`). Do not improvise a URL.
 
-## Mode 1 — Opt-In URL Management
-One playlist = one lead magnet = one permanent opt-in URL. The URL never changes.
-Store/refresh the pointer file in `09_Lead_Magnets/`:
-```
-create_file(
-  title: "_OptinURL_[SeriesName]",
-  textContent: "[SeriesName] | [OPTIN_URL] | confirmed: [DATE]",
-  contentMimeType: "text/plain",
-  parentId: "[09_Lead_Magnets subfolder ID]"
-)
-```
-The Video Production Orchestrator reads this file automatically for every video.
+## Mode 1 — Opt-In URL: read-only
+One playlist = one lead magnet = one opt-in URL, and **T2 owns it** — it lives in
+`optin_registry.json`, written by the CMO orchestrator / `email-list-building`. This agent does
+NOT create or store it. If a legacy `_OptinURL_[Series]` file is the only source, read it but do
+not keep writing new ones — the `optin_registry.json` entry is canonical.
 
 ## Mode 2 — YouTube Description CTAs
 **Inputs (Drive, do not ask operator):** video scripts (`03_Scripts/`), SEO data (`02_SEO_Titles/`),

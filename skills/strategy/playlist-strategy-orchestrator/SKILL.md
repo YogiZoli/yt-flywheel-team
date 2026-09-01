@@ -1,6 +1,6 @@
 ---
 name: playlist-strategy-orchestrator
-description: LAYER A controller — designs a whole YouTube playlist and emits the per-video Video Brief Cards that the execution layer consumes. Runs once per playlist, plus re-plan runs after an analytics review. Triggers ONLY when the user says "playlist stratégia", "playlist strategy", "tervezd meg a playlistet", "plan the playlist", "playlist koncepció", "playlist újratervezés", "re-plan the playlist", or "playlist brief". Chain: Agent 01 (Playlist Mode) → Agent 02 (Playlist Keyword Mode) → emit PlaylistStrategy doc + one Video Brief Card per planned video. Does NOT build the funnel (that is strategic-launch-orchestrator + email-list-building) and does NOT produce any single video (that is video-production-orchestrator).
+description: LAYER A controller — designs a whole YouTube playlist and emits the per-video Video Brief Cards that the execution layer consumes, plus the playlist_brief.json handoff for the T2 funnel team. Runs once per playlist, plus re-plan runs after an analytics review. Triggers ONLY when the user says "playlist stratégia", "playlist strategy", "tervezd meg a playlistet", "plan the playlist", "playlist koncepció", "playlist újratervezés", "re-plan the playlist", or "playlist brief". Chain: Agent 01 (Playlist Mode) → Agent 02 (Playlist Keyword Mode) → emit PlaylistStrategy doc + one Video Brief Card per planned video + playlist_brief.json, then STOP. Does NOT build the funnel (T2: CMO orchestrator / email-list-building reads playlist_brief.json on its own) and does NOT produce any single video (video-production-orchestrator).
 ---
 
 # Playlist Strategy Orchestrator (Layer A)
@@ -150,8 +150,8 @@ Per `layer-interface.md` §1 and §2, write to `01_Strategy/`:
 ### 3a. The PlaylistStrategy doc
 `create_file(title: "PlaylistStrategy_[SeriesName]", contentMimeType: "text/plain",
 parentId: "[01_Strategy subfolderID]", textContent: "[PLAYLIST STRATEGY v1 block]")`.
-Fill `optin_url:` from any existing `_OptinURL_[Series]` file, else
-`pending — set by strategic-launch-orchestrator`.
+Fill `optin_url:` from any existing `optin_registry.json` entry for this `playlist_id`, else
+from a legacy `_OptinURL_[Series]` file, else `pending — set by the T2 funnel`.
 
 ### 3b. One Video Brief Card per planned video
 For each EP in the sequence, `create_file(title: "Brief_[SeriesSlug]_EP[NN]_[topic-slug]",
@@ -159,7 +159,25 @@ contentMimeType: "text/plain", parentId: "[01_Strategy subfolderID]",
 textContent: "[VIDEO BRIEF CARD v1 block]")` with `status: planned`.
 Every field comes from S1 + S2 — no blanks except genuinely optional ones.
 
-### 3c. Re-plan mode only
+### 3c. `playlist_brief.json` — the T1 → T2 handoff (`layer-interface.md` §7)
+Write it to `01_Strategy/` so the T2 funnel team can start independently. **Then stop — do NOT
+invoke any T2 skill.** T2 (CMO orchestrator / email-list-building) reads this file on its own.
+```
+create_file(title: "playlist_brief", contentMimeType: "application/json",
+parentId: "[01_Strategy subfolderID]", textContent:
+{
+  "playlist_id": "[series-slug]",
+  "playlist_topic": "[plain-language topic]",
+  "primary_keyword": "[umbrella_keyword]",
+  "avatar_pain_point": "[2-3 sentences, from the Avatar Card + transformation_arc]",
+  "script_summary": "[3 sentences max — the playlist's through-line, NOT any full script]",
+  "video_count": [N]
+})
+```
+Re-plan mode: overwrite it (new file, same title) only if `playlist_topic` / `primary_keyword` /
+`video_count` changed; otherwise leave it — the funnel is already keyed to it.
+
+### 3d. Re-plan mode only
 Overwrite the existing PlaylistStrategy doc (new file, same title — newest wins). For Brief
 Cards: regenerate only those with `status: planned`; skip every `in_production` / `published`
 card. Bump `last_replanned`.
@@ -180,12 +198,15 @@ Playlist: [series_name] — [N] videó megtervezve
 DRIVE:
 → PlaylistStrategy_[SeriesName]: [webViewLink]
 → [N] Video Brief Card: Brief_[slug]_EP01 … EP[N]  (mind: status = planned)
+→ playlist_brief.json: [webViewLink]  (a T2 funnel csapat ezt olvassa)
 
-KÖVETKEZŐ LÉPÉS:
-- Ha a funnel MÉG NINCS kész ehhez a playlisthez:
-  → "teljes launch"  (strategic-launch-orchestrator: funnel + opt-in URL, majd ez a stratégia)
-- Ha a funnel MÁR él (van _OptinURL fájl):
-  → "új videó"  (video-production-orchestrator felveszi az EP01 Brief Cardot és legyártja)
+KÖVETKEZŐ LÉPÉS (két külön feladat, nem láncoljuk itt):
+- FUNNEL (traffic célpont): mondd "start" vagy "lead magnet"
+  → a T2 CMO orchestrator / email-list-building felveszi a playlist_brief.json-t,
+    felépíti a lead magnetet + landing oldalt, és kiírja az optin_registry.json-t
+- VIDEÓGYÁRTÁS: mondd "új videó"
+  → a video-production-orchestrator felveszi az EP01 Brief Cardot; az opt-in URL-t
+    az optin_registry.json-ból olvassa, ha a T2 már kész (ha nem, placeholderrel megy)
 - Analytics után átrendezés: "playlist újratervezés"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```

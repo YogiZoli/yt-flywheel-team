@@ -1,12 +1,13 @@
 # Shared Conventions — YT Flywheel Orchestrators
 Single source of truth for status artifacts, gate formats, context block schema,
-global commands, resume logic, and error handling. All three orchestrators
-(playlist-strategy-orchestrator, video-production-orchestrator, strategic-launch-orchestrator)
-read this file at startup: `references/conventions.md` at the plugin root
-(relative to a grouped skill: `../../../references/conventions.md`).
+global commands, resume logic, and error handling. Both real orchestrators
+(playlist-strategy-orchestrator, video-production-orchestrator) read this file at startup:
+`references/conventions.md` at the plugin root (relative to a grouped skill:
+`../../../references/conventions.md`). `strategic-launch-orchestrator` is a pointer and needs none of this.
 
-**Layer boundary:** the Strategy layer and the Execution layer are separated by the
-Video Brief Card. Their contract lives in `references/layer-interface.md` — read it too.
+**Boundaries:** the Strategy and Execution layers are separated by the Video Brief Card; the
+T1/T2/T3 teams are separated by `playlist_brief.json` / `optin_registry.json`. Both contracts
+live in `references/layer-interface.md` — read it too.
 
 ---
 

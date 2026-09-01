@@ -68,12 +68,15 @@ the Foundation doc, or subfolder IDs. Agents invoked standalone run their own Pr
 
 ## Workflow Sequence
 - **Setup (per channel, once):** `channel-manager` → Agent 00 (Foundation)
-- **Playlist launch (once per playlist):** `strategic-launch-orchestrator` (thin wrapper) →
-  `playlist-strategy-orchestrator` (Layer A) → funnel build DELEGATED to
-  `email-list-building:list-building-orchestrator` → Agent 09 stores opt-in URL
-- **Playlist strategy only (no funnel):** `playlist-strategy-orchestrator` directly.
+- **Playlist launch = TWO separate jobs, not chained:**
+  1. Traffic: `playlist-strategy-orchestrator` (Layer A) → PlaylistStrategy doc + Brief Cards +
+     `playlist_brief.json`, then STOP.
+  2. Funnel: the CMO orchestrator / `email-list-building` plugin (T2) reads `playlist_brief.json`
+     on its own, builds the funnel, writes `optin_registry.json`.
+  `strategic-launch-orchestrator` is a pointer to these two — it chains nothing.
 - **PRE-publishing (per video):** `video-production-orchestrator`: load Brief Card →
-  Agent 02 (Execution Mode) → Agent 03 → [production core] → Agent 04 → Agent 05
+  Agent 02 (Execution Mode, tight per-video keyword) → Agent 03 → [production core] → Agent 04 →
+  Agent 05 (reads `optin_registry.json` for the opt-in URL)
 - **POST-publishing (optional menu):** 03c Shorts · Agent 07 (Repurposing [R] + Community [C])
   · Agent 09 (conversion audit) · 05b Captions · Agent 06 weekly → feeds Layer A re-plan
 - **Funnel building is NEVER done in this plugin** — always the email-list-building plugin.
