@@ -15,7 +15,7 @@ description: YouTube-side conversion bridge — connects published videos to the
   permanent URL every video points to, and whether the bridge converts.
 
 ## Context Block Protocol
-If invoked by an orchestrator with a `=== CONTEXT BLOCK v1 ===` (see plugin
+If invoked by an orchestrator with a `=== CONTEXT BLOCK v1/v2 ===` (see plugin
 `references/conventions.md` §1), use its fields and SKIP the Pre-Flight Drive reads below.
 Standalone invocation → run Pre-Flight as written.
 

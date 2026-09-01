@@ -40,7 +40,7 @@ Never dark text on a mid-tone button (white on solid, 4.5:1 or better) | Never m
 **Playbook modules:** 7 (Thumbnail Strategy)
 
 ## Context Block Protocol
-If invoked by an orchestrator with a `=== CONTEXT BLOCK v1 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs, confirmed title) and SKIP the Pre-Flight Drive reads below for every field the block provides — STANDING_RULES must still be read from Drive. Standalone invocation → run Pre-Flight as written.
+If invoked by an orchestrator with a `=== CONTEXT BLOCK v1/v2 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs, confirmed title) and SKIP the Pre-Flight Drive reads below for every field the block provides — STANDING_RULES must still be read from Drive. Standalone invocation → run Pre-Flight as written.
 
 ## Pre-Flight: Active Channel Check (standalone only)
 Use Drive MCP tools directly — do not ask the operator to provide these:

@@ -51,23 +51,23 @@ sentences for HeyGen TTS), but the document structure stays identical across typ
 **Primary style references:** Adam Erhart (simplicity, direct, numbered steps) · Ownership Method (email-first CTA philosophy, value-first delivery)
 
 ## Context Block Protocol
-If invoked by an orchestrator with a `=== CONTEXT BLOCK v1 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs, confirmed title, playlist info, lead magnet, avatar summary) and SKIP the Pre-Flight Drive reads below for every field the block provides. Standalone invocation → run Pre-Flight as written.
+If invoked by an orchestrator with a `=== CONTEXT BLOCK v1/v2 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs, `BRIEF_ID`, confirmed title, playlist info, lead magnet, avatar summary) and SKIP the Pre-Flight Drive reads below for every field the block provides. When `BRIEF_ID` is set, the named Video Brief Card is read-only truth for topic / video_type / playlist position / lead magnet (`references/layer-interface.md`). Standalone → run Pre-Flight.
 
 ## Pre-Flight: Active Channel Check + Inputs (standalone only)
 Use Drive MCP tools directly for all reads — do not ask the operator to paste these:
 1. **Read `_Active_Channel.gdoc`:** `search_files(query: "title = '_Active_Channel'")` → take first result's `id` → `read_file_content(fileId)` → parse line 1: `[Channel Name] | [Channel Folder ID]`. Store **Channel Folder ID**. If empty → invoke `channel-manager`.
 2. Fetch inputs from Drive automatically:
    - **Title:** `search_files(query: "title = '02_SEO_Titles' and parentId = '[channelFolderID]'")` → subfolder ID → read most recent → extract confirmed title
-   - **Video type:** `search_files(query: "title = '01_Strategy' and parentId = '[channelFolderID]'")` → read most recent brief
+   - **Video Brief Card:** `search_files(query: "title = '01_Strategy' and parentId = '[channelFolderID]'")` → read the most recent `Brief_*` card that is `status: in_production` (or the one the operator names). It carries video_type, playlist position, angle, lead magnet, next episode.
    - **Avatar Card:** `search_files(query: "title = '00_Foundation' and parentId = '[channelFolderID]'")` → read most recent
    - **Lead magnet name + link:** `search_files(query: "title = '09_Lead_Magnets' and parentId = '[channelFolderID]'")` → read most recent
 3. If confirmed title is genuinely missing (02_SEO_Titles/ is empty), ask the operator. Otherwise proceed.
-4. **Playlist Context (MANDATORY):** From the Agent 01 Strategy brief, extract and store:
-   - Playlist Name (e.g. "YouTube for REAL Ownership")
-   - This video's position (e.g. EP.04 of 10)
-   - Arc position: Opening (EP 1–2) / Middle (EP 3–7) / Closing (EP 8+)
-   - The playlist's designated Lead Magnet (LM1a / LM1b / LM2 / LM3 — see CTA Slot System)
-   - The next episode's topic (for playlist-aware "Next Video" CTA)
+4. **Playlist Context (MANDATORY):** From the Video Brief Card (`layer-interface.md` §1), extract and store:
+   - `playlist` name and `episode` position (e.g. EP.04 of 10) and `arc` (Opening / Middle / Closing)
+   - `cta_lead_magnet` (name + slot code LM1a / LM1b / LM2 / LM3 — see CTA Slot System)
+   - `angle` — the framing this script must deliver
+   - `next_episode_topic` — for the playlist-aware "Next Video" CTA
+   For an `AD-HOC` card, playlist/arc are `n/a` — write a standalone script with an email-opt-in CTA.
 
 ---
 
