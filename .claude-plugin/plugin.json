@@ -1,7 +1,14 @@
 {
     "name": "yt-flywheel-team",
-    "version": "1.5.1",
-    "description": "YouTube Evergreen Flywheel — 13-skill AI Agent Team with two-tier orchestration and context-block handoff. Strategic Launch Orchestrator defines the playlist concept, delegates funnel building to the email-list-building plugin, and stores the permanent opt-in URL. Video Production Orchestrator runs the per-video pipeline (SEO, script, audio, thumbnail, publish). Post-publish: Shorts, repurposing+community, 25-language captions, conversion audit. Multi-channel, outputs in Google Drive.",
+    "version": "1.6.0",
+    "description": "YouTube Evergreen Flywheel — 14-skill AI Agent Team split into two clean layers. LAYER A (Playlist Strategy, runs once per playlist): playlist-strategy-orchestrator + Agent 01 decide the whole playlist concept, umbrella keyword, video sequence and per-video keyword map, then emit a formal PlaylistStrategy doc plus one pre-generated Video Brief Card per planned video. LAYER B (Per-Video Execution, runs every video): video-production-orchestrator consumes one Brief Card and runs SEO title/description, script, production core, thumbnail, publish — no strategy work at video time. The Video Brief Card is the interface (references/layer-interface.md). strategic-launch-orchestrator is a thin wrapper: playlist strategy, then funnel build (delegated to email-list-building), then opt-in URL storage. Multi-channel, outputs in Google Drive.",
+    "skills": [
+        "./skills/strategy",
+        "./skills/shared",
+        "./skills/execution",
+        "./skills/launch",
+        "./skills/setup"
+    ],
     "author": {
         "name": "Zoltan Gero",
         "email": "humorketing@gmail.com"
