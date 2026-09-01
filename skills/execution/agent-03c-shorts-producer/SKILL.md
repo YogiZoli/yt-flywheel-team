@@ -5,10 +5,12 @@ description: Use this agent to produce YouTube Shorts from an approved HeyGen lo
 
 # Agent 03c — Shorts Producer
 
-## VIDEO_TYPE Awareness (v2)
-Read VIDEO_TYPE from the CONTEXT BLOCK (or the Video Brief Card if standalone):
-- `heygen_avatar` → produce HeyGen 9:16 production briefs per Short (the flow below, unchanged).
-- `talking_head` / `screen_recording` → produce **timestamped clip-cut briefs** instead:
+## VIDEO_TYPE Awareness
+Read VIDEO_TYPE from the CONTEXT BLOCK (or the Video Brief Card if standalone). Five types:
+- `avatar_local` / `avatar_native` → produce HeyGen 9:16 production briefs per Short (the flow
+  below). The avatar and voice come from the channel Foundation doc (own / standard HeyGen /
+  client upload), never a fixed identity.
+- `screen_recording` / `talking_head` / `faceless_generated` → produce **timestamped clip-cut briefs** instead:
   same segment identification and Shorts Ownership Formula, but output = per-Short cut list
   (source timecode [start]→[end] from the published video, hook rewrite for text overlay,
   caption style, 9:16 crop guidance). Skip HeyGen prompt generation entirely; the operator
@@ -145,15 +147,19 @@ SEO keyword: [primary or secondary keyword from Agent 02]
 For each Short script, create a complete HeyGen prompt. Shorts use different settings than
 the long-form video — vertical format, avatar repositioned, captions mandatory.
 
-### HeyGen Shorts Settings (9:16 Vertical — Zoltan Gero)
+### HeyGen Shorts Settings (9:16 Vertical)
+
+Avatar ID and Voice ID come from the channel Foundation doc (`heygen_avatar_id`,
+`heygen_voice_id`) — do not hardcode a person. The values below are this channel's current
+defaults / examples; swap them for the active channel's.
 
 ```
 Orientation:   Vertical (9:16) — MANDATORY for Shorts
 Target length: 30–60 seconds strictly
-Avatar ID:     bfcee432248442539191df03f922f575
+Avatar ID:     [Foundation heygen_avatar_id — e.g. bfcee432248442539191df03f922f575]
 Frame:         Circle Frame — smaller than long-form, bottom-right or bottom-center
 Engine:        Motion Engine Avatar III, Unlimited Engine
-Voice ID:      99b6f9eca33e474483987860185fdc43
+Voice ID:      [Foundation heygen_voice_id — e.g. 99b6f9eca33e474483987860185fdc43]
 Voice Speed:   +50% faster than default. Mandatory.
 Captions:      ON — large, bold, centered, high contrast. Essential.
 Background:    Dark, minimal, or brand-consistent. Never distracting.
@@ -181,12 +187,12 @@ IMPORTANT: This is a YouTube Short. Vertical 9:16. 30–60 seconds max. Captions
 - Voice Speed: +50% faster than default. Mandatory.
 
 ## AVATAR
-- Avatar ID: bfcee432248442539191df03f922f575
+- Avatar ID: from Foundation `heygen_avatar_id` (own / standard HeyGen / client upload) — e.g. `bfcee432248442539191df03f922f575`
 - Frame: Circle Frame | Position: bottom-right corner
 - Engine: Motion Engine Avatar III
 
 ## VOICE
-- Voice ID: 99b6f9eca33e474483987860185fdc43
+- Voice ID: from Foundation `heygen_voice_id` — e.g. `99b6f9eca33e474483987860185fdc43`
 - Speed: +50% faster. No exceptions.
 
 ## CAPTIONS

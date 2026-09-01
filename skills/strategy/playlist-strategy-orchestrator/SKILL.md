@@ -98,8 +98,9 @@ Invoke `agent-01-channel-strategist` with the CONTEXT BLOCK and this brief:
 > - ONE umbrella keyword the whole playlist ladders up to
 > - the single transformation arc the playlist delivers
 > - 8–12 videos in Evergreen-first order; per video: topic, type (Evergreen/Viral/Depth),
->   arc position (Opening EP1–2 / Middle / Closing), and `video_type`
->   (talking_head / heygen_avatar / screen_recording) chosen by content fit
+>   arc position (Opening EP1–2 / Middle / Closing), and `video_type` chosen by content fit —
+>   one of `avatar_local` (primary), `avatar_native` (short-form/Shorts only, <2.5 min),
+>   `screen_recording`, `talking_head`, `faceless_generated` (priority order, most→least used)
 > - `default_video_type` for the playlist + `target_type_mix` (guide 65/25/10)
 > - the ONE lead magnet transformation this playlist's companion guide delivers + slot code
 > - recommended CTA language, consistent across every video

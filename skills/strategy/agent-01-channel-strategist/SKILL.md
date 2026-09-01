@@ -76,10 +76,13 @@ pick one video. Produce a concept working note in `01_Strategy/`
 - `default_video_type` + `target_type_mix` (guide 65/25/10)
 - `cta_language` — consistent across every video
 - the ordered **VIDEO SEQUENCE**: 8-12 rows, each `EP | topic | type (Evergreen/Viral/Depth) |
-  arc (Opening EP1-2 / Middle / Closing) | video_type`
-  (talking_head / heygen_avatar / screen_recording, by content fit: software tutorial →
-  screen_recording · personal story/authority → talking_head · evergreen scalable teaching →
-  heygen_avatar)
+  arc (Opening EP1-2 / Middle / Closing) | video_type`. `video_type` is one of, by content fit
+  (priority order, most→least used):
+  - `avatar_local` — evergreen scalable teaching (primary, default for most videos)
+  - `avatar_native` — short-form / Shorts avatar content only (< 2.5 min)
+  - `screen_recording` — software tutorial / anything shown on screen
+  - `talking_head` — personal story / authority, or B-roll for another type
+  - `faceless_generated` — no personal brand identity attached; fully agnostic (no avatar/voice needed)
 - if analytics input exists: fold the CONTENT DIRECTION UPDATE into the sequence
 
 The orchestrator runs Agent 02 (Playlist Keyword Mode) next for the keyword map, then emits the

@@ -75,7 +75,8 @@ primary_keyword:       [broad playlist-level anchor keyword — Layer B refines 
 secondary_keywords:    [comma-separated, optional]
 search_intent:         informational | commercial | transactional
 angle:                 [the specific take / framing — 1 sentence]
-video_type:            talking_head | heygen_avatar | screen_recording
+video_type:            avatar_local | avatar_native | screen_recording | talking_head | faceless_generated
+                       # priority order, most→least used. avatar_native = short-form/Shorts only (<2.5 min).
 sr_audio_mode:         live | elevenlabs_vo | n/a       # only when video_type = screen_recording
 
 transformation_promise:[what the viewer can do after watching]
@@ -128,7 +129,7 @@ lead_magnet:           [name + slot code]
 optin_url:             [URL or "pending — set by strategic-launch-orchestrator"]
 cta_language:          [the consistent CTA phrasing used across every video in the series]
 
-default_video_type:    talking_head | heygen_avatar | screen_recording
+default_video_type:    avatar_local | avatar_native | screen_recording | talking_head | faceless_generated
 target_type_mix:       Evergreen [X]% / Viral [Y]% / Depth [Z]%   # guide: 65 / 25 / 10
 
 --- VIDEO SEQUENCE ---
