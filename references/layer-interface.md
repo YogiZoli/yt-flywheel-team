@@ -38,10 +38,15 @@ Every skill that touches strategy or a video brief reads this file.
                          feedback → Layer A re-plan (never into a running pipeline)
 ```
 
-**One rule above all:** Layer B runs entirely inside the frame Layer A set. If Layer B
-ever needs to decide keyword / topic / angle / video_type / lead magnet at video time,
-that is a bug — it means a Brief Card is missing or incomplete. The fix is to run
-Layer A, not to improvise in Layer B.
+**One rule above all:** Layer B runs entirely inside the frame Layer A set. Layer B does NOT
+decide `topic` / `angle` / `video_type` / `cta_lead_magnet` — those come from the Brief Card and
+Layer B never changes them.
+
+**Keyword is the one exception.** The Brief Card's `primary_keyword` is a broad playlist-level
+anchor. Layer B (Agent 02 Execution Mode) always runs its own tighter, video-specific keyword
+pass on top of it — the umbrella keyword is wide, the video keyword is narrow. This is deliberate
+duplicate work. If the card has no keyword, Layer B researches from scratch and continues — it
+never stops and never routes back to Layer A for a keyword.
 
 ---
 
@@ -66,7 +71,7 @@ arc:                   Opening | Middle | Closing
 status:                planned | in_production | published
 
 topic:                 [one sentence — what this video is about]
-primary_keyword:       [the ONE search phrase this video targets]
+primary_keyword:       [broad playlist-level anchor keyword — Layer B refines this per video; may be blank]
 secondary_keywords:    [comma-separated, optional]
 search_intent:         informational | commercial | transactional
 angle:                 [the specific take / framing — 1 sentence]
@@ -87,12 +92,14 @@ notes:                 [free text for the execution layer — optional]
 
 | Field | Written by | May Layer B change it? |
 |---|---|---|
-| everything except `status` | Layer A only | **No** |
-| `status` | Layer A sets `planned`; Layer B advances it to `in_production` then `published` | Yes, `status` only |
+| `topic`, `angle`, `video_type`, `cta_lead_magnet`, `playlist`, `episode`, `arc` | Layer A only | **No** |
+| `primary_keyword` / `secondary_keywords` | Layer A sets the anchor | Layer B **refines** per video (Agent 02 §B0) — records the tighter video keyword, keeps the anchor as secondary |
+| `status` | Layer A sets `planned` | Layer B advances `planned → in_production → published` |
 
-If Layer B believes any non-status field is wrong, it STOPS and reports to the operator:
-`"A Brief Card [brief_id] [mező] mezője nem stimmel. Ez stratégiai döntés — futtasd a playlist-strategy-orchestrator-t az újratervezéshez."`
-It does not edit the field and continue.
+If Layer B believes `topic` / `angle` / `video_type` / `cta_lead_magnet` is wrong, it STOPS and
+reports: `"A Brief Card [brief_id] [mező] mezője nem stimmel. Ez stratégiai döntés — futtasd a
+playlist-strategy-orchestrator-t az újratervezéshez."` It does not edit those and continue.
+A missing or weak `primary_keyword` is NOT a reason to stop — Layer B just researches it.
 
 ---
 
@@ -155,10 +162,10 @@ Layer B (`video-production-orchestrator`) resolves the Brief Card at Step 0, fir
 A single video with no playlist is allowed. It is the exception, not the path.
 
 - Trigger: `"ad-hoc videó"` / `"egyszeri videó"` / `"ad-hoc video"`.
-- Layer B generates a **minimal Brief Card inline** by asking the operator 3 things:
-  topic, primary keyword (or "kutasd ki" → runs agent-02 in a one-off research pass),
-  video_type. All other fields: `arc: n/a`, `playlist: AD-HOC`, `cta_lead_magnet` = the
-  channel's current `_OptinURL` lead magnet if present else `email_optin` generic.
+- Layer B generates a **minimal Brief Card inline** by asking the operator 2 things: topic and
+  video_type. `primary_keyword` is left blank — Agent 02 §B0 researches it. All other fields:
+  `arc: n/a`, `playlist: AD-HOC`, `cta_lead_magnet` = the channel's current `_OptinURL` lead
+  magnet if present else `email_optin` generic.
 - The card is saved to `01_Strategy/` as `Brief_ADHOC_[date]_[slug]` with `status: in_production`.
 - Individual Layer B agents (`agent-02` … `agent-05`) also run fully standalone with no
   orchestrator and no card — they fall back to their own Pre-Flight Drive reads as written

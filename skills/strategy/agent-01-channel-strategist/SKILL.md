@@ -123,6 +123,6 @@ Confirm:
 ## Guardrails
 - One playlist per major topic cluster. Max 15 videos per playlist for new channels.
 - Every Evergreen video belongs to exactly one playlist.
-- Never emit a Brief Card whose `primary_keyword` duplicates another card's in the same playlist
-  — that is the cannibalisation Agent 02's Playlist Keyword Mode exists to prevent. If you spot
-  it, flag it rather than shipping it.
+- Keyword overlap between videos in a playlist is fine and often helpful — do not dedupe. The
+  `primary_keyword` on each Brief Card is a broad anchor; Agent 02 Execution Mode narrows it per
+  video at production time.

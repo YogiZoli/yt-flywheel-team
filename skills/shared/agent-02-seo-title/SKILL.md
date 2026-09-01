@@ -1,6 +1,6 @@
 ---
 name: agent-02-seo-title
-description: SHARED SEO skill with two modes. PLAYLIST KEYWORD MODE (Layer A, invoked by playlist-strategy-orchestrator) builds the per-video keyword map for a whole playlist at once with a cannibalization check — no titles. EXECUTION MODE (Layer B, invoked by video-production-orchestrator with BRIEF_ID) takes one locked Video Brief Card and produces only 3 title variants, description skeleton, tags, hashtags and a chapters placeholder — it does NOT do fresh keyword research. Standalone with a topic but no card runs a one-off research pass (ad-hoc path). Trigger phrases: "give me a title", "playlist kulcsszavak", "keyword map", "SEO for my video", "write the description".
+description: SHARED SEO skill with two modes. PLAYLIST KEYWORD MODE (Layer A, invoked by playlist-strategy-orchestrator) builds the broad per-video keyword map for a whole playlist at once (overlap between videos is fine, no cannibalization check) — no titles. EXECUTION MODE (Layer B, invoked by video-production-orchestrator with BRIEF_ID) takes one Video Brief Card, runs its own tighter video-specific keyword pass on top of the playlist anchor (deliberate duplicate work — broad vs specific), then produces 3 title variants, description skeleton, tags, hashtags and a chapters placeholder. It never stops if the card has no keyword — it researches from scratch. Trigger phrases: "give me a title", "playlist kulcsszavak", "keyword map", "SEO for my video", "write the description".
 ---
 
 # Agent 02 — SEO & Title (SHARED — Layer A keyword map / Layer B title work)
@@ -45,15 +45,11 @@ per video, at production time (a title written now would drift from the script w
 If vidIQ is available: `vidiq_keyword_research` per primary keyword for real volume + competition
 scores; `vidiq_trending_videos` for the niche; fold the scores into the map.
 
-### Cannibalization check (MANDATORY)
-No two videos may share a `primary_keyword` or target the same search. If the sequence forces an
-overlap (two EPs that would compete in search), do NOT ship it — return:
-```
-⚠ KULCSSZÓ-ÜTKÖZÉS: EP0X ("[kw]") és EP0Y ("[kw]") ugyanarra a keresésre megy.
-Javaslat: EP0X → "[distinct kw]" · EP0Y → "[distinct kw]"  (vagy a két témát vond össze)
-```
-Only when the whole map is distinct, emit the final line:
-`keyword_map_check: [N] videó, [N] egyedi primary_keyword, 0 ütközés.`
+### Overlap is fine — no cannibalization check
+Do NOT dedupe. Two videos in a playlist can share or overlap a keyword — that is normal for a
+topic cluster and often helps (the playlist ranks as a body of work). Just record what each
+video targets. This map is the playlist-level anchor; Layer B (§B) runs a tighter, video-specific
+keyword pass per video on top of it.
 
 ### Output — write to Drive
 `create_file(title: "[YYYY-MM-DD]_Agent02_KeywordMap_[series-slug]",
@@ -69,14 +65,22 @@ The orchestrator reads this to fill `primary_keyword` / `search_intent` / `angle
 **Invoked by** `video-production-orchestrator` at Step 2, CONTEXT BLOCK carries `BRIEF_ID`.
 **Input:** the Video Brief Card named by `BRIEF_ID` in `01_Strategy/`. Read it.
 
-**The keyword is already decided.** Use the card's `primary_keyword`, `secondary_keywords`,
-`search_intent`, `angle`, `authority_hook` verbatim. **Do NOT run keyword research. Do NOT
-change the keyword.** If `primary_keyword` is missing or `[PENDING ...]`:
+### B0 — Video-specific keyword pass (ALWAYS run — deliberate duplicate work)
+The playlist keyword map (§A) is broad — it positions the video in the cluster. Now go narrow:
+find the tightest keyword that matches THIS video's `topic` + `angle`.
+1. **Anchor:** if the card has a `primary_keyword`, that is your starting point. Search around it
+   for a more specific long-tail (`vidiq_keyword_research` if available; autocomplete + related
+   otherwise). The specific keyword wins for the title; keep the card's keyword as a secondary.
+2. **No keyword on the card:** research from scratch off the `topic`. **Never stop, never route
+   back to Layer A** — just do the research and continue.
+3. Do NOT change the card's `topic`, `angle`, `video_type` or `cta_lead_magnet` — only the keyword
+   is refined here.
 ```
-STOP. A Brief Card [brief_id] primary_keyword mezője üres. Ez Layer A döntés.
-Futtasd: "playlist újratervezés"  (vagy egyszeri videóhoz: "ad-hoc videó").
+VIDEO KEYWORD: [specific kw]   (playlist anchor: [card primary_keyword or "none"])
+SEARCH INTENT: [informational | commercial | transactional]
+LONG-TAIL: [3-5]   AUTHORITY HOOK: [name/tool or none]   DATA SOURCE: [vidIQ | estimated]
 ```
-Do not invent one and continue.
+Use `VIDEO KEYWORD` everywhere below (`primary keyword`), and list the playlist anchor among the tags.
 
 ### B1 — Title Creation (3 variants)
 Rules (non-negotiable):
@@ -128,7 +132,7 @@ Related video: [next_episode_topic from card — URL placeholder]
 ```
 
 ### B3 — Tags (6-8)
-`TAGS: [primary_keyword], [secondary 1], [secondary 2], [secondary 3], [channel name], [broad category 1], [broad category 2]`
+`TAGS: [VIDEO KEYWORD], [playlist anchor kw], [long-tail 1], [long-tail 2], [channel name], [broad category 1], [broad category 2]`
 
 ### B4 — Hashtags (3 max)
 `HASHTAGS: #[primarykeyword] #[niche] #[broad category]`
@@ -146,18 +150,9 @@ Confirm: `"✅ SEO doc saved → [webViewLink] | Erősítsd meg a címet, aztán
 
 ---
 
-# §C — AD-HOC ONE-OFF (escape hatch, standalone only)
+# §C — AD-HOC / STANDALONE (no Brief Card)
 
 Operator gave a bare topic with no Brief Card, or the `video-production-orchestrator` is on the
-`"ad-hoc videó"` path. Run ONE research pass, then produce the §B output.
-
-Research pass:
-1. Identify the primary keyword (what would the ideal viewer search?).
-2. 3-5 long-tail variations. Search intent. Authority-hook opportunity.
-3. vidIQ if available: `vidiq_keyword_research` + `vidiq_trending_videos`.
-```
-PRIMARY KEYWORD: [kw]  |  SEARCH INTENT: [..]  |  VOLUME: [score/est]  |  COMPETITION: [score/est]
-LONG-TAIL: [3-5]  |  AUTHORITY HACK: [yes/no + suggestion]  |  DATA SOURCE: [vidIQ / estimated]
-```
-Then continue exactly as §B (B1-B5) using this keyword. Note in the output doc that this was an
-ad-hoc research pass, not a playlist keyword-map decision.
+`"ad-hoc videó"` path with a minimal card. This is just §B with no playlist anchor: run B0's
+research from scratch off the topic, then B1-B5. Note in the output doc that there was no
+playlist keyword map behind this one.
