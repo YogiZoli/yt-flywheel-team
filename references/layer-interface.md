@@ -1,0 +1,189 @@
+# Layer Interface — Playlist Strategy ↔ Per-Video Execution
+
+Single source of truth for the boundary between the two layers of this plugin.
+Every skill that touches strategy or a video brief reads this file.
+
+---
+
+## 0. THE TWO LAYERS
+
+```
+┌─────────────────────────────────────────┐        ┌─────────────────────────────────────────┐
+│  LAYER A — PLAYLIST STRATEGY             │        │  LAYER B — PER-VIDEO EXECUTION           │
+│  runs once per playlist (+ re-plans)     │        │  runs once per video                     │
+│                                         │        │                                         │
+│  skills/strategy/                        │        │  skills/execution/                       │
+│    playlist-strategy-orchestrator        │        │    video-production-orchestrator         │
+│    agent-01-channel-strategist           │        │    agent-03-script-writer                │
+│  skills/shared/                          │        │    agent-04-thumbnail                    │
+│    agent-02-seo-title (Playlist Keyword  │        │    agent-05-launch-publish               │
+│                        Mode)             │        │    agent-05b / agent-06 / agent-07 / 03c │
+│                                         │        │  skills/shared/                          │
+│                                         │        │    agent-02-seo-title (Execution Mode)   │
+│                                         │        │                                         │
+│  DECIDES:                               │        │  DECIDES:                               │
+│  - playlist concept + positioning       │        │  - title wording (3 variants)           │
+│  - umbrella keyword                     │  ───►  │  - description prose, chapters          │
+│  - the ordered video sequence           │ Brief  │  - script content                      │
+│  - per-video: topic, primary keyword,   │  Card  │  - thumbnail composition                │
+│    search intent, angle, video_type,    │        │  - production format + publish copy     │
+│    transformation, CTA lead magnet      │        │                                         │
+│                                         │        │  NEVER decides keyword, angle, topic,   │
+│  WRITES the PlaylistStrategy doc + one   │        │  video_type, or which lead magnet.      │
+│  Video Brief Card per planned video.     │        │  READS them from the Brief Card.        │
+└─────────────────────────────────────────┘        └─────────────────────────────────────────┘
+                    ▲                                                   │
+                    │              agent-06 analytics review            │
+                    └───────────────────────────────────────────────────┘
+                         feedback → Layer A re-plan (never into a running pipeline)
+```
+
+**One rule above all:** Layer B runs entirely inside the frame Layer A set. If Layer B
+ever needs to decide keyword / topic / angle / video_type / lead magnet at video time,
+that is a bug — it means a Brief Card is missing or incomplete. The fix is to run
+Layer A, not to improvise in Layer B.
+
+---
+
+## 1. THE INTERFACE ARTIFACT — VIDEO BRIEF CARD
+
+The Video Brief Card is the single unit that crosses the boundary. Layer A produces one
+per planned video; Layer B consumes exactly one per run.
+
+**Location:** `01_Strategy/` subfolder of the active channel.
+**Filename:** `Brief_[SeriesSlug]_EP[NN]_[topic-slug]` (e.g. `Brief_youtube-ownership_EP04_email-list`).
+**Format:** plain-text Google Doc, `key: value` lines, one blank line between blocks.
+
+### Schema (v1)
+
+```
+=== VIDEO BRIEF CARD v1 ===
+brief_id:              [series-slug]-ep[NN]            # stable, unique within the channel
+playlist:              [Series Name]
+umbrella_keyword:      [playlist-level keyword]
+episode:               [N] of [total]
+arc:                   Opening | Middle | Closing
+status:                planned | in_production | published
+
+topic:                 [one sentence — what this video is about]
+primary_keyword:       [the ONE search phrase this video targets]
+secondary_keywords:    [comma-separated, optional]
+search_intent:         informational | commercial | transactional
+angle:                 [the specific take / framing — 1 sentence]
+video_type:            talking_head | heygen_avatar | screen_recording
+sr_audio_mode:         live | elevenlabs_vo | n/a       # only when video_type = screen_recording
+
+transformation_promise:[what the viewer can do after watching]
+cta_lead_magnet:       [lead magnet name + slot code, e.g. "Ownership Playbook PDF (LM1a)"]
+cta_type:              email_optin | next_video | related_video
+next_episode_topic:    [topic of EP N+1, for the "Next Video" CTA — or "series finale"]
+
+authority_hook:        [known name/tool to borrow search volume, or "none"]
+notes:                 [free text for the execution layer — optional]
+=== END VIDEO BRIEF CARD v1 ===
+```
+
+### Who writes which field
+
+| Field | Written by | May Layer B change it? |
+|---|---|---|
+| everything except `status` | Layer A only | **No** |
+| `status` | Layer A sets `planned`; Layer B advances it to `in_production` then `published` | Yes, `status` only |
+
+If Layer B believes any non-status field is wrong, it STOPS and reports to the operator:
+`"A Brief Card [brief_id] [mező] mezője nem stimmel. Ez stratégiai döntés — futtasd a playlist-strategy-orchestrator-t az újratervezéshez."`
+It does not edit the field and continue.
+
+---
+
+## 2. THE PLAYLIST STRATEGY DOC
+
+The umbrella document. One per playlist. The Brief Cards are its rows made concrete.
+
+**Filename:** `PlaylistStrategy_[SeriesName]` in `01_Strategy/`.
+
+### Schema (v1)
+
+```
+=== PLAYLIST STRATEGY v1 ===
+series_name:           [Series Name]
+series_slug:           [series-slug]
+created:               [YYYY-MM-DD]
+last_replanned:        [YYYY-MM-DD or "never"]
+status:                active | paused | complete
+
+audience:              [who this playlist catches — from the Avatar Card]
+positioning:           [how this playlist is positioned vs the channel's other playlists]
+umbrella_keyword:      [the playlist-level keyword all videos ladder up to]
+transformation_arc:    [the single transformation the whole playlist delivers]
+
+lead_magnet:           [name + slot code]
+optin_url:             [URL or "pending — set by strategic-launch-orchestrator"]
+cta_language:          [the consistent CTA phrasing used across every video in the series]
+
+default_video_type:    talking_head | heygen_avatar | screen_recording
+target_type_mix:       Evergreen [X]% / Viral [Y]% / Depth [Z]%   # guide: 65 / 25 / 10
+
+--- VIDEO SEQUENCE ---
+EP01 | [topic] | keyword: [kw] | type: [Evergreen/Viral/Depth] | video_type: [..] | brief: [emitted/pending]
+EP02 | ...
+...
+EP12 | ...
+--- END SEQUENCE ---
+
+keyword_map_check:     [1 line confirming no two EPs target the same primary_keyword]
+=== END PLAYLIST STRATEGY v1 ===
+```
+
+---
+
+## 3. RESOLUTION — WHICH BRIEF CARD DOES A VIDEO RUN USE
+
+Layer B (`video-production-orchestrator`) resolves the Brief Card at Step 0, first hit wins:
+
+1. **Explicit in the trigger** — `"új videó EP04"` or `"új videó brief: youtube-ownership-ep04"`.
+2. **Next `planned` card in sequence** — read `PlaylistStrategy_[Series]`, take the lowest-EP
+   card whose `status: planned`. Show it, confirm at Gate 1.
+3. **No PlaylistStrategy doc and no card** → tell the operator:
+   `"Nincs playlist stratégia ehhez a csatornához. Futtasd: 'playlist stratégia'. Vagy egyszeri videó playlist nélkül: 'ad-hoc videó'."`
+4. **`"ad-hoc videó"`** → the ONE sanctioned escape hatch (see §4).
+
+---
+
+## 4. AD-HOC SINGLE VIDEO (escape hatch)
+
+A single video with no playlist is allowed. It is the exception, not the path.
+
+- Trigger: `"ad-hoc videó"` / `"egyszeri videó"` / `"ad-hoc video"`.
+- Layer B generates a **minimal Brief Card inline** by asking the operator 3 things:
+  topic, primary keyword (or "kutasd ki" → runs agent-02 in a one-off research pass),
+  video_type. All other fields: `arc: n/a`, `playlist: AD-HOC`, `cta_lead_magnet` = the
+  channel's current `_OptinURL` lead magnet if present else `email_optin` generic.
+- The card is saved to `01_Strategy/` as `Brief_ADHOC_[date]_[slug]` with `status: in_production`.
+- Individual Layer B agents (`agent-02` … `agent-05`) also run fully standalone with no
+  orchestrator and no card — they fall back to their own Pre-Flight Drive reads as written
+  in each SKILL.md. "Playlist nélkül, pipeline nélkül" is supported.
+
+---
+
+## 5. FEEDBACK LOOP
+
+`agent-06-analytics-reviewer` (Layer B, post-publish) writes a review to `06_Analytics_Reviews/`
+with a **CONTENT DIRECTION UPDATE** section. That section is an input to Layer A, not to any
+running pipeline. Acting on it means:
+
+- Operator says `"playlist újratervezés"` → `playlist-strategy-orchestrator` re-runs in
+  re-plan mode: reads the latest analytics review, reorders / rewrites the `planned` Brief
+  Cards from the current EP onward, bumps `last_replanned`. Already-`published` cards are
+  never touched.
+
+A breakthrough video flagged by agent-06 does **not** auto-change anything. It waits for the
+operator to trigger a re-plan.
+
+---
+
+## 6. CONTEXT BLOCK CARRIES THE HANDOFF
+
+When an orchestrator invokes an agent it passes the CONTEXT BLOCK (conventions.md §1).
+As of v2 the block carries `BRIEF_ID` and the playlist fields are sourced from the Brief
+Card, not re-derived. Agents receiving `BRIEF_ID` treat the named card as read-only truth.
