@@ -164,8 +164,8 @@ A single video with no playlist is allowed. It is the exception, not the path.
 - Trigger: `"ad-hoc videó"` / `"egyszeri videó"` / `"ad-hoc video"`.
 - Layer B generates a **minimal Brief Card inline** by asking the operator 2 things: topic and
   video_type. `primary_keyword` is left blank — Agent 02 §B0 researches it. All other fields:
-  `arc: n/a`, `playlist: AD-HOC`, `cta_lead_magnet` = the channel's current `_OptinURL` lead
-  magnet if present else `email_optin` generic.
+  `arc: n/a`, `playlist: AD-HOC`, `cta_lead_magnet` = the lead magnet from any `optin_registry.json`
+  entry for the channel if present, else `email_optin` generic.
 - The card is saved to `01_Strategy/` as `Brief_ADHOC_[date]_[slug]` with `status: in_production`.
 - Individual Layer B agents (`agent-02` … `agent-05`) also run fully standalone with no
   orchestrator and no card — they fall back to their own Pre-Flight Drive reads as written
@@ -194,3 +194,26 @@ operator to trigger a re-plan.
 When an orchestrator invokes an agent it passes the CONTEXT BLOCK (conventions.md §1).
 As of v2 the block carries `BRIEF_ID` and the playlist fields are sourced from the Brief
 Card, not re-derived. Agents receiving `BRIEF_ID` treat the named card as read-only truth.
+
+---
+
+## 7. CROSS-TEAM CONTRACT (T1 ↔ T2 ↔ T3)
+
+This plugin (`yt-flywheel-team`) is **T1** in the freedomOS 3-team system. The Video Brief Card
+above is INTERNAL to T1 (per video, within a playlist). The team boundaries use different files.
+Canonical: `github.com/YogiZoli/freedomOS` → `docs/architecture.md`.
+
+| File | Writer | Reader | Contains | This plugin |
+|---|---|---|---|---|
+| `playlist_brief.json` | **T1** | T2 | `playlist_id`, `playlist_topic`, `primary_keyword`, `avatar_pain_point`, `script_summary`, `video_count` | `playlist-strategy-orchestrator` writes it at S3c, then stops |
+| `optin_registry.json` | T2 | **T1** | `playlist_id`, `opt_in_url`, `lead_magnet_type`, `lead_magnet_title`, entry tag, landing page id, `confirmed_date` | `video-production-orchestrator` reads it at Step 0b (per `playlist_id`) |
+| `campaign_brief.json` | T2 | T3 | segment tags, entry workflow id | not touched here |
+
+Rules:
+- **T1 never invokes a T2 skill.** It writes `playlist_brief.json` and stops. T2 (the CMO
+  orchestrator in `email-list-building`) picks it up on its own.
+- **Platform-agnostic:** the contract carries an opt-in URL, a tag name and a lead-magnet type.
+  It does NOT name GHL, Canva, SuperAgent or any tool. T2 chooses the platform internally.
+- If `optin_registry.json` is missing when a video is produced, T1 uses a placeholder in the
+  description and does not block — the funnel can come later and the operator can re-run publish.
+- `strategic-launch-orchestrator` is a pointer only. It chains nothing.

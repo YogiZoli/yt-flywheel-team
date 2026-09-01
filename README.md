@@ -48,17 +48,18 @@ A one-off video with no playlist uses the `"ad-hoc videó"` escape hatch.
 | `agent-05b-multilingual-captions` | execution | B (post) | "felirat fordítás" |
 | `agent-06-analytics-reviewer` | execution | B (post) → feeds A | "review my analytics" |
 | `agent-07-repurposing` | execution | B (post) | "repurpose" [R] / "community post" [C] |
-| `strategic-launch-orchestrator` | launch | wrapper | "teljes launch", "playlist launch" |
+| `strategic-launch-orchestrator` | launch | pointer | "teljes launch" → routes to the two jobs, chains nothing |
 | `agent-09-conversion-bridge` | launch | — | "conversion audit", "CTA copy" |
 | `channel-manager` | setup | — | "create new channel", "switch to channel X" |
 | `agent-00-channel-foundation` | setup | — | "set up my channel", "channel foundation" |
 
-**Architecture notes (v1.6):**
+**Architecture notes (v1.7):**
 - Two layers, one plugin. The layer group dirs are registered via the `skills` array in `.claude-plugin/plugin.json`.
-- The Video Brief Card is the contract — schema and rules in `references/layer-interface.md`.
+- The Video Brief Card is the interface between the two layers — schema and rules in `references/layer-interface.md`.
 - Orchestrators read Drive ONCE and pass a CONTEXT BLOCK v2 (with `BRIEF_ID`) to every agent (`references/conventions.md`).
-- `strategic-launch-orchestrator` is now a thin wrapper: playlist strategy (delegated to Layer A) → funnel build (delegated to `email-list-building`) → opt-in URL storage.
-- Funnel building (lead magnet, landing page, GHL) is DELEGATED to the `email-list-building` plugin.
+- **Cross-team contract (T1/T2/T3):** `playlist-strategy-orchestrator` writes `playlist_brief.json` and stops; `video-production-orchestrator` reads `optin_registry.json` written by T2. This plugin never invokes a T2 skill. See `layer-interface.md` §7 and `freedomOS/docs/architecture.md`.
+- `strategic-launch-orchestrator` is a pointer only — it routes the operator to the traffic job (`playlist stratégia`) and the funnel job (CMO orchestrator / `email-list-building`) and chains nothing.
+- Funnel building (lead magnet, landing page, email automation) is entirely team T2's — platform-agnostic contract, GHL today.
 
 ---
 
@@ -99,13 +100,14 @@ All agents read from the **YouTube Evergreen Flywheel Playbook v2.0** Google Doc
 "set up my channel"                  →  Agent 00 builds Foundation doc
 ```
 
-**Playlist launch (once per playlist):**
+**Playlist launch = two separate jobs (not chained here):**
 ```
-"teljes launch"  →  strategic-launch-orchestrator:
-   playlist-strategy-orchestrator (Layer A) → PlaylistStrategy doc + N Brief Cards
-   → email-list-building plugin (funnel) → opt-in URL stored
+Job 1 — TRAFFIC:  "playlist stratégia"  →  playlist-strategy-orchestrator (Layer A)
+   → PlaylistStrategy doc + N Video Brief Cards + playlist_brief.json, then stop
+Job 2 — FUNNEL:   "start" / "lead magnet"  →  CMO orchestrator (email-list-building plugin, T2)
+   → reads playlist_brief.json, builds lead magnet + landing page, writes optin_registry.json
 ```
-Or just the strategy layer, no funnel: `"playlist stratégia"`.
+`video-production-orchestrator` reads `optin_registry.json` automatically once T2 is done.
 
 **Every video — Layer B (PRE-publishing):**
 ```
@@ -166,6 +168,6 @@ The channel-manager skill creates the YT_Flywheel master folder in your Drive, t
 
 ---
 
-**Version:** 1.6.0
+**Version:** 1.7.0
 **Author:** Zoltan Gero (humorketing@gmail.com)
 **License:** Personal use

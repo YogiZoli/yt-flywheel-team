@@ -101,15 +101,18 @@ All of those apply to this orchestrator — they are not repeated below.
    in the artifact AND in the Gate 1 message.
 4. If nothing resolves → invoke `channel-manager` skill before proceeding.
 
-### 0b. Read opt-in URL (CRITICAL)
-`search_files(query: "title contains '_OptinURL' and parentId = '[channelFolderID]'")` → read content.
-Parse: `[SeriesName] | [OPTIN_URL] | confirmed: [DATE]`
+### 0b. Read opt-in URL from the T2 contract (CRITICAL)
+The opt-in URL is the T2 → T1 handoff (`references/layer-interface.md` §7). Resolve first hit:
+1. **`optin_registry.json`** (T2 writes it): `search_files(query: "title contains 'optin_registry' and parentId = '[channelFolderID]'")`
+   → read → find the entry whose `playlist_id` matches this run's playlist → take `opt_in_url`.
+2. **Legacy `_OptinURL_[Series]`** text file (pre-contract): `search_files(query: "title contains '_OptinURL' and parentId = '[channelFolderID]'")`
+   → parse `[SeriesName] | [OPTIN_URL] | confirmed: [DATE]`.
 
 If found → store as `ACTIVE_OPTIN_URL`, pass to Agent 05 automatically at Step 6.
 If NOT found → display warning:
 ```
-⚠️  Nincs opt-in URL. A funnel még nincs felépítve.
-   Javaslat: előbb futtasd a Strategic Launch Orchestratort.
+⚠️  Nincs opt-in URL (nincs optin_registry.json bejegyzés ehhez a playlisthez).
+   A funnelt a T2 csapat építi: mondd "start" vagy "lead magnet" (email-list-building / CMO orchestrator).
    Folytatás opt-in URL nélkül? → "igen, folytatom" / "előbb funnel"
 ```
 If operator says "igen, folytatom" → proceed with `ACTIVE_OPTIN_URL = null` (placeholder in descriptions).
@@ -134,8 +137,8 @@ Set the card `status: in_production` (new file, same title).
 ### 0c-adhoc. Ad-hoc single video (escape hatch — layer-interface.md §4)
 Ask the operator two things: topic and video_type (T/H/S). Leave `primary_keyword` blank —
 Agent 02 §B0 researches it at Step 2. Build a minimal Brief Card:
-`playlist: AD-HOC`, `arc: n/a`, `cta_lead_magnet` = the channel's current `_OptinURL` lead magnet
-if present else generic `email_optin`. Save as `Brief_ADHOC_[YYYY-MM-DD]_[slug]` with
+`playlist: AD-HOC`, `arc: n/a`, `cta_lead_magnet` = the lead magnet from any `optin_registry.json`
+entry for the channel if present, else generic `email_optin`. Save as `Brief_ADHOC_[YYYY-MM-DD]_[slug]` with
 `status: in_production`. Set `BRIEF_ID` accordingly. Continue the pipeline normally from Step 1.
 
 ### 0d. Scan current pipeline state
