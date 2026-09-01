@@ -1,19 +1,22 @@
 ---
 name: strategic-launch-orchestrator
-description: Channel-level launch controller — runs ONCE per playlist before any video is published. Defines the full playlist concept, then delegates funnel building (lead magnet, landing page, GHL automation) to the email-list-building plugin's list-building-orchestrator, and stores the permanent opt-in URL so every video description has a live link from day one. Triggers ONLY when the user says "playlist launch", "channel launch", "new playlist", "playlist setup", "indítsuk el a playlistet", "playlist concept", "teljes launch", or "before the first video". (Funnel/lead-magnet-only requests belong to the email-list-building plugin, not here.)
+description: Channel-level launch conductor — runs ONCE per playlist before any video is published. A thin wrapper that sequences three skills: playlist-strategy-orchestrator (Layer A concept + Brief Cards), then the email-list-building plugin's list-building-orchestrator (lead magnet, landing page, GHL automation), then agent-09 to store the permanent opt-in URL so every video description has a live link from day one. It contains neither the playlist strategy nor the funnel build. Triggers ONLY when the user says "playlist launch", "channel launch", "new playlist", "playlist setup", "indítsuk el a playlistet", "teljes launch", or "before the first video". Playlist-strategy-only requests → playlist-strategy-orchestrator. Funnel-only requests → email-list-building plugin.
 ---
 
-# Strategic Launch Orchestrator
-**Role:** Channel-level master controller. Runs ONCE per playlist, before video 1 is published.
-**Chains:** Agent 01 (Playlist Mode) → `email-list-building:list-building-orchestrator` (funnel build)
-→ Agent 09 (YouTube-side bridge: description CTAs + opt-in URL storage).
-**Output:** Permanent opt-in URL stored in Drive → Video Production Orchestrator reads it automatically.
+# Strategic Launch Orchestrator (thin wrapper)
+**Role:** Channel-level launch conductor. Runs ONCE per playlist, before video 1 is published.
+It does NOT contain the playlist strategy or the funnel build — it sequences the two skills that
+do, then stores the result.
+**Chains:** `playlist-strategy-orchestrator` (Layer A — concept + Brief Cards) →
+`email-list-building:list-building-orchestrator` (funnel build) →
+`agent-09-conversion-bridge` (opt-in URL storage + per-video description CTAs).
+**Output:** the permanent opt-in URL in Drive → both the Brief Cards and every publishing
+artifact then point to a live link from day one.
 
 ## SHARED CONVENTIONS — READ FIRST
-At startup, read `../../references/conventions.md` (plugin root `references/conventions.md`).
-It defines: the CONTEXT BLOCK schema (§1), the shared status artifact HTML base (§2),
-gate block format (§3), global commands (§4), resume logic (§5), and error handling (§6).
-Build the CONTEXT BLOCK at Step 0 and pass it to every skill invoked.
+At startup, read `../../../references/conventions.md` (CONTEXT BLOCK §1, status artifact §2, gate
+format §3, global commands §4, resume §5, errors §6) and `../../../references/layer-interface.md`
+(what the Layer A step produces). Build the CONTEXT BLOCK at Step 0 and pass it to every skill invoked.
 
 ---
 
@@ -40,8 +43,8 @@ START
 [00] Read active channel + Foundation doc
   │
   ▼
-[S1] Agent 01 — Playlist Strategy Mode    ← GATE 1: Confirm playlist concept
-  │
+[S1] DELEGATE → playlist-strategy-orchestrator   ← it owns Gate 1 (concept + sequence)
+  │       returns: PlaylistStrategy doc + N Video Brief Cards (status: planned)
   ▼
 [S2–S5] Funnel Build — DELEGATED to email-list-building plugin
   │      (list-building-orchestrator: lead magnet → design → landing page → GHL)
@@ -78,8 +81,8 @@ Extract: Avatar Card (viewer identity, transformation), Hero Story, channel nich
 `search_files(query: "title contains 'PlaylistStrategy' and parentId = '[channelFolderID]'")` → if found, read it.
 If a strategy already exists: present it and ask:
 "Folytatjuk ezt a playlistet, vagy új playlistet indítunk?"
-- Continue → skip S1, go directly to S2.
-- New → run S1 fresh.
+- Continue → skip S1 (Layer A already ran), go directly to S2.
+- New → run S1 (delegates to playlist-strategy-orchestrator).
 
 ### 0d. Check for existing opt-in URL
 `search_files(query: "title contains '_OptinURL' and parentId = '[channelFolderID]'")` → if found, read content.
@@ -101,10 +104,10 @@ Header: `🚀 Strategic Launch`. Step rows for this orchestrator:
 ```html
 <h2>🚀 Strategic Launch</h2>
 <div class="ch"><!-- CHANNEL_NAME --> · <!-- DATE --></div>
-<div class="step <!-- S1 -->"><span class="icon">🧠</span>
-<span class="label">S1 — Playlist Strategy</span>
+<div class="step <!-- S1 -->"><span class="icon">🧭</span>
+<span class="label">S1 — Playlist Strategy (delegated to Layer A)</span>
 <span class="status"><!-- S1S --></span></div>
-<div class="gate">▸ Gate 1: Confirm playlist concept</div>
+<div class="gate">▸ Gate 1: owned by playlist-strategy-orchestrator (concept + sequence)</div>
 <div class="step <!-- S2 -->"><span class="icon">📄</span>
 <span class="label">S2 — Lead Magnet Content</span>
 <span class="status"><!-- S2S --></span></div>
@@ -135,39 +138,20 @@ Status text: `"✓ kész"` / `"→ fut..."` / `"⏸ jóváhagyásra vár"` / `"�
 
 ---
 
-## STEP S1 — Agent 01: Playlist Strategy Mode
+## STEP S1 — DELEGATE to playlist-strategy-orchestrator (Layer A)
 
-**NOT the standard "next video" mode. This is playlist-level thinking.**
+Do NOT design the playlist here. Invoke `playlist-strategy-orchestrator` in Fresh mode with the
+CONTEXT BLOCK. It runs Agent 01 (Playlist Mode) + Agent 02 (Playlist Keyword Mode), owns its own
+Gate 1 (concept + sequence), and emits to `01_Strategy/`:
+- `PlaylistStrategy_[SeriesName]` doc
+- one `Brief_[SeriesSlug]_EP[NN]` Video Brief Card per planned video, `status: planned`
 
-Invoke `agent-01-channel-strategist` skill with the following modified brief:
+While it runs, keep this launch artifact's S1 row `active`, then `done` when it hands back.
+Capture from its handback: `series_name`, `series_slug`, `N` (video count), and the lead magnet
+transformation promise — S2 needs them.
 
-> "Run in Playlist Strategy Mode. Do NOT pick one video. Instead, design the full playlist:
-> - Playlist name and topic cluster
-> - Umbrella keyword for the playlist
-> - 8–12 video topics in order (Evergreen-first sequence)
-> - Video type for each (Evergreen / Viral / Depth — target ratio: 65% / 25% / 10%)
-> - `default_video_type:` for the playlist (talking_head / heygen_avatar / screen_recording)
->   plus a per-video `video_type:` where a video deviates from the default —
->   the Video Production Orchestrator reads these at Step 0c (no need to ask per video)
-> - Lead magnet concept: the ONE transformation the companion guide delivers
-> - Recommended CTA language (consistent across all videos in the series)"
-
-Save Playlist Strategy to Drive: `PlaylistStrategy_[SeriesName]` in `01_Strategy/` subfolder.
-Update artifact: S1 → `waiting`. Then present:
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 1 — Playlist koncepció jóváhagyás
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Playlist stratégia mentve → [webViewLink]
-Jóváhagyás → "jóváhagyom" / "ok" / "mehet"
-Módosítás → "módosítsd: [mi változzon]"
-Teljes újragenerálás → "újra"
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-**Do NOT proceed to S2 until the playlist concept is locked.**
-This is the foundation document — all downstream content derives from it.
+**Do NOT proceed to S2 until the playlist-strategy-orchestrator has handed back a locked
+PlaylistStrategy doc.** It is the foundation document — the funnel and every video derive from it.
 
 ---
 
@@ -236,6 +220,9 @@ create_file(
 )
 ```
 
+Also update the `PlaylistStrategy_[SeriesName]` doc (new file, same title): set `optin_url:` to
+the live URL. The Brief Cards reference the lead magnet by name, so they need no edit.
+
 Update artifact: S6 → `done`, show the URL box (add `visible` class to `.urlbox`).
 
 Then invoke `agent-09-conversion-bridge` (CTA mode) with the CONTEXT BLOCK + confirmed opt-in URL
@@ -254,6 +241,7 @@ Playlist: [series name] ([N] videó tervezve)
 
 DRIVE OUTPUTS:
 → Playlist Strategy:      [webViewLink]
+→ Video Brief Cards:     [N] db (Brief_[slug]_EP01 … EP[N], mind status: planned)
 → Lead Magnet RAW:        [webViewLink]
 → Lead Magnet Designed:   [webViewLink]
 → Landing Page HTML:      [webViewLink]
@@ -266,9 +254,9 @@ GHL LIVE:
 → Flow tesztelve és megerősítve ✓
 
 KÖVETKEZŐ LÉPÉS:
-→ Mondd: "új videó" → Video Production Orchestrator automatikusan
-  beolvassa az opt-in URL-t és beépíti minden publishing artifactba.
-→ Az első videót most már ki lehet adni — a funnel él.
+→ Mondd: "új videó" → a Video Production Orchestrator felveszi az EP01
+  Brief Cardot, beolvassa az opt-in URL-t, és legyártja a videót.
+→ Az első videót most már ki lehet adni — a funnel él, a Brief Cardok készen állnak.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -287,7 +275,7 @@ If triggered and Drive scan shows partial completion, present:
 
 ```
 Részleges launch található:
-→ S1 Playlist Strategy: [kész / hiányzik]
+→ S1 Playlist Strategy + Brief Cards: [kész / hiányzik]
 → S2 Lead Magnet RAW: [kész / hiányzik]
 → S3 PDF Design: [kész / hiányzik]
 → S4 Landing Page: [kész / hiányzik]
