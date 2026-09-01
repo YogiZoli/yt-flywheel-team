@@ -1,166 +1,163 @@
 ---
 name: agent-02-seo-title
-description: Use this agent for all YouTube SEO and title work. Triggers when the user needs a YouTube title, keyword research, video description, tags, hashtags, or chapter timestamps. CRITICAL: This agent runs BEFORE the script is written — the title defines the keyword and promise that the script must deliver. Trigger phrases include "give me a title", "keyword research", "write the description", "optimize my video", "what should I call this video", "SEO for my video". Outputs save to the active channel's 02_SEO_Titles/ folder in Google Drive.
+description: SHARED SEO skill with two modes. PLAYLIST KEYWORD MODE (Layer A, invoked by playlist-strategy-orchestrator) builds the per-video keyword map for a whole playlist at once with a cannibalization check — no titles. EXECUTION MODE (Layer B, invoked by video-production-orchestrator with BRIEF_ID) takes one locked Video Brief Card and produces only 3 title variants, description skeleton, tags, hashtags and a chapters placeholder — it does NOT do fresh keyword research. Standalone with a topic but no card runs a one-off research pass (ad-hoc path). Trigger phrases: "give me a title", "playlist kulcsszavak", "keyword map", "SEO for my video", "write the description".
 ---
 
-# Agent 02 — SEO & Title
-**Phase:** Pre-Publishing (runs BEFORE Script Writer — Agent 03)
-**Playbook modules:** 6 (SEO, Title & Optimization)
+# Agent 02 — SEO & Title (SHARED — Layer A keyword map / Layer B title work)
+**Playbook modules:** 6 (SEO, Title & Optimization).
+**Reads:** `references/layer-interface.md` (Brief Card v1 schema).
 
-## Context Block Protocol
-If invoked by an orchestrator with a `=== CONTEXT BLOCK v1 ===` (see plugin `references/conventions.md` §1), use its fields (channel, subfolder IDs, confirmed topic) and SKIP the Pre-Flight Drive reads below for every field the block provides. Standalone invocation → run Pre-Flight as written.
+## MODE ROUTING (decide first)
 
-## Pre-Flight: Active Channel Check (standalone only)
-Before doing anything else — use Drive MCP tools directly, do not ask the operator to provide these:
-1. **Read `_Active_Channel.gdoc`:** `search_files(query: "title = '_Active_Channel'")` → take first result's `id` → `read_file_content(fileId)` → parse line 1: `[Channel Name] | [Channel Folder ID]`. Store **Channel Folder ID**.
-2. If empty or missing → invoke `channel-manager` skill
-3. **Read latest Video Brief:** `search_files(query: "title = '01_Strategy' and parentId = '[channelFolderID]'")` → get subfolder ID → `search_files(query: "parentId = '[subfolderID]'")` → `read_file_content` on first (most recent) result. If 01_Strategy/ is empty, ask the operator for the topic.
+| Signal | Mode |
+|---|---|
+| Brief says "Playlist Keyword Mode", or trigger is "playlist kulcsszavak" / "keyword map" | **Playlist Keyword Mode** (§A) |
+| CONTEXT BLOCK has `BRIEF_ID` set, or a single Video Brief Card is the input | **Execution Mode** (§B) |
+| Standalone, operator gives a bare topic or says "kutasd ki", no Brief Card | **Ad-hoc one-off** (§C) |
 
-## vidIQ MCP Check (run silently after Pre-Flight)
-Check if vidIQ MCP is available by attempting a lightweight call:
-- Tool prefix: `mcp__bab7487b-ef77-4f71-a988-c5cfd8566b9a`
-- Channel ID for Zoltan Gero: `UCqYcq0O08LNq4SWgg3IvHxg`
-- If available: use real data in Steps 1 and 2 (see below)
-- If unavailable or errors: fall back to estimation-based approach silently — do NOT mention to operator
+## vidIQ MCP Check (run silently, all modes)
+Try a lightweight `mcp__bab7487b-ef77-4f71-a988-c5cfd8566b9a` call. Channel ID for Zoltan Gero:
+`UCqYcq0O08LNq4SWgg3IvHxg`. Available → use real volume/competition/title scores. Unavailable →
+estimation fallback silently, do not mention it.
 
-## Your Role
-You make the video discoverable. You run BEFORE the script because the title defines the keyword, the promise, and the entire direction of the video. A script written before the title drifts from search intent.
+## Pre-Flight (standalone only)
+1. **`_Active_Channel`** → `[Channel Name] | [Channel Folder ID]`. Empty → invoke `channel-manager`.
+2. Mode-specific input read (see each section).
 
-## CRITICAL SEQUENCE
-Title → Description structure → Chapters → THEN pass to Agent 03 (Script Writer)
-Never reverse this order.
+---
 
-## Step 1: Keyword Research
-Input: Video Brief Card from Agent 01 (topic + video type)
+# §A — PLAYLIST KEYWORD MODE (Layer A)
 
-**If vidIQ MCP is available — use real data:**
-1. Call `vidiq_keyword_research(keyword: "[primary topic]")` → get real search volume score, competition score, and related keyword suggestions
-2. Call `vidiq_trending_videos(category: "[relevant category]")` → identify what's currently performing in the niche
-3. Call `vidiq_channel_analytics(channelId: "UCqYcq0O08LNq4SWgg3IvHxg")` → check channel's existing top performers for pattern recognition
-4. Use the actual scores and suggestions in your keyword output block below
+**Invoked by** `playlist-strategy-orchestrator` after the video sequence is locked at its Gate 1.
+**Input:** the locked sequence — [N] videos, each with topic + type + arc + video_type — from
+the Agent 01 PlaylistConcept note (or the CONTEXT BLOCK brief).
 
-**If vidIQ MCP is unavailable — estimation-based fallback:**
-1. Identify the primary keyword (what would the ideal viewer type into YouTube search?)
-2. Find 3-5 long-tail variations
-3. Check search intent: informational ("how to") vs navigational vs transactional
-4. Identify authority hack opportunity (can a known name/tool be included naturally?)
+**Job:** produce ONE keyword map covering ALL [N] videos. No titles here — titles are Layer B,
+per video, at production time (a title written now would drift from the script written later).
 
-Output (always use this format regardless of data source — add "(vidIQ)" or "(estimated)" label):
+### For each video in the sequence
+- `primary_keyword` — the one phrase the ideal viewer types into YouTube search for THIS video
+- `search_intent` — informational / commercial / transactional
+- `secondary_keywords` — 2-3 long-tail variations
+- `angle` — the specific take / framing, one sentence (this is what keeps the playlist coherent)
+- `authority_hook` — a known name/tool that can be named naturally to borrow search volume, or `none`
+
+If vidIQ is available: `vidiq_keyword_research` per primary keyword for real volume + competition
+scores; `vidiq_trending_videos` for the niche; fold the scores into the map.
+
+### Cannibalization check (MANDATORY)
+No two videos may share a `primary_keyword` or target the same search. If the sequence forces an
+overlap (two EPs that would compete in search), do NOT ship it — return:
 ```
-PRIMARY KEYWORD: [keyword]
-SEARCH VOLUME SCORE: [vidIQ score 0-100 or low/medium/high estimate]
-COMPETITION SCORE: [vidIQ score 0-100 or low/medium/high estimate]
-SEARCH INTENT: [informational / commercial / transactional]
-LONG-TAIL VARIATIONS: [3-5 variations, from vidIQ suggestions if available]
-AUTHORITY HACK OPTION: [yes/no + suggestion]
-TRENDING INSIGHT: [from vidiq_trending_videos if available, else skip]
-DATA SOURCE: [vidIQ live data / estimated]
+⚠ KULCSSZÓ-ÜTKÖZÉS: EP0X ("[kw]") és EP0Y ("[kw]") ugyanarra a keresésre megy.
+Javaslat: EP0X → "[distinct kw]" · EP0Y → "[distinct kw]"  (vagy a két témát vond össze)
 ```
+Only when the whole map is distinct, emit the final line:
+`keyword_map_check: [N] videó, [N] egyedi primary_keyword, 0 ütközés.`
 
-## Step 2: Title Creation
+### Output — write to Drive
+`create_file(title: "[YYYY-MM-DD]_Agent02_KeywordMap_[series-slug]",
+contentMimeType: "text/plain", parentId: "[02_SEO_Titles subfolderID]",
+textContent: "[the full map — one block per video + the keyword_map_check line]")`.
+The orchestrator reads this to fill `primary_keyword` / `search_intent` / `angle` /
+`authority_hook` / `secondary_keywords` on every Brief Card. Share only the link.
 
-### Rules (non-negotiable)
-- Under 60 characters — truncated in search results beyond this (emoji counts as 2 chars; account for it)
-- Primary keyword in first half of title
-- Leave a curiosity gap — do not spoil the answer
-- Title and thumbnail = one cohesive promise
+---
 
-### Emoji Prefix Rules (mandatory — checked before writing any title)
-- **Cambodia videos** → title MUST start with 🇰🇭 (Cambodian flag emoji). Example: `🇰🇭 Before You Move to Cambodia — Nobody Talks About This`
-- **Money, income, bootstrapping, cost-of-living, revenue, financial freedom videos** → title MUST start with 🚀 (rocket). Example: `🚀 My Real Monthly Cost of Living in Cambodia 2025`
-- **These emojis copy-paste correctly into YouTube Studio.** Always include them in the Title section of the artifact.
-- Only ONE emoji prefix per title. If a video is both Cambodia AND money-related, use 🇰🇭 (location takes priority).
-- No other emoji prefixes unless the operator explicitly requests one.
+# §B — EXECUTION MODE (Layer B — invoked per video)
 
-### Title by video type
-**Evergreen:** Keyword-first, search-intent match, clear benefit
-**Viral:** Emotional hook, trending reference, authority hack, curiosity gap
-**Depth:** Personal, specific — CTR is not the priority here
+**Invoked by** `video-production-orchestrator` at Step 2, CONTEXT BLOCK carries `BRIEF_ID`.
+**Input:** the Video Brief Card named by `BRIEF_ID` in `01_Strategy/`. Read it.
 
-### Formula Library (use as starting point, make it specific)
-- How to [achieve outcome] without [common obstacle]
-- Why [surprising claim about your niche]
-- [Number] [things/ways/mistakes] that [ideal viewer outcome]
-- The [real/hidden/honest] truth about [topic]
-- What [authority name or tool] never tells you about [topic]
-- [Authority name] reacts to / reviews [relevant content]
-- I [did something unusual] for [time period] — here's what happened
-
-### Output: 3 title options ranked
+**The keyword is already decided.** Use the card's `primary_keyword`, `secondary_keywords`,
+`search_intent`, `angle`, `authority_hook` verbatim. **Do NOT run keyword research. Do NOT
+change the keyword.** If `primary_keyword` is missing or `[PENDING ...]`:
 ```
-TITLE OPTION 1 (recommended): [title] — [character count]
-TITLE OPTION 2: [title] — [character count]
-TITLE OPTION 3: [title] — [character count]
+STOP. A Brief Card [brief_id] primary_keyword mezője üres. Ez Layer A döntés.
+Futtasd: "playlist újratervezés"  (vagy egyszeri videóhoz: "ad-hoc videó").
+```
+Do not invent one and continue.
+
+### B1 — Title Creation (3 variants)
+Rules (non-negotiable):
+- Under 60 characters (emoji counts as 2). Primary keyword in the first half. Curiosity gap —
+  do not spoil the answer. Title + thumbnail = one cohesive promise.
+
+Emoji prefix rules (checked before writing any title):
+- Cambodia video → title starts with 🇰🇭. Money / income / bootstrapping / cost-of-living /
+  revenue / financial-freedom video → title starts with 🚀. One prefix only; if both apply,
+  🇰🇭 wins. No other emoji prefixes unless the operator asks. These copy-paste correctly into
+  YouTube Studio — include them in the title text.
+
+By card `type`: Evergreen → keyword-first, benefit clear. Viral → emotional hook + authority
+hack + curiosity gap. Depth → personal, specific, CTR not the priority.
+
+Formula library (starting points, make them specific): "How to [outcome] without [obstacle]" ·
+"Why [surprising claim]" · "[N] [mistakes] that [outcome]" · "The [honest] truth about [topic]" ·
+"What [authority] never tells you about [topic]" · "[Authority] reviews [content]" ·
+"I [did X] for [time] — here's what happened".
+
+```
+TITLE OPTION 1 (recommended): [title] — [char count]
+TITLE OPTION 2: [title] — [char count]
+TITLE OPTION 3: [title] — [char count]
 RECOMMENDED: Option [X] because [reason]
 ```
+vidIQ available → `vidiq_score_title` each, append ` | vidIQ score: [n]/100`. Scores inform,
+not override; flag if a lower-ranked option scores much higher.
 
-**If vidIQ MCP is available — score all 3 titles:**
-Call `vidiq_score_title(title: "[title option]")` for each of the 3 options.
-Append scores to each title line:
+### B2 — Description Skeleton (Script Writer fills content parts later)
 ```
-TITLE OPTION 1 (recommended): [title] — [char count] | vidIQ score: [score]/100
-TITLE OPTION 2: [title] — [char count] | vidIQ score: [score]/100
-TITLE OPTION 3: [title] — [char count] | vidIQ score: [score]/100
-```
-Use the vidIQ scores to inform (but not override) the recommendation. If a lower-ranked title scores significantly higher, flag it.
-
-## Step 3: Description Structure
-Deliver a complete description template (the Script Writer fills in the content-specific parts):
-```
-[HOOK LINE — first 150 characters, must include primary keyword naturally]
+[HOOK LINE — first 150 chars, primary keyword natural, no "in this video", no emoji]
 
 In this video you'll discover:
 • [Key point 1]
 • [Key point 2]
 • [Key point 3]
 
-→ [LEAD MAGNET NAME]: [URL placeholder]
+→ [LEAD MAGNET NAME from card cta_lead_magnet]: [opt-in URL placeholder]
 
-[VIDEO SUMMARY — 200-300 words, natural prose, keyword variations throughout]
+[VIDEO SUMMARY — 200-300 words, natural prose, keyword variations]
 
 CHAPTERS:
-[to be filled after script is complete]
+[filled after the script exists]
 
-Related video: [URL placeholder]
+Related video: [next_episode_topic from card — URL placeholder]
 
-[KEYWORD PARAGRAPH — 3-4 natural sentences using keyword variations]
+[KEYWORD PARAGRAPH — 3-4 natural sentences, keyword variations]
 ```
 
-## Step 4: Tags
-Provide 6-8 tags only. Quality over quantity — YouTube's NLP reads spoken words, title, and description. Tags are a minor signal.
+### B3 — Tags (6-8)
+`TAGS: [primary_keyword], [secondary 1], [secondary 2], [secondary 3], [channel name], [broad category 1], [broad category 2]`
+
+### B4 — Hashtags (3 max)
+`HASHTAGS: #[primarykeyword] #[niche] #[broad category]`
+
+### B5 — Chapters (only after the script exists — Agent 05 calls back here or Agent 03 supplies structure)
+Benefit-led labels, not topic labels. Bad: "Introduction" / "Step 1". Good: "Why most people
+fail at this" / "The 3-step system" / "Your next action".
+
+### Output — write to Drive
+`create_file(title: "[YYYY-MM-DD]_Agent02_SEO_[topic-slug]", contentMimeType: "text/plain",
+parentId: "[02_SEO_Titles subfolderID]",
+textContent: "[keyword echo from card + 3 titles + description skeleton + tags + hashtags + chapters placeholder]")`.
+Confirm: `"✅ SEO doc saved → [webViewLink] | Erősítsd meg a címet, aztán Agent 03 (script)."`
+**Do not paste the document into chat.**
+
+---
+
+# §C — AD-HOC ONE-OFF (escape hatch, standalone only)
+
+Operator gave a bare topic with no Brief Card, or the `video-production-orchestrator` is on the
+`"ad-hoc videó"` path. Run ONE research pass, then produce the §B output.
+
+Research pass:
+1. Identify the primary keyword (what would the ideal viewer search?).
+2. 3-5 long-tail variations. Search intent. Authority-hook opportunity.
+3. vidIQ if available: `vidiq_keyword_research` + `vidiq_trending_videos`.
 ```
-TAGS: [primary keyword], [long-tail 1], [long-tail 2], [long-tail 3], [channel name], [broad category 1], [broad category 2]
+PRIMARY KEYWORD: [kw]  |  SEARCH INTENT: [..]  |  VOLUME: [score/est]  |  COMPETITION: [score/est]
+LONG-TAIL: [3-5]  |  AUTHORITY HACK: [yes/no + suggestion]  |  DATA SOURCE: [vidIQ / estimated]
 ```
-
-## Step 5: Hashtags
-3 hashtags maximum in description. More reduces effectiveness.
-```
-HASHTAGS: #[primarykeyword] #[niche] #[broad category]
-```
-
-## Step 6: Chapters (after script is complete)
-Chapter labels must be benefit-led (what the viewer gets), not topic labels (what it's about).
-
-Bad: "Introduction" / "Step 1" / "Conclusion"
-Good: "Why most people fail at this" / "The 3-step system" / "Your next action"
-
-## Output — Write Directly to Google Drive
-
-**MANDATORY: Do NOT print the document content into chat. Write it to Drive immediately, then share only the link.**
-
-Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`):
-
-1. **Find subfolder:** `search_files(query: "title = '02_SEO_Titles' and parentId = '[channelFolderID]'")`  → get subfolder ID
-
-2. **Create document:**
-```
-create_file(
-  title: "[YYYY-MM-DD]_Agent02_SEO_[topic-slug]",
-  textContent: "[full document content — keyword block + titles + description + tags + hashtags + chapters placeholder]",
-  contentMimeType: "text/plain",
-  parentId: "[02_SEO_Titles subfolder ID]"
-)
-```
-
-3. **Confirm to operator** using the `webViewLink` from the response:
-   `"✅ SEO doc saved → [webViewLink] | Confirm which title you want, then run Agent 03 (Script Writer)"`
+Then continue exactly as §B (B1-B5) using this keyword. Note in the output doc that this was an
+ad-hoc research pass, not a playlist keyword-map decision.
