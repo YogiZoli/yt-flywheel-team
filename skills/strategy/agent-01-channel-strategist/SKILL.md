@@ -3,6 +3,8 @@ name: agent-01-channel-strategist
 description: LAYER A (Playlist Strategy) — the strategic brain that decides playlist concept, positioning, sequencing, and per-video framing. Use for content strategy, playlist planning, "what should I make next", "give me video ideas", channel growth direction, video-type selection, and post-analytics re-planning. Primary mode is Playlist Mode (invoked by playlist-strategy-orchestrator). Standalone it runs Single-Video Re-plan mode: it inserts/updates ONE video in the playlist sequence and emits a Video Brief Card with status:planned. It never runs inside a video production pipeline — the execution layer consumes the Brief Card it produced earlier. Outputs to the active channel's 01_Strategy/ folder.
 ---
 
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
+
 # Agent 01 — Channel Strategist (LAYER A)
 **Layer:** Playlist Strategy. **Playbook modules:** 2 (Flywheel), 4 (Video Types), 8.2 (Breakthrough Protocol).
 **Reads:** `references/layer-interface.md` (Brief Card v1 + PlaylistStrategy v1 schemas).

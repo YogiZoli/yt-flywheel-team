@@ -3,6 +3,8 @@ name: agent-03c-shorts-producer
 description: Use this agent to produce YouTube Shorts from an approved HeyGen long-form video. IMPORTANT: This agent runs ONLY from the post-publish menu — NEVER automatically during or after the main pipeline. Triggers when the operator explicitly says "shorts", "make the Shorts", "Shorts guide", or "generate Shorts" AFTER the main video is already published on YouTube. Do NOT trigger on "HeyGen approved" alone — that is a main pipeline gate, not a Shorts trigger. Reads the approved script and SEO data from Google Drive, identifies the 3–5 best 30–60 second segments, writes individual Short scripts following the Shorts Ownership Formula, generates a HeyGen production brief for each Short (9:16 vertical), saves all outputs to Drive, and uploads each completed Short to YouTube via Claude in Chrome.
 ---
 
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
+
 # Agent 03c — Shorts Producer
 
 ## VIDEO_TYPE Awareness
@@ -156,10 +158,10 @@ defaults / examples; swap them for the active channel's.
 ```
 Orientation:   Vertical (9:16) — MANDATORY for Shorts
 Target length: 30–60 seconds strictly
-Avatar ID:     [Foundation heygen_avatar_id — e.g. bfcee432248442539191df03f922f575]
+Avatar ID:     [Foundation heygen_avatar_id]
 Frame:         Circle Frame — smaller than long-form, bottom-right or bottom-center
 Engine:        Motion Engine Avatar III, Unlimited Engine
-Voice ID:      [Foundation heygen_voice_id — e.g. 99b6f9eca33e474483987860185fdc43]
+Voice ID:      [Foundation heygen_voice_id]
 Voice Speed:   +50% faster than default. Mandatory.
 Captions:      ON — large, bold, centered, high contrast. Essential.
 Background:    Dark, minimal, or brand-consistent. Never distracting.
@@ -187,12 +189,12 @@ IMPORTANT: This is a YouTube Short. Vertical 9:16. 30–60 seconds max. Captions
 - Voice Speed: +50% faster than default. Mandatory.
 
 ## AVATAR
-- Avatar ID: from Foundation `heygen_avatar_id` (own / standard HeyGen / client upload) — e.g. `bfcee432248442539191df03f922f575`
+- Avatar ID: from Foundation `heygen_avatar_id` (own / standard HeyGen / client upload)
 - Frame: Circle Frame | Position: bottom-right corner
 - Engine: Motion Engine Avatar III
 
 ## VOICE
-- Voice ID: from Foundation `heygen_voice_id` — e.g. `99b6f9eca33e474483987860185fdc43`
+- Voice ID: from Foundation `heygen_voice_id`
 - Speed: +50% faster. No exceptions.
 
 ## CAPTIONS
@@ -214,9 +216,9 @@ SHORT_[YYYY-MM-DD]_[parent-slug]_S[NN]_[seo-keyword]
 ```
 
 Examples:
-- `SHORT_2026-05-16_ai-agents-content-workflow_S01_ai-agent-tutorial`
-- `SHORT_2026-05-16_ai-agents-content-workflow_S02_automate-youtube`
-- `SHORT_2026-05-16_ai-agents-content-workflow_S03_heygen-workflow`
+- `SHORT_2026-01-15_parent-slug_S01_short-slug`
+- `SHORT_2026-01-15_parent-slug_S02_short-slug`
+- `SHORT_2026-01-15_parent-slug_S03_short-slug`
 
 The filename tells you instantly: it's a Short, which longform it came from,
 which number in the batch, and which SEO keyword it targets.
@@ -339,7 +341,7 @@ HeyGen Production Steps:
    SHORT_[YYYY-MM-DD]_[parent-slug]_S[NN]_[seo-keyword].mp4
 
 Save all downloaded Shorts to:
-   C:\Users\gdp\Documents\Claude\Projects\YouTube\Shorts\[parent-slug]\
+   {paths.local_root}/Shorts/[parent-slug]/
 
 When all files are saved → say "Shorts done, upload"
 and I'll upload each one directly to YouTube Studio via Claude in Chrome.
@@ -355,7 +357,7 @@ and I'll upload each one directly to YouTube Studio via Claude in Chrome.
 **Pre-flight before uploading:**
 1. List downloaded files:
    Use `mcp__Desktop_Commander__list_directory` on
-   `C:\Users\gdp\Documents\Claude\Projects\YouTube\Shorts\[parent-slug]\`
+   `{paths.local_root}/Shorts/[parent-slug]/`
    Confirm each expected file is present (SHORT_..._S01_..., S02_, S03_...).
 2. Read Upload Pack from Drive:
    `search_files(query: "title contains 'ShortsUploadPack' and title contains '[parent-slug]'")` →
@@ -449,5 +451,5 @@ upgraded. For now, the Chrome path is reliable and requires zero manual work fro
 | YouTube Upload Pack | Drive: `03c_Shorts_Guides/[YYYY-MM-DD]_Agent03c_ShortsUploadPack_[parent-slug]` |
 | Production Artifact | In chat (persistent, reopenable) |
 | HeyGen project folder name | `SHORTS | [Channel Name] | [parent-slug]` (operator creates in HeyGen) |
-| Downloaded Short files | `C:\Users\gdp\Documents\Claude\Projects\YouTube\Shorts\[parent-slug]\` |
+| Downloaded Short files | `{paths.local_root}/Shorts/[parent-slug]/` |
 | Published Shorts | YouTube (uploaded via Claude in Chrome, URLs confirmed in chat) |

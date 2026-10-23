@@ -1,13 +1,15 @@
 ---
 name: playlist-strategy-orchestrator
-description: LAYER A controller — designs a whole YouTube playlist and emits the per-video Video Brief Cards that the execution layer consumes, plus the playlist_brief.json handoff for the T2 funnel team. Runs once per playlist, plus re-plan runs after an analytics review. Triggers ONLY when the user says "playlist strategy", "plan the playlist", "playlist concept", "re-plan the playlist", or "playlist brief". Chain: Agent 01 (Playlist Mode) → Agent 02 (Playlist Keyword Mode) → emit PlaylistStrategy doc + one Video Brief Card per planned video + playlist_brief.json, then STOP. Does NOT build the funnel (T2: CMO orchestrator / email-list-building reads playlist_brief.json on its own) and does NOT produce any single video (video-production-orchestrator).
+description: LAYER A controller — designs a whole YouTube playlist and emits the per-video Video Brief Cards that the execution layer consumes, plus the playlist_brief.json handoff for the T2 funnel team. Runs once per playlist, plus re-plan runs after an analytics review. Triggers ONLY when the user says "playlist strategy", "plan the playlist", "playlist concept", "re-plan the playlist", or "playlist brief". Chain: Agent 01 (Playlist Mode) → Agent 02 (Playlist Keyword Mode) → emit PlaylistStrategy doc + one Video Brief Card per planned video + playlist_brief.json, then STOP. Does NOT build the funnel (T2: the funnel skill from the config reads playlist_brief.json on its own) and does NOT produce any single video (video-production-orchestrator).
 ---
+
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
 
 # Playlist Strategy Orchestrator (Layer A)
 **Role:** Channel/playlist-level decision controller. Decides the whole playlist ONCE, then
 emits the interface artifacts the execution layer runs on.
 **Never does:** funnel building, lead magnet content, a single video's SEO title / script /
-thumbnail / publish. Those are Layer B and the email-list-building plugin.
+thumbnail / publish. Those are Layer B and the funnel skill (`{integrations.funnel_skill}`).
 
 **Output = the interface (see `references/layer-interface.md`):**
 - one `PlaylistStrategy_[SeriesName]` doc (umbrella concept + ordered sequence)
@@ -162,7 +164,7 @@ Every field comes from S1 + S2 — no blanks except genuinely optional ones.
 
 ### 3c. `playlist_brief.json` — the T1 → T2 handoff (`layer-interface.md` §7)
 Write it to `01_Strategy/` so the T2 funnel team can start independently. **Then stop — do NOT
-invoke any T2 skill.** T2 (CMO orchestrator / email-list-building) reads this file on its own.
+invoke any T2 skill.** T2 (the funnel skill in `{integrations.funnel_skill}`) reads this file on its own.
 ```
 create_file(title: "playlist_brief", contentMimeType: "application/json",
 parentId: "[01_Strategy subfolderID]", textContent:
@@ -198,15 +200,15 @@ Playlist: [series_name] — [N] videos planned
 
 DRIVE:
 → PlaylistStrategy_[SeriesName]: [webViewLink]
-→ [N] Video Brief Card: Brief_[slug]_EP01 … EP[N]  (mind: status = planned)
-→ playlist_brief.json: [webViewLink]  (a T2 funnel csapat ezt olvassa)
+→ [N] Video Brief Card: Brief_[slug]_EP01 … EP[N]  (all: status = planned)
+→ playlist_brief.json: [webViewLink]  (the T2 funnel skill reads this)
 
 NEXT STEP (two separate jobs, not chained here):
 - FUNNEL (traffic target): say "start" or "lead magnet"
-  → a T2 CMO orchestrator / email-list-building felveszi a playlist_brief.json-t,
+  → the T2 funnel skill (`{integrations.funnel_skill}`) picks up playlist_brief.json,
     builds the lead magnet + landing page and writes optin_registry.json
 - VIDEO PRODUCTION: say "new video"
-  → a video-production-orchestrator felveszi az EP01 Brief Cardot; az opt-in URL-t
+  → video-production-orchestrator picks up the EP01 Brief Card; it
     reads it from optin_registry.json if T2 is done (if not, it uses a placeholder)
 - Reorder after analytics: "re-plan the playlist"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

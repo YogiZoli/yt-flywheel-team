@@ -3,6 +3,8 @@ name: agent-05-launch-publish
 description: Use this agent when ready to upload a video to YouTube. Triggers when the user says "ready to upload", "publish my video", "upload checklist", "launch my channel", "60 day plan", or "6 week plan". Also handles end screen, Cards, captions checklist, HeyGen Production Prompt, Publishing Artifact with copy buttons, and chapter finalization. Phase 2 triggers on "HeyGen approved" or equivalent to finalize chapter timestamps. Outputs save to the active channel's 05_Publish_Checklists/ folder in Google Drive.
 ---
 
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
+
 # Agent 05 — Launch & Publish
 **Phase:** Pre-Publishing + HeyGen Production (two-phase workflow)
 **Playbook modules:** 6.3 (Captions), 9 (Launch Plan)
@@ -31,11 +33,11 @@ Structure:
 - **Opening paragraph** (lines 1-3): hook that works as standalone preview. First 150 characters are critical — must compel click without "in this video" or emojis. Match the title's promise exactly.
 - **Lead magnet line:** `→ [Lead Magnet Name]: [link]` — always second, before anything else
 - **Chapters section:** `CHAPTERS` header + draft timestamps (generated in Step 3 below)
-- **About paragraph:** 2-3 sentences about Zoltan + channel subscribe CTA
+- **About paragraph:** 2-3 sentences about {creator.name} + channel subscribe CTA
 - **3 hashtags:** at the very end of description (use exact hashtags from Agent 02)
 
 ### Step 2: Generate Tags
-**MAXIMIZE to ~500 characters** — YouTube's hard limit. Do NOT use only 6-8 tags; fill the full allowance. Combine: primary keyword, long-tail variations, location-specific phrases, broader category terms, year (e.g. "cambodia 2025"), channel/brand name (Zoltan Gero), synonyms, and alternative phrasings. Count characters as you build the list and stop just under 500. The operator pastes all tags at once into YouTube Studio (deletes old tags → Ctrl+V → done). Always display the char count in the artifact badge (e.g. "498 / 500").
+**MAXIMIZE to ~500 characters** — YouTube's hard limit. Do NOT use only 6-8 tags; fill the full allowance. Combine: primary keyword, long-tail variations, location-specific phrases, broader category terms, year (e.g. "[topic] 2026"), channel/brand name ({channel.name}), synonyms, and alternative phrasings. Count characters as you build the list and stop just under 500. The operator pastes all tags at once into YouTube Studio (deletes old tags → Ctrl+V → done). Always display the char count in the artifact badge (e.g. "498 / 500").
 
 ### Step 3: Generate Draft Chapters
 Derive chapter timestamps directly from the script sections:
@@ -180,18 +182,18 @@ Use `mcp__cowork__create_artifact` to create a persistent HTML page with all pub
 
 After the Publishing Artifact is live, convert the script (fetched in Pre-Flight) into HeyGen marker format. Save to Drive.
 
-#### Standing HeyGen Settings (v4 — Zoltan Gero)
+#### Standing HeyGen Settings (v4, from config and Foundation doc)
 
 **Avatar:**
 - Avatar ID: from the channel Foundation doc `heygen_avatar_id` (the channel's own avatar, a
-  standard HeyGen avatar, or a client's uploaded avatar — never hardcode a person). Current
-  channel default / example: `bfcee432248442539191df03f922f575`.
+  standard HeyGen avatar, or a client's uploaded avatar — never hardcode a person). No default
+  ID in the plugin.
 - Frame: Circle Frame applied throughout
 - Engine: Motion Engine Avatar III, Unlimited Engine
 - Fallback: Do NOT substitute silently. Flag immediately and wait for instruction.
 
 **Voice:**
-- Voice ID: from Foundation `heygen_voice_id` (cloned or standard). Example: `99b6f9eca33e474483987860185fdc43`.
+- Voice ID: from Foundation `heygen_voice_id` (cloned or standard).
 - Speed: Minimum +25% faster than default, recommended +50% faster. Mandatory, entire video, no exceptions.
 - Fallback: substitute free voice matching the channel's voice profile, flag which.
 
@@ -216,7 +218,7 @@ After the Publishing Artifact is live, convert the script (fetched in Pre-Flight
 
 ```
 # HeyGen Video Agent — Video Prompt
-### For: Zoltan Gero | YouTube Teaching & Tutorial Videos
+### For: {creator.name} | {channel.name}
 Template v4.0 | Changes: [brief note on what changed from previous version]
 
 ---
@@ -235,12 +237,12 @@ Estimate total video credits before generating.
 - Voice Speed: FASTER than default. Minimum +25% faster, recommended +50% faster. Mandatory, entire video.
 ---
 ## SECTION 2, AVATAR
-- Avatar ID: from Foundation `heygen_avatar_id` (own / standard HeyGen / client upload). Example: bfcee432248442539191df03f922f575
+- Avatar ID: from Foundation `heygen_avatar_id` (own / standard HeyGen / client upload)
 - Frame: Circle Frame applied throughout every avatar appearance
 - Engine: Motion Engine Avatar III, Unlimited Engine
 - Fallback rule: Do NOT substitute silently. Flag immediately.
 ## SECTION 3, VOICE
-- Voice ID: from Foundation `heygen_voice_id`. Example: 99b6f9eca33e474483987860185fdc43
+- Voice ID: from Foundation `heygen_voice_id`
 - Speed: +50% faster than default (minimum +25%). Applies to entire video. No exceptions.
 - Fallback rule: substitute free voice matching the channel's voice profile, flag which one was used.
 ```
@@ -345,7 +347,7 @@ Metrics to collect: Views per video, Average retention %, CTR % (by traffic sour
 
 ## Captions Workflow
 
-**Philosophy:** Always use the HeyGen-generated caption file — it is more accurate than YouTube auto-captions, especially for Zoltan's European accent, AI/tech vocabulary, and AI-cloned voice. Upload it as the English closed caption track on YouTube.
+**Philosophy:** Always use the HeyGen-generated caption file — it is more accurate than YouTube auto-captions, especially for non-native accents, AI/tech vocabulary, and AI-cloned voice. Upload it as the English closed caption track on YouTube.
 
 ### Naming Convention
 `[title-slug]_ENG_cc_timestamps.srt`

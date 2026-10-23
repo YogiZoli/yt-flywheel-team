@@ -39,7 +39,7 @@ A one-off video with no playlist uses the `"ad-hoc video"` escape hatch.
 |---|---|---|---|
 | `playlist-strategy-orchestrator` | strategy | A | "playlist strategy", "plan the playlist", "re-plan the playlist" |
 | `agent-01-channel-strategist` | strategy | A | "what should I make next", "give me video ideas" |
-| `agent-02-seo-title` | shared | A + B | "playlist kulcsszavak" (A) · "give me a title" (B) |
+| `agent-02-seo-title` | shared | A + B | "playlist keywords" (A) · "give me a title" (B) |
 | `video-production-orchestrator` | execution | B | "new video", "new video cycle", "ad-hoc video" |
 | `agent-03-script-writer` | execution | B | "write my script" |
 | `agent-03c-shorts-producer` | execution | B (post) | "make the Shorts" |
@@ -57,8 +57,8 @@ A one-off video with no playlist uses the `"ad-hoc video"` escape hatch.
 - Two layers, one plugin. The layer group dirs are registered via the `skills` array in `.claude-plugin/plugin.json`.
 - The Video Brief Card is the interface between the two layers — schema and rules in `references/layer-interface.md`.
 - Orchestrators read Drive ONCE and pass a CONTEXT BLOCK v2 (with `BRIEF_ID`) to every agent (`references/conventions.md`).
-- **Cross-team contract (T1/T2/T3):** `playlist-strategy-orchestrator` writes `playlist_brief.json` and stops; `video-production-orchestrator` reads `optin_registry.json` written by T2. This plugin never invokes a T2 skill. See `layer-interface.md` §7 and `freedomOS/docs/architecture.md`.
-- `strategic-launch-orchestrator` is a pointer only — it routes the operator to the traffic job (`playlist strategy`) and the funnel job (CMO orchestrator / `email-list-building`) and chains nothing.
+- **Cross-team contract (T1/T2/T3):** `playlist-strategy-orchestrator` writes `playlist_brief.json` and stops; `video-production-orchestrator` reads `optin_registry.json` written by T2. This plugin never invokes a T2 skill. See `layer-interface.md` §7.
+- `strategic-launch-orchestrator` is a pointer only — it routes the operator to the traffic job (`playlist strategy`) and the funnel job (funnel skill (`{integrations.funnel_skill}`)) and chains nothing.
 - Funnel building (lead magnet, landing page, email automation) is entirely team T2's — platform-agnostic contract, GHL today.
 
 ---
@@ -89,7 +89,7 @@ When you say "switch to AI Agents Channel", every subsequent agent saves outputs
 
 ### 2. Knowledge Base
 All agents read from the **YouTube Evergreen Flywheel Playbook v2.0** Google Doc:
-- Doc ID: `1tl712hBu4OARg_zrA5wu4kqtOcn729ssrqD1yEdmcLI`
+- Doc ID: `playbook.doc_id` in your config
 - Update the Playbook → all agents instantly use the new version (no plugin update needed)
 
 ### 3. The Workflow
@@ -104,7 +104,7 @@ All agents read from the **YouTube Evergreen Flywheel Playbook v2.0** Google Doc
 ```
 Job 1 — TRAFFIC:  "playlist strategy"  →  playlist-strategy-orchestrator (Layer A)
    → PlaylistStrategy doc + N Video Brief Cards + playlist_brief.json, then stop
-Job 2 — FUNNEL:   "start" / "lead magnet"  →  CMO orchestrator (email-list-building plugin, T2)
+Job 2 — FUNNEL:   "start" / "lead magnet"  →  funnel skill from the config (T2)
    → reads playlist_brief.json, builds lead magnet + landing page, writes optin_registry.json
 ```
 `video-production-orchestrator` reads `optin_registry.json` automatically once T2 is done.

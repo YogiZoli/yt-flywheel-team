@@ -3,6 +3,8 @@ name: agent-05b-multilingual-captions
 description: Post-publish multilingual caption generator. Translates English SRT to 25 languages using free Google Translate (no API key, no paid service), saves all SRTs to Drive, uploads to YouTube as subtitle tracks. Triggers after video is published. Phrases: "multilingual captions", "05b", "translate captions", "sub upload", "subtitle upload", "25 languages".
 ---
 
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
+
 # Agent 05b — Multilingual Caption Generator & Uploader
 **Phase:** Post-publish (runs after Agent 05 Phase 2 is complete)
 **Cost:** Zero — translation via free Python library (`deep-translator`), no API key, no paid service

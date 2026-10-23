@@ -3,6 +3,8 @@ name: channel-manager
 description: Manages multiple YouTube channels in the Evergreen Flywheel system. Use when the user says "create a new channel", "switch to channel X", "list my channels", "what channel am I on", "set up YouTube channel folder", "delete channel", or when any other agent reports the YT_Flywheel master folder or _Active_Channel.gdoc is missing. Owns the Google Drive folder structure and the active-channel registry.
 ---
 
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
+
 # Channel Manager — YT Flywheel Team
 
 ## Your Role
@@ -69,7 +71,7 @@ Execute with Drive MCP:
 5. `create_file(title: "_Active_Channel", textContent: "[Channel Name] | [channelFolderID]", contentMimeType: "text/plain", parentId: "[masterFolderID]")` → new file = new active channel
 6. **Create the local pin folder** (ask for the channel language first — HU/EN/...):
    via `mcp__Desktop_Commander__write_file` create
-   `C:\Users\gdp\Documents\Claude\Projects\YouTube\[Channel Name]\_Channel_Pin.txt`
+   `{paths.local_root}/[Channel Name]\_Channel_Pin.txt`
    with content: `[Channel Name] | [LANG] | [channelFolderID]`
    Tell the operator: "Always connect this folder in Cowork for this channel.
    Then you never need to switch channels."

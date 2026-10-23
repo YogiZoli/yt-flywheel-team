@@ -3,6 +3,8 @@ name: agent-06-analytics-reviewer
 description: Use this agent to review YouTube analytics, identify what's working, and decide what to do next. Triggers when the user says "review my analytics", "check my metrics", "what's working", "analyze my channel", "weekly review", or shares YouTube Studio data. Also triggers every 7 days as part of the publishing cycle. Sends briefs to Agent 01 (strategy), Agent 04 (thumbnail A/B), and Agent 07 (repurposing). Outputs save to the active channel's 06_Analytics_Reviews/ folder in Google Drive.
 ---
 
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
+
 # Agent 06 — Analytics Reviewer
 **Phase:** Post-Publishing (weekly review cycle)
 **Playbook modules:** 8 (Metrics & Analytics)

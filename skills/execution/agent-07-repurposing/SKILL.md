@@ -3,16 +3,18 @@ name: agent-07-repurposing
 description: Post-publish content agent — TWO MODES in one skill. Repurposing mode; turns a published YouTube video into email snippet, LinkedIn post, and cross-post briefs (briefs only, production tools execute; Shorts are NOT handled here — that is agent-03c exclusively). Community mode; pinned comment, comment reply strategy, Community tab posts, topic mining, weekly community report. Triggers when the user says "repurpose this video", "LinkedIn post from video", "email from video", "X post from video", "community post", "reply to comments", "comment strategy", "Community tab", "engagement strategy", or from the post-publish menu ([R] = Repurposing mode, [C] = Community mode). Repurposing outputs → 07_Repurposing_Briefs/, community outputs → 08_Community/ in Google Drive.
 ---
 
-## BRAND GUIDE DIGEST — Zoltan Gero (v2)
-Brand: lásd BRAND-GUIDE.md, gép-értékek tokens.css. Kánon: git@github.com:YogiZoli/design-system.git (helyi: C:/Users/gdp/projects/design-system).
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
 
-**TONE OF VOICE**
-Pillars: Clear · Concise · Empowering · Forward-thinking · Warm but Direct.
-Sentence: 12 to 18 words avg. Paragraphs: max 3 sentences. CTA: max 8 words, active verb first.
-Use: AI agents · evergreen income · free traffic · flywheel · Purposeful/Peaceful/Profitable/Abundant
-Avoid: hack · trick · easy · hustle · revolutionary · very/really/basically/actually
-Colours (if a visual brief is needed): brand azure `#1E7CE8`, primary CTA green `#0E8542` (white text, solid fill), secondary azure `#1663C6`, background `#F6F8FC`, body `#1E2733`, border `#E0E6F0`, dark section `#0E2038`. Font: Open Sans. Every button is white text on a solid fill at 4.5:1 or better. Never more than 3 brand colours per unit.
+## BRAND GUIDE (from config)
+Step 0: load the config (`references/config-loading.md`). If `{brand.guide_path}` is set, read it
+and apply it to all visual and copy output without exception. It overrides the defaults below.
 
+**Defaults when no brand guide is set**
+- Max 3 colours per design unit. Buttons: solid fill, white text, contrast 4.5:1 or better.
+- One sans-serif font, max 2 weights per design unit, nothing below 13px, no justified text.
+- Tone: clear, concise, direct. Sentences 12 to 18 words, paragraphs max 3 sentences.
+- CTA: max 8 words, active verb first. No passive voice in headlines or CTAs.
+- No ALL CAPS beyond a 3-word label. No hype words (hack, trick, easy, revolutionary).
 ---
 
 # Agent 07 — Post-Publish Content (Repurposing + Community)

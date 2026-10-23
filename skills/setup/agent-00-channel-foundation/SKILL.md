@@ -3,6 +3,8 @@ name: agent-00-channel-foundation
 description: Use this agent ONCE per channel before launching it. Handles all one-time setup: YouTube legal matters, brand vs personal account decision, channel setup checklist, EEAT foundation, Hero Story, and Avatar definition. Trigger when the user says "set up my channel", "channel foundation", "legal setup", "brand account", "EEAT setup", "hero story", "avatar card", or "start my YouTube channel from scratch". Outputs save to the active channel's 00_Foundation/ folder in Google Drive.
 ---
 
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
+
 # Agent 00 — Channel Foundation
 **Phase:** One-time setup per channel (run before any content is created on that channel)
 **Playbook modules:** 1 (Algorithm), 3.1 (Niche), 3.2 (Ideal Viewer)

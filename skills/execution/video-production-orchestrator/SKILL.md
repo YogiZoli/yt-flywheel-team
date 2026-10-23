@@ -3,6 +3,8 @@ name: video-production-orchestrator
 description: LAYER B controller — runs the per-video pipeline end to end from an already-decided Video Brief Card to published YouTube upload. Consumes exactly ONE Brief Card (produced earlier by Layer A / playlist-strategy-orchestrator); does NO strategy, keyword, topic, angle or video-type decision at video time. Reads Drive state ONCE, builds a CONTEXT BLOCK (with BRIEF_ID), passes it to every agent. FIVE video types via Production Core adapters, in priority order (most to least used) — avatar_local, avatar_native, screen_recording, talking_head, faceless_generated — with a shared PRE phase (load card, SEO title/description, master script) and shared POST phase (thumbnail, publish, chapters, post-publish menu). Triggers ONLY when the user says "new video", "start new video", "video pipeline", "run the video pipeline", "new video cycle", or "ad-hoc video" (playlist-less single video). Core chain: load Brief Card → 02 title/desc → 03 master script + type adapter → [PRODUCTION CORE] → 04 thumbnail → 05 publish. Shorts, Repurposing, Community = post-publish only.
 ---
 
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
+
 # Video Production Orchestrator (v3 — Layer B, Brief-Card driven, 5 video types)
 **Role:** Per-video pipeline controller (LAYER B). Runs for every single video, always inside
 the frame a Video Brief Card already set.
@@ -174,7 +176,7 @@ Check what's already done for the active channel this cycle:
 - `03_Scripts` → any approved master script? Any type-adapted output (`_TH` / `_HG` / `_SR` / `_FL`)?
 - `04_Thumbnail_Briefs` → any thumbnail brief from today?
 - `05_Publish_Checklists` → any publish checklist?
-- Local `Audio\` → any MP3 in `C:\Users\gdp\Documents\Claude\Projects\YouTube\Audio\`? (avatar_local / avatar_native / screen_recording VO only)
+- Local `Audio/` → any MP3 in `{paths.local_root}/Audio/`? (avatar_local / avatar_native / screen_recording VO only)
 
 Use `search_files(query: "parentId = '[folderID]'")` per folder, sort by `createdTime` descending.
 Mark completed steps DONE in artifact, offer skip with `"redo [N]"`.
@@ -375,10 +377,10 @@ Ha ElevenLabs API-t akarsz helyette → "11labs api"
    `[VOICE_ID]` = the channel's `elevenlabs_voice_id` from the Foundation doc (or the Brief
    Card's `voice_id` override). If the Foundation has no voice id, ask the operator for it once —
    do NOT assume a fixed voice. Model `eleven_turbo_v2_5`. API key from
-   `C:\Users\gdp\Documents\Claude\Projects\YouTube\.config\elevenlabs.env`.
-   Save MP3 + `_align.json` to `C:\Users\gdp\Documents\Claude\Projects\YouTube\Audio\`,
+   `{paths.secrets_env}`.
+   Save MP3 + `_align.json` to `{paths.local_root}/Audio/`,
    naming: `[YYYY-MM-DD]_Audio_[title-slug]_[voice-slug].mp3`.
-3. Generate SRT: run `C:\Users\gdp\Documents\Claude\Projects\YouTube\Scripts\generate_srt.py`
+3. Generate SRT: run `{paths.scripts}/generate_srt.py`
    with the align file (offset 0; for >2500-char scripts split at sentence boundaries and
    chain offsets from each part's "Last seconds" value).
 4. Present MP3 + SRT `computer://` links for approval, then continue to Gate 4 confirmation.

@@ -19,6 +19,7 @@ Agents invoked standalone (no context block) run their own Pre-Flight as written
 
 ```
 === CONTEXT BLOCK v2 ===
+CONFIG_PATH: [path of the loaded config, see config-loading.md; agents use its values]
 CHANNEL_NAME: [name]
 CHANNEL_LANG: [HU | EN | ... — from _Channel_Pin.txt; drives ALL public-facing copy language]
 CHANNEL_FOLDER_ID: [Drive folder ID]
@@ -140,7 +141,7 @@ first hit wins, run at Step 0a of every orchestrator and in every standalone age
 1. **Pin file in the connected working folder** (HIGHEST priority):
    look for `_Channel_Pin.txt` in the Cowork session's connected folder (and its root).
    Format, line 1: `[Channel Name] | [LANG] | [Channel Drive Folder ID]`
-   Example: `VoxFlow | HU | 1AbC...xyz`
+   Example: `My Channel | EN | 1AbC...xyz`
    If found → the session is HARD-BOUND to this channel:
    - All outputs go to this channel's Drive folder. All copy is written in [LANG].
    - `"switch to ..."` commands are REFUSED in this session with:
@@ -157,6 +158,6 @@ questions, ever. Internal chat with the operator follows the operator's language
 
 Per-channel setup (one-time, channel-manager does it on "create new channel"):
 - Drive: `YT_Flywheel/[Channel]/` structure (as before)
-- Local: `C:\Users\gdp\Documents\Claude\Projects\YouTube\[Channel]\` working folder
+- Local: `{paths.local_root}/[Channel]/` working folder
   containing `_Channel_Pin.txt` — the operator connects THIS folder in Cowork sessions
   dedicated to that channel.

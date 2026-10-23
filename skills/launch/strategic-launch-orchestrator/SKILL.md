@@ -1,7 +1,9 @@
 ---
 name: strategic-launch-orchestrator
-description: Pointer skill (retired as an orchestrator). A playlist launch is TWO separate jobs with two separate owners, and this plugin does not chain them. Traffic side = playlist-strategy-orchestrator (this plugin). Funnel side = the CMO orchestrator / email-list-building plugin (T2). Triggers on the old launch phrases ("playlist launch", "channel launch", "new playlist", "playlist setup", "launch the playlist", "full launch", "before the first video") and routes the operator to the right one.
+description: Pointer skill (retired as an orchestrator). A playlist launch is TWO separate jobs with two separate owners, and this plugin does not chain them. Traffic side = playlist-strategy-orchestrator (this plugin). Funnel side = the funnel skill set in the config (T2). Triggers on the old launch phrases ("playlist launch", "channel launch", "new playlist", "playlist setup", "launch the playlist", "full launch", "before the first video") and routes the operator to the right one.
 ---
+
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
 
 # Strategic Launch — Pointer (not an orchestrator any more)
 
@@ -15,7 +17,7 @@ Produces: `PlaylistStrategy_[Series]` doc, one Video Brief Card per planned vide
 `playlist_brief.json` (the T1 → T2 handoff). Then it stops.
 
 ## Job 2 — FUNNEL: landing page + lead magnet + email sequences
-**Owner:** the **CMO orchestrator** in the `email-list-building` plugin (team T2), which also
+**Owner:** the funnel skill set in `{integrations.funnel_skill}` (team T2), which also
 hands off to the `campaign-ai-agent-team` plugin (T3) for the email sequences.
 Trigger: `"start"` / `"lead magnet"` / `"funnel setup"`.
 T2 reads `playlist_brief.json` on its own, builds the funnel on whatever platform it chooses
@@ -24,8 +26,7 @@ reads automatically for every video description. No manual coordination, no cros
 from here.
 
 ## The contract between them
-See `references/layer-interface.md` §7 (T1 / T2 / T3 handoff files) and
-`freedomOS/docs/architecture.md` for the canonical version.
+See `references/layer-interface.md` §7 (T1 / T2 / T3 handoff files).
 
 ```
 playlist-strategy-orchestrator ──playlist_brief.json──► CMO orchestrator (T2)

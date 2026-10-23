@@ -200,9 +200,9 @@ Card, not re-derived. Agents receiving `BRIEF_ID` treat the named card as read-o
 
 ## 7. CROSS-TEAM CONTRACT (T1 ↔ T2 ↔ T3)
 
-This plugin (`yt-flywheel-team`) is **T1** in the freedomOS 3-team system. The Video Brief Card
+This plugin (`yt-flywheel-team`) is **T1** in a 3-team system (traffic, funnel, delivery). The Video Brief Card
 above is INTERNAL to T1 (per video, within a playlist). The team boundaries use different files.
-Canonical: `github.com/YogiZoli/freedomOS` → `docs/architecture.md`.
+The handoff files are listed in §7 below.
 
 | File | Writer | Reader | Contains | This plugin |
 |---|---|---|---|---|
@@ -212,7 +212,7 @@ Canonical: `github.com/YogiZoli/freedomOS` → `docs/architecture.md`.
 
 Rules:
 - **T1 never invokes a T2 skill.** It writes `playlist_brief.json` and stops. T2 (the CMO
-  orchestrator in `email-list-building`) picks it up on its own.
+  skill set in `integrations.funnel_skill`) picks it up on its own.
 - **Platform-agnostic:** T1 reads only the neutral top-level fields (`opt_in_url`, and for display
   `lead_magnet_title`). `platform` (default `gohighlevel`) names T2's tool; `platform_meta` holds
   tool-specific IDs and is T2/T3 only. Swapping GHL for another tool changes nothing in T1.
