@@ -37,7 +37,7 @@ Use Drive MCP tools directly (the Google Drive tool, found by name (see referenc
 - Operator says "both" / "R C" → run both, one combined confirmation.
 
 **Shorts rule:** Shorts scripts and Shorts briefs belong EXCLUSIVELY to `agent-03c-shorts-producer`.
-If the operator asks for Shorts here, route them to 03c ("shortokat is kérem"). Never produce a
+If the operator asks for Shorts here, route them to 03c ("make the Shorts"). Never produce a
 Shorts script in this skill.
 
 ---

@@ -1,6 +1,6 @@
 ---
 name: agent-05-launch-publish
-description: Use this agent when ready to upload a video to YouTube. Triggers when the user says "ready to upload", "publish my video", "upload checklist", "launch my channel", "60 day plan", or "6 week plan". Also handles end screen, Cards, captions checklist, HeyGen Production Prompt, Publishing Artifact with copy buttons, and chapter finalization. Phase 2 triggers on "HeyGen jóváhagyva" or equivalent to finalize chapter timestamps. Outputs save to the active channel's 05_Publish_Checklists/ folder in Google Drive.
+description: Use this agent when ready to upload a video to YouTube. Triggers when the user says "ready to upload", "publish my video", "upload checklist", "launch my channel", "60 day plan", or "6 week plan". Also handles end screen, Cards, captions checklist, HeyGen Production Prompt, Publishing Artifact with copy buttons, and chapter finalization. Phase 2 triggers on "HeyGen approved" or equivalent to finalize chapter timestamps. Outputs save to the active channel's 05_Publish_Checklists/ folder in Google Drive.
 ---
 
 # Agent 05 — Launch & Publish
@@ -166,14 +166,14 @@ Use `mcp__cowork__create_artifact` to create a persistent HTML page with all pub
   11. **DESIGN BRIEF** — the full thumbnail brief from Agent 04 (read from `04_Thumbnail_Briefs` subfolder). Styled with a distinct purple/lavender border and background so it stands out. Scrollable if long (max-height ~320px with overflow-y: auto). Has its own Copy button. Label: "Design Brief" with sub-label "Nano Banana / Canva". This allows the operator to copy the full design brief instantly without searching Google Drive.
 
   12. **POST-PUBLISH ACTIONS** — shown at the bottom of the artifact after the video is published. Dark background section (#111), header "Post-Publish Menu", subtext "All optional — run in any order after the video is live." Five action buttons in a row, each styled as a pill/chip. On click, each button copies a trigger phrase to clipboard so the operator can paste it into chat:
-      - **[S] Shorts** → copies `"shortokat is kérem"` | grey chip
+      - **[S] Shorts** → copies `"make the Shorts"` | grey chip
       - **[R] Repurpose** → copies `"repurpose"` | grey chip
       - **[C] Community** → copies `"community post"` | grey chip
       - **[E] Email/Funnel** → copies `"conversion audit"` | grey chip
-      - **[M] Captions** → copies `"felirat fordítás"` | green chip (highest SEO ROI — visually distinguished)
+      - **[M] Captions** → copies `"translate captions"` | green chip (highest SEO ROI — visually distinguished)
       Below the buttons: small text — "[M] Captions = 25 language SRT upload. Free. ~3 min. Biggest SEO boost."
 
-- Footer: small grey text — "Chapters are estimates (130 wpm). After HeyGen video approval, say 'HeyGen jóváhagyva' to finalize."
+- Footer: small grey text — "Chapters are estimates (130 wpm). After HeyGen video approval, say 'HeyGen approved' to finalize."
 - **Save the artifact `id`** from the tool response — required for Phase 2 update.
 
 ### Step 7: Generate HeyGen Production Prompt
@@ -269,13 +269,13 @@ Save HeyGen prompt to Drive root (`parentId: 0AG9wJnPFjzalUk9PVA`).
 File naming: `[YYYY-MM-DD]_HeyGen_[title-slug]_Video[ep-number]_v1`
 
 **Phase 1 completion message to operator:**
-`"Publishing Artifact live in chat — all copy buttons ready | HeyGen prompt saved → [heygen-link] | Paste the HeyGen document into HeyGen Video Agent and start generation. Come back when you've watched and approved the final video: say 'HeyGen jóváhagyva' + any chapter timing corrections. | Checklist saved → [checklist-link]"`
+`"Publishing Artifact live in chat — all copy buttons ready | HeyGen prompt saved → [heygen-link] | Paste the HeyGen document into HeyGen Video Agent and start generation. Come back when you've watched and approved the final video: say 'HeyGen approved' + any chapter timing corrections. | Checklist saved → [checklist-link]"`
 
 ---
 
 ## PHASE 2: Chapters Finalization (Post-HeyGen Approval)
 
-**Trigger:** Operator says "HeyGen jóváhagyva", "approved", "chapters ok", "jóváhagytam", "mehet a chapters", or any equivalent confirmation the final HeyGen video has been watched and approved.
+**Trigger:** Operator says "HeyGen approved", "approved", "chapters ok", or any equivalent confirmation the final HeyGen video has been watched and approved.
 
 Steps:
 1. Ask: "Any chapter timestamp corrections? Or should I confirm the draft estimates as-is?" (Keep it short — one question.)
@@ -286,7 +286,7 @@ Steps:
    - Remove the amber [DRAFT] badge from the chapters header
    - Update the DESCRIPTION section to include the finalized chapters (replace the draft placeholder)
 5. Confirm: `"Chapters finalized. Publishing Artifact updated."`
-6. **Automatically invoke Agent 05b** — do NOT wait for operator to type "felirat fordítás".
+6. **Automatically invoke Agent 05b** — do NOT wait for operator to type "translate captions".
    Say: `"▶ Starting Agent 05b — Multilingual Captions (25 languages, free, ~3 min)..."`
    Then invoke `agent-05b-multilingual-captions` skill immediately.
    Pass: active channel folder ID, English SRT location (from Captions/ subfolder), video ID (ask once if not yet provided).
@@ -305,7 +305,7 @@ Steps:
 1. Copy video URL and share with known ideal viewers (personal message, not broadcast)
 2. Add video link to email signature if not already present
 3. Pass video URL to Agent 07 (Post-Publish Content — Repurposing [R] + Community [C] modes)
-4. **Multilingual captions (SEO boost):** Say "felirat fordítás" or "M" to trigger Agent 05b.
+4. **Multilingual captions (SEO boost):** Say "translate captions" or "M" to trigger Agent 05b.
    Translates English SRT to 25 languages, uploads to YouTube. Free, ~3 min. Zero storage impact.
 
 ---

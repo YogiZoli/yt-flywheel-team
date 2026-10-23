@@ -1,6 +1,6 @@
 ---
 name: agent-03c-shorts-producer
-description: Use this agent to produce YouTube Shorts from an approved HeyGen long-form video. IMPORTANT: This agent runs ONLY from the post-publish menu — NEVER automatically during or after the main pipeline. Triggers when the operator explicitly says "shorts", "shortokat is kérem", "csináljuk a shortokat", "make the Shorts", "Shorts guide", or "generate Shorts" AFTER the main video is already published on YouTube. Do NOT trigger on "HeyGen jóváhagyva" alone — that is a main pipeline gate, not a Shorts trigger. Reads the approved script and SEO data from Google Drive, identifies the 3–5 best 30–60 second segments, writes individual Short scripts following the Shorts Ownership Formula, generates a HeyGen production brief for each Short (9:16 vertical), saves all outputs to Drive, and uploads each completed Short to YouTube via Claude in Chrome.
+description: Use this agent to produce YouTube Shorts from an approved HeyGen long-form video. IMPORTANT: This agent runs ONLY from the post-publish menu — NEVER automatically during or after the main pipeline. Triggers when the operator explicitly says "shorts", "make the Shorts", "Shorts guide", or "generate Shorts" AFTER the main video is already published on YouTube. Do NOT trigger on "HeyGen approved" alone — that is a main pipeline gate, not a Shorts trigger. Reads the approved script and SEO data from Google Drive, identifies the 3–5 best 30–60 second segments, writes individual Short scripts following the Shorts Ownership Formula, generates a HeyGen production brief for each Short (9:16 vertical), saves all outputs to Drive, and uploads each completed Short to YouTube via Claude in Chrome.
 ---
 
 # Agent 03c — Shorts Producer
@@ -16,7 +16,7 @@ Read VIDEO_TYPE from the CONTEXT BLOCK (or the Video Brief Card if standalone). 
   caption style, 9:16 crop guidance). Skip HeyGen prompt generation entirely; the operator
   cuts clips in their editor. Upload Pack and YouTube upload steps are identical.
 **Phase:** POST-PUBLISH ONLY — runs exclusively from the post-publish menu after main video is live on YouTube.
-**WARNING: NEVER auto-trigger from "HeyGen jóváhagyva" or any main pipeline gate.**
+**WARNING: NEVER auto-trigger from "HeyGen approved" or any main pipeline gate.**
 **Position in Flywheel:** YouTube published → [operator chooses "S" from post-publish menu] → **[03c Shorts Producer]** → Agent 07 (Repurposing / Community modes)
 
 ---
@@ -315,7 +315,7 @@ After all Drive saves succeed, use `mcp__cowork__create_artifact` to create a pe
   - Copy button: YouTube description
   - Copy button: tags
   - Status badge toggling between "To do: generate in HeyGen" and "Done" (click to toggle)
-- Footer note: "All Shorts generated in HeyGen → say 'Shorts kész, töltsd fel' to upload via Claude in Chrome."
+- Footer note: "All Shorts generated in HeyGen → say 'Shorts done, upload' to upload via Claude in Chrome."
 - Save artifact `id` from response — needed for any future updates.
 
 ---
@@ -341,7 +341,7 @@ HeyGen Production Steps:
 Save all downloaded Shorts to:
    C:\Users\gdp\Documents\Claude\Projects\YouTube\Shorts\[parent-slug]\
 
-When all files are saved → say "Shorts kész, töltsd fel"
+When all files are saved → say "Shorts done, upload"
 and I'll upload each one directly to YouTube Studio via Claude in Chrome.
 ```
 
@@ -349,8 +349,8 @@ and I'll upload each one directly to YouTube Studio via Claude in Chrome.
 
 ## Step 7: YouTube Upload via Claude in Chrome
 
-**Trigger:** Operator says "Shorts kész, töltsd fel", "upload the Shorts", "töltsd fel a shortokat",
-"mehet a feltöltés", or equivalent confirmation all HeyGen Short files are downloaded and saved.
+**Trigger:** Operator says "Shorts done, upload", "upload the Shorts",
+"start the upload", or equivalent confirmation all HeyGen Short files are downloaded and saved.
 
 **Pre-flight before uploading:**
 1. List downloaded files:
@@ -427,7 +427,7 @@ upgraded. For now, the Chrome path is reliable and requires zero manual work fro
 
 ## Error Handling
 
-| Hiba | Teendő |
+| Error | Action |
 |------|--------|
 | Script not found in Drive | "No approved script in 03_Scripts. Run Agent 03 and approve script first." |
 | SEO data missing | "No Agent 02 output found. Run Agent 02 to confirm title and keywords first." |

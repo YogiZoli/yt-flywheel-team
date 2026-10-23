@@ -115,7 +115,7 @@ After Drive reads, ask the operator exactly this — one message:
 Wait for the answer. If both research/voice answers are No and the operator says OK, go straight to Phase 1 with the Handraiser default plan active.
 
 **Handraiser intake rules:**
-- Handraiser is DEFAULT ON. The block above is a reminder, not a questionnaire — "OK" / "jóváhagyom" / no objection → execute the default plan exactly, no further handraiser questions.
+- Handraiser is DEFAULT ON. The block above is a reminder, not a questionnaire — "OK" / "approve" / no objection → execute the default plan exactly, no further handraiser questions.
 - Operator edits (keywords, offer name, slots, or "no handraiser") → apply and proceed. "No handraiser" → standard single conversion CTA system, everything below unchanged.
 - Offer name persists between scripts (read from the previous script's handraiser metadata block or 09_Lead_Magnets). Ask only if none exists — NEVER invent one. Without a confirmed offer name, all ACTION slots are omitted (Slot 2 dropped, Slot 3 forced to GUIDE) and the operator is told why in the delivery message.
 
@@ -174,7 +174,7 @@ Lead Magnet CTA: [active slot — must match playlist's designated LM]
 Next video: [specific EP.X+1 topic — not generic; this is the playlist continuation hook]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Approve? Reply "jóváhagyom" or "approved" to get the full script.
+Approve? Reply "approve" or "approved" to get the full script.
 Or reply with edits — I'll revise before writing.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -525,7 +525,7 @@ Execute these Drive MCP steps (the Google Drive tool, found by name (see referen
    ```
    Script saved → [webViewLink]
 
-   Review it. When approved, say "jóváhagyom" or "approved".
+   Review it. When approved, say "approve" or "approved".
    Next: manual ElevenLabs audio (Gate 4 in the pipeline — paste script into ElevenLabs).
 
    CTA Slot active: PDF Lead Magnet.

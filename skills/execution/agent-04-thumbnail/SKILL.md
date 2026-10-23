@@ -152,12 +152,12 @@ create_file(
 ```
 
 3. After saving to Drive, present the Nano Banana 2 brief to the operator in chat, then display:
-   "Thumbnail brief kész — Generálod Nano Banana 2-vel (ajánlott), vagy Canvával? → 'nano' / 'canva' / 'kész'"
+   "Thumbnail brief done. Generate with Nano Banana 2 (recommended) or with Canva? → 'nano' / 'canva' / 'done'"
    Default if no explicit request: Nano Banana 2 path only. Do NOT call Canva MCP unless operator says 'canva'.
 
 ## Canva MCP — Optional (only if operator requests it)
 
-**Only invoke Canva MCP if the operator explicitly says 'canva' or 'mindkettő'.** (Canva tools, found by name; see references/config-loading.md section 4).
+**Only invoke Canva MCP if the operator explicitly says 'canva' or 'both'.** (Canva tools, found by name; see references/config-loading.md section 4).
 The primary execution path is Nano Banana 2 — the brief + prompt is the deliverable. Canva MCP is a secondary option.
 If Canva MCP times out or fails: log as SKIPPED in the pipeline status, continue. Never block the workflow on Canva.
 
@@ -181,7 +181,7 @@ Example prompt to pass to Canva:
 After Canva creation (only if requested):
 ```
 Brief mentve Drive-ra → [webViewLink]
-Canva thumbnail generálva → [design link] — tekintsd át, exportáld PNG-ként, töltsd fel YouTube Studioba
+Canva thumbnail generated → [design link]. Review it, export as PNG, upload it in YouTube Studio.
 
-Amikor a thumbnail kész és jóváhagyva → futtasd az Agent 05-öt (Launch & Publish).
+When the thumbnail is done and approved → run Agent 05 (Launch & Publish).
 ```

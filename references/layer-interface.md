@@ -98,8 +98,8 @@ notes:                 [free text for the execution layer — optional]
 | `status` | Layer A sets `planned` | Layer B advances `planned → in_production → published` |
 
 If Layer B believes `topic` / `angle` / `video_type` / `cta_lead_magnet` is wrong, it STOPS and
-reports: `"A Brief Card [brief_id] [mező] mezője nem stimmel. Ez stratégiai döntés — futtasd a
-playlist-strategy-orchestrator-t az újratervezéshez."` It does not edit those and continue.
+reports: `"The [field] field of Brief Card [brief_id] is wrong. This is a strategy decision. Run
+playlist-strategy-orchestrator to re-plan."` It does not edit those and continue.
 A missing or weak `primary_keyword` is NOT a reason to stop — Layer B just researches it.
 
 ---
@@ -149,12 +149,12 @@ keyword_map_check:     [1 line confirming no two EPs target the same primary_key
 
 Layer B (`video-production-orchestrator`) resolves the Brief Card at Step 0, first hit wins:
 
-1. **Explicit in the trigger** — `"új videó EP04"` or `"új videó brief: youtube-ownership-ep04"`.
+1. **Explicit in the trigger** — `"new video EP04"` or `"new video brief: youtube-ownership-ep04"`.
 2. **Next `planned` card in sequence** — read `PlaylistStrategy_[Series]`, take the lowest-EP
    card whose `status: planned`. Show it, confirm at Gate 1.
 3. **No PlaylistStrategy doc and no card** → tell the operator:
-   `"Nincs playlist stratégia ehhez a csatornához. Futtasd: 'playlist stratégia'. Vagy egyszeri videó playlist nélkül: 'ad-hoc videó'."`
-4. **`"ad-hoc videó"`** → the ONE sanctioned escape hatch (see §4).
+   `"No playlist strategy for this channel. Run: 'playlist strategy'. Or a one-off video with no playlist: 'ad-hoc video'."`
+4. **`"ad-hoc video"`** → the ONE sanctioned escape hatch (see §4).
 
 ---
 
@@ -162,7 +162,7 @@ Layer B (`video-production-orchestrator`) resolves the Brief Card at Step 0, fir
 
 A single video with no playlist is allowed. It is the exception, not the path.
 
-- Trigger: `"ad-hoc videó"` / `"egyszeri videó"` / `"ad-hoc video"`.
+- Trigger: `"ad-hoc video"` / `"one-off video"`.
 - Layer B generates a **minimal Brief Card inline** by asking the operator 2 things: topic and
   video_type. `primary_keyword` is left blank — Agent 02 §B0 researches it. All other fields:
   `arc: n/a`, `playlist: AD-HOC`, `cta_lead_magnet` = the lead magnet from any `optin_registry.json`
@@ -170,7 +170,7 @@ A single video with no playlist is allowed. It is the exception, not the path.
 - The card is saved to `01_Strategy/` as `Brief_ADHOC_[date]_[slug]` with `status: in_production`.
 - Individual Layer B agents (`agent-02` … `agent-05`) also run fully standalone with no
   orchestrator and no card — they fall back to their own Pre-Flight Drive reads as written
-  in each SKILL.md. "Playlist nélkül, pipeline nélkül" is supported.
+  in each SKILL.md. "No playlist, no pipeline" is supported.
 
 ---
 
@@ -180,7 +180,7 @@ A single video with no playlist is allowed. It is the exception, not the path.
 with a **CONTENT DIRECTION UPDATE** section. That section is an input to Layer A, not to any
 running pipeline. Acting on it means:
 
-- Operator says `"playlist újratervezés"` → `playlist-strategy-orchestrator` re-runs in
+- Operator says `"re-plan the playlist"` → `playlist-strategy-orchestrator` re-runs in
   re-plan mode: reads the latest analytics review, reorders / rewrites the `planned` Brief
   Cards from the current EP onward, bumps `last_replanned`. Already-`published` cards are
   never touched.

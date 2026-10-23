@@ -62,7 +62,7 @@ the Foundation doc, or subfolder IDs. Agents invoked standalone run their own Pr
   `PlaylistStrategy` doc + one **Video Brief Card** per planned video (`status: planned`).
 - **LAYER B — Per-Video Execution** (`skills/execution/`, once per video): consumes ONE Brief
   Card and runs title/desc → script → production core → thumbnail → publish. It never decides
-  strategy. A missing card → run Layer A, or `"ad-hoc videó"` for a playlist-less one-off.
+  strategy. A missing card → run Layer A, or `"ad-hoc video"` for a playlist-less one-off.
 - The **Video Brief Card** is the only thing that crosses the boundary. Layer B may change its
   `status` and nothing else.
 

@@ -145,7 +145,7 @@ fail at this" / "The 3-step system" / "Your next action".
 `create_file(title: "[YYYY-MM-DD]_Agent02_SEO_[topic-slug]", contentMimeType: "text/plain",
 parentId: "[02_SEO_Titles subfolderID]",
 textContent: "[keyword echo from card + 3 titles + description skeleton + tags + hashtags + chapters placeholder]")`.
-Confirm: `"SEO doc saved → [webViewLink] | Erősítsd meg a címet, aztán Agent 03 (script)."`
+Confirm: `"SEO doc saved → [webViewLink] | Confirm the title, then Agent 03 (script)."`
 **Do not paste the document into chat.**
 
 ---
@@ -153,6 +153,6 @@ Confirm: `"SEO doc saved → [webViewLink] | Erősítsd meg a címet, aztán Age
 # §C — AD-HOC / STANDALONE (no Brief Card)
 
 Operator gave a bare topic with no Brief Card, or the `video-production-orchestrator` is on the
-`"ad-hoc videó"` path with a minimal card. This is just §B with no playlist anchor: run B0's
+`"ad-hoc video"` path with a minimal card. This is just §B with no playlist anchor: run B0's
 research from scratch off the topic, then B1-B5. Note in the output doc that there was no
 playlist keyword map behind this one.

@@ -1,6 +1,6 @@
 ---
 name: agent-09-email-list-builder
-description: YouTube-side conversion bridge — connects published videos to the email funnel. Triggers ONLY when the user says "conversion audit", "CTA copy", "description CTA", "CTA descriptions", "opt-in URL kezelés", "check my opt-in rate", or "conversion bridge". Does NOT build lead magnets, landing pages, or GHL automations — that is owned by the email-list-building plugin (list-building-orchestrator). This agent handles: per-video YouTube description CTAs, the permanent opt-in URL file in Drive, and the monthly conversion audit. Outputs save to the active channel's 09_Lead_Magnets/ folder in Google Drive.
+description: YouTube-side conversion bridge — connects published videos to the email funnel. Triggers ONLY when the user says "conversion audit", "CTA copy", "description CTA", "CTA descriptions", "opt-in URL management", "check my opt-in rate", or "conversion bridge". Does NOT build lead magnets, landing pages, or GHL automations — that is owned by the email-list-building plugin (list-building-orchestrator). This agent handles: per-video YouTube description CTAs, the permanent opt-in URL file in Drive, and the monthly conversion audit. Outputs save to the active channel's 09_Lead_Magnets/ folder in Google Drive.
 ---
 
 # Agent 09 — Conversion Bridge (YouTube ↔ Email Funnel)

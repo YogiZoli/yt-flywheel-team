@@ -10,7 +10,7 @@ description: LAYER A (Playlist Strategy) — the strategic brain that decides pl
 **What this agent is NOT:** it is not step 1 of a video pipeline. The Video Production
 Orchestrator does NOT invoke it. By the time a video is produced, Agent 01 has already done
 its job — the Brief Card exists. If a video run finds no Brief Card, the fix is to run
-`playlist-strategy-orchestrator` (or the operator uses `"ad-hoc videó"`), not to call Agent 01
+`playlist-strategy-orchestrator` (or the operator uses `"ad-hoc video"`), not to call Agent 01
 mid-pipeline.
 
 ## Context Block Protocol
@@ -119,7 +119,7 @@ estimated shelf life. Bias toward whatever balances the type mix and honours pro
 **MANDATORY:** write to Drive, share only links.
 
 Confirm:
-`"Playlist frissítve → [PlaylistStrategy link] | Új Brief Card: [brief_id] (status: planned) → [link]. A video-production-orchestrator felveszi, amikor 'új videó'-t mondasz."`
+`"Playlist updated → [PlaylistStrategy link] | New Brief Card: [brief_id] (status: planned) → [link]. video-production-orchestrator picks it up when you say 'new video'."`
 
 ---
 

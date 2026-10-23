@@ -1,6 +1,6 @@
 ---
 name: strategic-launch-orchestrator
-description: Pointer skill (retired as an orchestrator). A playlist launch is TWO separate jobs with two separate owners, and this plugin does not chain them. Traffic side = playlist-strategy-orchestrator (this plugin). Funnel side = the CMO orchestrator / email-list-building plugin (T2). Triggers on the old launch phrases ("playlist launch", "channel launch", "new playlist", "playlist setup", "indítsuk el a playlistet", "teljes launch", "before the first video") and routes the operator to the right one.
+description: Pointer skill (retired as an orchestrator). A playlist launch is TWO separate jobs with two separate owners, and this plugin does not chain them. Traffic side = playlist-strategy-orchestrator (this plugin). Funnel side = the CMO orchestrator / email-list-building plugin (T2). Triggers on the old launch phrases ("playlist launch", "channel launch", "new playlist", "playlist setup", "launch the playlist", "full launch", "before the first video") and routes the operator to the right one.
 ---
 
 # Strategic Launch — Pointer (not an orchestrator any more)
@@ -10,7 +10,7 @@ old design and it is gone. Route the operator:
 
 ## Job 1 — TRAFFIC: the playlist itself
 **Skill:** `playlist-strategy-orchestrator` (this plugin, Layer A).
-Trigger: `"playlist stratégia"` / `"tervezd meg a playlistet"`.
+Trigger: `"playlist strategy"` / `"plan the playlist"`.
 Produces: `PlaylistStrategy_[Series]` doc, one Video Brief Card per planned video, and
 `playlist_brief.json` (the T1 → T2 handoff). Then it stops.
 
@@ -33,5 +33,5 @@ video-production-orchestrator   ◄──optin_registry.json── CMO orchestra
 ```
 
 ## If the operator explicitly wants "everything, in order"
-Tell them: run `"playlist stratégia"` first, then `"start"` for the funnel. Two messages, two
+Tell them: run `"playlist strategy"` first, then `"start"` for the funnel. Two messages, two
 jobs, each resumable on its own. That is the whole launch.

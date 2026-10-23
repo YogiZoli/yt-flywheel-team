@@ -56,7 +56,7 @@ Execute with Drive MCP:
 ## Channel Pin — Switch-Free Mode (conventions.md §7)
 If the connected working folder contains `_Channel_Pin.txt` (`[Channel] | [LANG] | [Folder ID]`),
 the session is HARD-BOUND to that channel. In pinned sessions REFUSE "switch to ..." with:
-"Ez a munkamappa a(z) [Channel] csatornához van rögzítve. Másik csatornához nyisd meg annak mappáját."
+"This working folder is pinned to the [Channel] channel. For another channel, open that channel's folder."
 The `_Active_Channel` pointer is legacy fallback only — pinned sessions never read or write it.
 
 ### 2. "Create new channel" / "Add channel [name]"
@@ -71,8 +71,8 @@ Execute with Drive MCP:
    via `mcp__Desktop_Commander__write_file` create
    `C:\Users\gdp\Documents\Claude\Projects\YouTube\[Channel Name]\_Channel_Pin.txt`
    with content: `[Channel Name] | [LANG] | [channelFolderID]`
-   Tell the operator: "Ehhez a csatornához mindig ezt a mappát kösd be Coworkben —
-   akkor soha nem kell csatornát váltanod."
+   Tell the operator: "Always connect this folder in Cowork for this channel.
+   Then you never need to switch channels."
 7. Confirm: "Channel '[name]' created → [webViewLink]. Pin folder ready. Run Agent 00 (Channel Foundation) next."
 
 ### 3. "Switch to channel [name]" / "Activate channel X"

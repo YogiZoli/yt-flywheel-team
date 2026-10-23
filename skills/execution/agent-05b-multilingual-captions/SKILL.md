@@ -1,6 +1,6 @@
 ---
 name: agent-05b-multilingual-captions
-description: Post-publish multilingual caption generator. Translates English SRT to 25 languages using free Google Translate (no API key, no paid service), saves all SRTs to Drive, uploads to YouTube as subtitle tracks. Triggers after video is published. Phrases: "fordítsd le a feliratot", "multilingual captions", "05b", "caption fordítás", "felirat fordítás", "sub upload", "subtitle upload", "translate captions", "25 nyelv", "fordítás felirat".
+description: Post-publish multilingual caption generator. Translates English SRT to 25 languages using free Google Translate (no API key, no paid service), saves all SRTs to Drive, uploads to YouTube as subtitle tracks. Triggers after video is published. Phrases: "multilingual captions", "05b", "translate captions", "sub upload", "subtitle upload", "25 languages".
 ---
 
 # Agent 05b — Multilingual Caption Generator & Uploader
@@ -36,8 +36,8 @@ Use Drive MCP tools directly — do not ask operator to provide these:
 
 3. **Get video title slug:** Parse from the SRT filename (everything before `_ENG_cc_timestamps`)
 
-4. **Get YouTube video ID:** Ask operator: "Kérem illessze be a YouTube videó URL-jét
-   (pl. https://youtube.com/watch?v=XXXXXXXXXXX)" — extract the `v=` parameter.
+4. **Get YouTube video ID:** Ask operator: "Please paste the YouTube video URL
+   (e.g. https://youtube.com/watch?v=XXXXXXXXXXX)" — extract the `v=` parameter.
 
 ---
 
@@ -212,13 +212,13 @@ If automated upload fails:
 2. Print this message:
 
 ```
-WARNING: Automatikus YouTube upload nem sikerült — de minden fájl kész a Drive-on.
+WARNING: Automatic YouTube upload failed, but all files are ready on Drive.
 
-Manual upload (kb. 5 perc az összes nyelvhez):
-YouTube Studio → Videók → kattints a videóra → "Feliratok" tab
-→ minden nyelvnél: "ADD LANGUAGE" → Upload file → select SRT from Drive → Save
+Manual upload (about 5 minutes for all languages):
+YouTube Studio → Content → click the video → "Subtitles" tab
+→ for each language: "ADD LANGUAGE" → Upload file → select SRT from Drive → Save
 
-Drive mappa (25 SRT fájl): [CAPTIONS_FOLDER_LINK]
+Drive folder (25 SRT files): [CAPTIONS_FOLDER_LINK]
 ```
 
 ---
@@ -266,6 +266,6 @@ Agent 05b is one of three optional post-publish steps (all run independently, in
 
 | Agent | What it does | Trigger phrase |
 |-------|-------------|----------------|
-| **05b** | Multilingual captions — 25 languages, free | "felirat fordítás" / "05b" |
+| **05b** | Multilingual captions — 25 languages, free | "translate captions" / "05b" |
 | 03c | YouTube Shorts — 3-5 clips from long-form | "shortok" |
 | 07  | Repurposing briefs — Reels, LinkedIn, email | "repurpose" |
