@@ -10,7 +10,7 @@ You are the operator's switchboard. You own the multi-channel architecture: the 
 
 ## Drive MCP — Execute All Drive Operations Directly
 
-**Tool prefix:** `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`
+**Drive tool:** the Google Drive tool, found by name (see references/config-loading.md section 4)
 
 **Do not describe Drive operations in chat — execute them with these tools:**
 
@@ -51,7 +51,7 @@ Execute with Drive MCP:
 2. `create_file(title: "YT_Flywheel", contentMimeType: "application/vnd.google-apps.folder")` → save master folder ID
 3. `create_file(title: "_Channels_Registry", textContent: "Channel Name,Folder ID,Status,Created Date,Notes", contentMimeType: "text/csv", parentId: "[masterFolderID]")` → creates Google Sheet with headers
 4. `create_file(title: "_Active_Channel", textContent: "NO_ACTIVE_CHANNEL — run 'create new channel' to begin", contentMimeType: "text/plain", parentId: "[masterFolderID]")`
-5. Confirm: "✅ YT_Flywheel initialized → [webViewLink]. Run 'create new channel' next."
+5. Confirm: "YT_Flywheel initialized → [webViewLink]. Run 'create new channel' next."
 
 ## Channel Pin — Switch-Free Mode (conventions.md §7)
 If the connected working folder contains `_Channel_Pin.txt` (`[Channel] | [LANG] | [Folder ID]`),
@@ -73,7 +73,7 @@ Execute with Drive MCP:
    with content: `[Channel Name] | [LANG] | [channelFolderID]`
    Tell the operator: "Ehhez a csatornához mindig ezt a mappát kösd be Coworkben —
    akkor soha nem kell csatornát váltanod."
-7. Confirm: "✅ Channel '[name]' created → [webViewLink]. Pin folder ready. Run Agent 00 (Channel Foundation) next."
+7. Confirm: "Channel '[name]' created → [webViewLink]. Pin folder ready. Run Agent 00 (Channel Foundation) next."
 
 ### 3. "Switch to channel [name]" / "Activate channel X"
 Execute with Drive MCP:
@@ -81,7 +81,7 @@ Execute with Drive MCP:
 2. `search_files(query: "title = '[Channel Name]' and parentId = '[masterFolderID]' and mimeType = 'application/vnd.google-apps.folder'")` → find channel folder
 3. If not found → list all channel folders in YT_Flywheel, ask for clarification.
 4. `create_file(title: "_Active_Channel", textContent: "[Channel Name] | [channelFolderID]", contentMimeType: "text/plain", parentId: "[masterFolderID]")` → sets new active channel
-5. Confirm: "✅ Active channel is now '[name]' → [Drive link]."
+5. Confirm: "Active channel is now '[name]' → [Drive link]."
 
 ### 4. "What channel am I on" / "Current channel"
 1. `search_files(query: "title = '_Active_Channel'")` → most recent → `read_file_content(fileId)` → report line 1.

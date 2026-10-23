@@ -59,7 +59,7 @@ If any video below 40% retention: 0-30s = hook problem, 30-60s = outcome/structu
 
 **MANDATORY: Do NOT print the review content into chat. Write it to Drive immediately, then share only the link.**
 
-Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`):
+Execute these Drive MCP steps (the Google Drive tool, found by name (see references/config-loading.md section 4)):
 
 1. **Find subfolder:** `search_files(query: "title = '06_Analytics_Reviews' and parentId = '[channelFolderID]'")`  → get subfolder ID
 
@@ -100,4 +100,4 @@ What to avoid: [underperforming type/topic] | Publish time adjustment: [yes/no +
 ```
 
 3. **Confirm to operator** using the `webViewLink` from the response:
-   `"✅ Analytics review saved → [webViewLink] | Run Agent 01 next to plan based on these findings — and Agent 07 for repurposing the breakthrough."`
+   `"Analytics review saved → [webViewLink] | Run Agent 01 next to plan based on these findings — and Agent 07 for repurposing the breakthrough."`

@@ -163,7 +163,7 @@ Section 2: [Name] → Payoff: [what the viewer walks away knowing]
 Section 3: [Name] → Payoff: [what the viewer walks away knowing]
 [add sections as needed]
 
-★ Ownership CTA placement: after Section [X]
+(CTA) Ownership CTA placement: after Section [X]
    Reason: [this is the highest-value payoff — viewer is most receptive here]
    (Handraiser ON → this is Slot 2, the hot ACTION line)
 
@@ -235,7 +235,7 @@ Each section follows this exact pattern — Erhart model:
 - No transitional filler between sections. No "Now let's move on to..." — just start the next section.
 - Banned transitions: "Let's dive in" / "Let's unpack" / "Great, so" / "Moving on"
 
-**The Ownership CTA Rule — applied once, after the highest-value section marked ★ in Phase 1:**
+**The Ownership CTA Rule — applied once, after the highest-value section marked (CTA) in Phase 1:**
 
 After the section where the viewer just received the most value — when they are most satisfied
 and most receptive — add one natural sentence:
@@ -249,7 +249,7 @@ Rules for the Ownership CTA:
 - Feels like a natural extension of the value just delivered, not a break from it.
 - The lead magnet name comes from the Drive 09_Lead_Magnets read.
 - Never: "Like and subscribe" / "Hit the bell" / "Leave a comment below" as CTA.
-- **Handraiser ON → the Handraiser Slot 2 line REPLACES this CTA at the ★ position. See Handraiser CTA Layer.**
+- **Handraiser ON → the Handraiser Slot 2 line REPLACES this CTA at the (CTA) position. See Handraiser CTA Layer.**
 
 ---
 
@@ -332,7 +332,7 @@ Lead-temperature CTA system. Keyword comments trigger an automated reply with a 
 - COLD keyword (default GUIDE) → opt-in page, lead magnet, email list.
 - HOT keyword (default ACTION) → short sales page, personal video + one buy button, immediate purchase.
 
-**When ON, the Handraiser slots REPLACE the standard Ownership CTA (★ position) and the
+**When ON, the Handraiser slots REPLACE the standard Ownership CTA ((CTA) position) and the
 OWN Lead Magnet CTA. Never more than 3 CTAs total per video. Nothing stacks on top.**
 
 ### The three fixed slots
@@ -418,7 +418,7 @@ pauses or rendering artefacts in the final video.
 [spoken text]
 
 [OWNERSHIP CTA — Handraiser OFF | HANDRAISER SLOT 2 — Handraiser ON:
- hot ACTION line + [SCREEN TEXT: Comment "ACTION"] — after ★ section, ~66%]
+ hot ACTION line + [SCREEN TEXT: Comment "ACTION"] — after (CTA) section, ~66%]
 
 [SECTION 3: Name]
 [spoken text]
@@ -505,7 +505,7 @@ handraiser: {
 }
 ```
 
-Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`):
+Execute these Drive MCP steps (the Google Drive tool, found by name (see references/config-loading.md section 4)):
 
 1. **Find subfolder:**
    `search_files(query: "title = '03_Scripts' and parentId = '[channelFolderID]'")`

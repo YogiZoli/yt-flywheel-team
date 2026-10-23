@@ -113,7 +113,7 @@ DESIGN NOTES:
 - Standing rules applied: [list any rules from STANDING_RULES.gdoc]
 
 NANO BANANA 2 BRIEF (PRIMARY AI GENERATION PATH — USE THIS FIRST):
-⚠️ FACE REFERENCE — MANDATORY, NON-NEGOTIABLE:
+WARNING: FACE REFERENCE — MANDATORY, NON-NEGOTIABLE:
 Upload Zoltan's OWN profile photo to Nano Banana 2 as the face reference image.
 NEVER use an AI-generated face. NEVER use a stock model. NEVER generate a face from scratch.
 This applies to Nano Banana 2, Gemini, Midjourney, or ANY image tool — always use the uploaded photo.
@@ -137,7 +137,7 @@ Standing rules accumulate over time — always check current rules before creati
 
 **MANDATORY: Do NOT print the brief content into chat. Write it to Drive immediately, then share only the link.**
 
-Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`):
+Execute these Drive MCP steps (the Google Drive tool, found by name (see references/config-loading.md section 4)):
 
 1. **Find subfolder:** `search_files(query: "title = '04_Thumbnail_Briefs' and parentId = '[channelFolderID]'")`  → get subfolder ID
 
@@ -152,12 +152,12 @@ create_file(
 ```
 
 3. After saving to Drive, present the Nano Banana 2 brief to the operator in chat, then display:
-   "🎨 Thumbnail brief kész ✅ — Generálod Nano Banana 2-vel (ajánlott), vagy Canvával? → 'nano' / 'canva' / 'kész'"
+   "Thumbnail brief kész — Generálod Nano Banana 2-vel (ajánlott), vagy Canvával? → 'nano' / 'canva' / 'kész'"
    Default if no explicit request: Nano Banana 2 path only. Do NOT call Canva MCP unless operator says 'canva'.
 
 ## Canva MCP — Optional (only if operator requests it)
 
-**Only invoke Canva MCP if the operator explicitly says 'canva' or 'mindkettő'.** (tool prefix: `mcp__e0a1ca47-291e-44bf-b717-da5532e324d8`).
+**Only invoke Canva MCP if the operator explicitly says 'canva' or 'mindkettő'.** (Canva tools, found by name; see references/config-loading.md section 4).
 The primary execution path is Nano Banana 2 — the brief + prompt is the deliverable. Canva MCP is a secondary option.
 If Canva MCP times out or fails: log as SKIPPED in the pipeline status, continue. Never block the workflow on Canva.
 
@@ -180,8 +180,8 @@ Example prompt to pass to Canva:
 ### Step 3: Confirm to operator
 After Canva creation (only if requested):
 ```
-✅ Brief mentve Drive-ra → [webViewLink]
-✅ Canva thumbnail generálva → [design link] — tekintsd át, exportáld PNG-ként, töltsd fel YouTube Studioba
+Brief mentve Drive-ra → [webViewLink]
+Canva thumbnail generálva → [design link] — tekintsd át, exportáld PNG-ként, töltsd fel YouTube Studioba
 
 Amikor a thumbnail kész és jóváhagyva → futtasd az Agent 05-öt (Launch & Publish).
 ```

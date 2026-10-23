@@ -115,7 +115,7 @@ Before creating the artifact, collect the following — do NOT ask the operator 
 
 **Cards — two cards required:**
 - Card 1: Playlist card — target = the playlist this video belongs to (from the Video Brief Card). Timestamp = ~20% of estimated video length.
-- Card 2: Video card — target = most recently published video on the channel. Use `mcp__bab7487b-ef77-4f71-a988-c5cfd8566b9a__vidiq_channel_videos` to get the channel's latest video title and URL. If this is the first video on the channel, set Card 2 target to BLANK and note it in the artifact.
+- Card 2: Video card — target = most recently published video on the channel. Use the vidIQ `vidiq_channel_videos` tool (found by name) to get the channel's latest video title and URL. If this is the first video on the channel, set Card 2 target to BLANK and note it in the artifact.
 
 **End Screen — two elements (last 20 seconds of video):**
 - End Screen 1: Subscribe button (always present)
@@ -133,22 +133,22 @@ Use `mcp__cowork__create_artifact` to create a persistent HTML page with all pub
 
 **HTML requirements:**
 - Clean layout: page background `#F6F8FC`, body text `#1E2733`, card surface `#FFFFFF` with `1px #E0E6F0` border (brand v2, see BRAND-GUIDE.md)
-- Page header: "📋 Publishing Pack — [video title]"
+- Page header: "Publishing Pack — [video title]"
 - 10 content sections. Sections 1–4 and 6–9 each have:
   - Bold section label
   - Content in a `<pre>` or `<div>` block with monospace font and light grey background
-  - **Copy button** — use a ROBUST two-method approach: try `navigator.clipboard.writeText()` first; if it fails or is unavailable, fall back to creating a hidden `<textarea>`, selecting its content, and calling `document.execCommand('copy')`. This ensures the button works in all environments without requiring the user to press Ctrl+C. Button briefly shows "✓ Copied!" (green) for 1.5 seconds after click, then resets to "Copy".
+  - **Copy button** — use a ROBUST two-method approach: try `navigator.clipboard.writeText()` first; if it fails or is unavailable, fall back to creating a hidden `<textarea>`, selecting its content, and calling `document.execCommand('copy')`. This ensures the button works in all environments without requiring the user to press Ctrl+C. Button briefly shows "Copied!" (green) for 1.5 seconds after click, then resets to "Copy".
 - Section 5 (SETTINGS) is a visual-only reminder block — amber/yellow tint, no copy button.
 - **Sections in order:**
-  1. **TITLE** — the YouTube video title. Apply emoji prefix rule (from Agent 02): 🇰🇭 for Cambodia videos, 🚀 for money/income/bootstrapping videos. The emoji must be part of the title text so it copies correctly.
+  1. **TITLE** — the YouTube video title. Apply the title prefix rule from Agent 02 (`{channel.title_prefixes}` in the config). The prefix must be part of the title text so it copies correctly.
   2. **DESCRIPTION** — full description text including chapters (chapters show [DRAFT] inline)
   3. **TAGS** — comma-separated list, paste-ready for YouTube Studio. Display a live character counter badge next to the section label (e.g. "498 / 500" in green). Tags MUST be maximized to ~500 characters. Operator workflow: delete all existing tags in YouTube Studio → paste all tags with one Ctrl+V.
   4. **HASHTAGS** — 3 hashtags on one line
   5. **SETTINGS** — styled as a checklist reminder block (amber/yellow background tint, no copy button):
      ```
-     ☑ Not made for kids — select "No, it's not made for kids"
-     ☑ AI-generated content disclosure — check the AI content box
-     ☑ Visibility — set to Unlisted until ready to publish
+     [ ] Not made for kids — select "No, it's not made for kids"
+     [ ] AI-generated content disclosure — check the AI content box
+     [ ] Visibility — set to Unlisted until ready to publish
      ```
   6. **PLAYLIST** — exact playlist name to add this video to (paste into YouTube Studio playlist field)
   7. **CARDS** — paste-ready reference block (added in YouTube Studio → Video Details → Cards):
@@ -163,15 +163,15 @@ Use `mcp__cowork__create_artifact` to create a persistent HTML page with all pub
      ```
   9. **THUMBNAIL** — Google Drive link to thumbnail image exported from Canva (Agent 04 output). Display as a clickable link inside the copy block. If placeholder, show the placeholder text in italics with a distinct orange border on the block.
   10. **CHAPTERS (DRAFT)** — timestamps only, with a visible amber badge `[DRAFT]` next to the section header
-  11. **DESIGN BRIEF** — the full thumbnail brief from Agent 04 (read from `04_Thumbnail_Briefs` subfolder). Styled with a distinct purple/lavender border and background so it stands out. Scrollable if long (max-height ~320px with overflow-y: auto). Has its own Copy button. Label: "🎨 Design Brief" with sub-label "Nano Banana / Canva". This allows the operator to copy the full design brief instantly without searching Google Drive.
+  11. **DESIGN BRIEF** — the full thumbnail brief from Agent 04 (read from `04_Thumbnail_Briefs` subfolder). Styled with a distinct purple/lavender border and background so it stands out. Scrollable if long (max-height ~320px with overflow-y: auto). Has its own Copy button. Label: "Design Brief" with sub-label "Nano Banana / Canva". This allows the operator to copy the full design brief instantly without searching Google Drive.
 
-  12. **POST-PUBLISH ACTIONS** — shown at the bottom of the artifact after the video is published. Dark background section (#111), header "🚀 Post-Publish Menu", subtext "All optional — run in any order after the video is live." Five action buttons in a row, each styled as a pill/chip. On click, each button copies a trigger phrase to clipboard so the operator can paste it into chat:
+  12. **POST-PUBLISH ACTIONS** — shown at the bottom of the artifact after the video is published. Dark background section (#111), header "Post-Publish Menu", subtext "All optional — run in any order after the video is live." Five action buttons in a row, each styled as a pill/chip. On click, each button copies a trigger phrase to clipboard so the operator can paste it into chat:
       - **[S] Shorts** → copies `"shortokat is kérem"` | grey chip
       - **[R] Repurpose** → copies `"repurpose"` | grey chip
       - **[C] Community** → copies `"community post"` | grey chip
       - **[E] Email/Funnel** → copies `"conversion audit"` | grey chip
       - **[M] Captions** → copies `"felirat fordítás"` | green chip (highest SEO ROI — visually distinguished)
-      Below the buttons: small text — "💡 [M] Captions = 25 language SRT upload. Free. ~3 min. Biggest SEO boost."
+      Below the buttons: small text — "[M] Captions = 25 language SRT upload. Free. ~3 min. Biggest SEO boost."
 
 - Footer: small grey text — "Chapters are estimates (130 wpm). After HeyGen video approval, say 'HeyGen jóváhagyva' to finalize."
 - **Save the artifact `id`** from the tool response — required for Phase 2 update.
@@ -269,7 +269,7 @@ Save HeyGen prompt to Drive root (`parentId: 0AG9wJnPFjzalUk9PVA`).
 File naming: `[YYYY-MM-DD]_HeyGen_[title-slug]_Video[ep-number]_v1`
 
 **Phase 1 completion message to operator:**
-`"✅ Publishing Artifact live in chat — all copy buttons ready | ✅ HeyGen prompt saved → [heygen-link] | Paste the HeyGen document into HeyGen Video Agent and start generation. Come back when you've watched and approved the final video: say 'HeyGen jóváhagyva' + any chapter timing corrections. | ✅ Checklist saved → [checklist-link]"`
+`"Publishing Artifact live in chat — all copy buttons ready | HeyGen prompt saved → [heygen-link] | Paste the HeyGen document into HeyGen Video Agent and start generation. Come back when you've watched and approved the final video: say 'HeyGen jóváhagyva' + any chapter timing corrections. | Checklist saved → [checklist-link]"`
 
 ---
 
@@ -285,7 +285,7 @@ Steps:
    - Replace CHAPTERS section content with finalized timestamps
    - Remove the amber [DRAFT] badge from the chapters header
    - Update the DESCRIPTION section to include the finalized chapters (replace the draft placeholder)
-5. Confirm: `"✅ Chapters finalized. Publishing Artifact updated."`
+5. Confirm: `"Chapters finalized. Publishing Artifact updated."`
 6. **Automatically invoke Agent 05b** — do NOT wait for operator to type "felirat fordítás".
    Say: `"▶ Starting Agent 05b — Multilingual Captions (25 languages, free, ~3 min)..."`
    Then invoke `agent-05b-multilingual-captions` skill immediately.
@@ -391,7 +391,7 @@ Captions live in a dedicated subfolder inside the active channel folder:
 
 **MANDATORY: Do NOT print checklist content into chat. Write to Drive immediately, then share only the link.**
 
-Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`):
+Execute these Drive MCP steps (the Google Drive tool, found by name (see references/config-loading.md section 4)):
 
 1. **Find subfolder:** `search_files(query: "title = '05_Publish_Checklists' and parentId = '[channelFolderID]'")`  → get subfolder ID
 

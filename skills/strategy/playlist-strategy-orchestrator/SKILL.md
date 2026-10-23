@@ -72,17 +72,17 @@ BLOCK per conventions.md §1 with `BRIEF_ID: n/a`. Create the status artifact vi
 `mcp__cowork__create_artifact`, update after every step.
 
 ## STATUS ARTIFACT (HTML)
-Shared HTML base from `conventions.md` §2. Header: `🧭 Playlist Strategy`. Step rows:
+Shared HTML base from `conventions.md` §2. Header: `Playlist Strategy`. Step rows:
 
 ```html
-<h2>🧭 Playlist Strategy</h2>
+<h2>Playlist Strategy</h2>
 <div class="ch"><!-- CHANNEL_NAME --> · <!-- DATE --> · <!-- MODE: Fresh | Re-plan --></div>
-<div class="step <!-- S1 -->"><span class="icon">🧠</span>
+<div class="step <!-- S1 -->"><span class="icon"></span>
 <span class="label">S1 — Playlist Concept + Sequence (Agent 01)</span><span class="status"><!-- S1S --></span></div>
 <div class="gate">▸ Gate 1: Approve concept + video sequence</div>
-<div class="step <!-- S2 -->"><span class="icon">🔍</span>
+<div class="step <!-- S2 -->"><span class="icon"></span>
 <span class="label">S2 — Per-Video Keyword Map (Agent 02)</span><span class="status"><!-- S2S --></span></div>
-<div class="step <!-- S3 -->"><span class="icon">🗂️</span>
+<div class="step <!-- S3 -->"><span class="icon"></span>
 <span class="label">S3 — Emit PlaylistStrategy doc + Brief Cards</span><span class="status"><!-- S3S --></span></div>
 ```
 
@@ -111,7 +111,7 @@ Then:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 1 — Playlist koncepció + sorrend
+GATE 1 — Playlist koncepció + sorrend
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Csatorna: [CHANNEL_NAME] ([CHANNEL_LANG])
 Playlist: [series_name] · umbrella keyword: [kw] · [N] videó
@@ -191,7 +191,7 @@ Update artifact S3 → `done`. Then the handback.
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ PLAYLIST STRATÉGIA — KÉSZ
+PLAYLIST STRATÉGIA — KÉSZ
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Csatorna: [CHANNEL_NAME]
 Playlist: [series_name] — [N] videó megtervezve

@@ -19,7 +19,7 @@ Pre-Flight Drive reads it covers. `BRIEF_ID` is `n/a` for this agent — Layer A
 whole playlist. Standalone → run Pre-Flight as written.
 
 ## Pre-Flight (standalone only)
-Drive MCP directly (prefix `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`), do not ask the operator:
+Drive MCP directly (the Google Drive tool, found by name (see references/config-loading.md section 4)), do not ask the operator:
 1. **`_Active_Channel`** → parse `[Channel Name] | [Channel Folder ID]`. Empty → invoke `channel-manager`.
 2. **Foundation:** `00_Foundation` subfolder → most recent doc → Avatar Card + Hero Story + niche.
 3. **Existing strategy:** `01_Strategy/` → any `PlaylistStrategy_*` doc + all `Brief_*` cards. Read them.
@@ -119,7 +119,7 @@ estimated shelf life. Bias toward whatever balances the type mix and honours pro
 **MANDATORY:** write to Drive, share only links.
 
 Confirm:
-`"✅ Playlist frissítve → [PlaylistStrategy link] | Új Brief Card: [brief_id] (status: planned) → [link]. A video-production-orchestrator felveszi, amikor 'új videó'-t mondasz."`
+`"Playlist frissítve → [PlaylistStrategy link] | Új Brief Card: [brief_id] (status: planned) → [link]. A video-production-orchestrator felveszi, amikor 'új videó'-t mondasz."`
 
 ---
 

@@ -16,8 +16,8 @@ Read VIDEO_TYPE from the CONTEXT BLOCK (or the Video Brief Card if standalone). 
   caption style, 9:16 crop guidance). Skip HeyGen prompt generation entirely; the operator
   cuts clips in their editor. Upload Pack and YouTube upload steps are identical.
 **Phase:** POST-PUBLISH ONLY — runs exclusively from the post-publish menu after main video is live on YouTube.
-**⚠️ NEVER auto-trigger from "HeyGen jóváhagyva" or any main pipeline gate.**
-**Position in Flywheel:** YouTube published ✅ → [operator chooses "S" from post-publish menu] → **[03c Shorts Producer]** → Agent 07 (Repurposing / Community modes)
+**WARNING: NEVER auto-trigger from "HeyGen jóváhagyva" or any main pipeline gate.**
+**Position in Flywheel:** YouTube published → [operator chooses "S" from post-publish menu] → **[03c Shorts Producer]** → Agent 07 (Repurposing / Community modes)
 
 ---
 
@@ -82,7 +82,7 @@ For each identified segment, note:
 
 Present selection to operator before writing scripts:
 ```
-🎬 Identified [N] Short candidates:
+Identified [N] Short candidates:
 
 S01 — [Section label] | Hook: "[first sentence]" | ~[word count] words (~[seconds]s)
 S02 — [Section label] | Hook: "[first sentence]" | ~[word count] words (~[seconds]s)
@@ -227,7 +227,7 @@ which number in the batch, and which SEO keyword it targets.
 
 **MANDATORY: Do NOT print full scripts into chat. Write to Drive immediately.**
 
-Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`):
+Execute these Drive MCP steps (the Google Drive tool, found by name (see references/config-loading.md section 4)):
 
 ### 4a: Find or Create `03c_Shorts_Guides/` Subfolder
 
@@ -305,7 +305,7 @@ After all Drive saves succeed, use `mcp__cowork__create_artifact` to create a pe
 
 **HTML requirements:**
 - Dark background (`#0E2038`), white or `#82B0F7` text, green `#24A957` pop (Shorts / Reels brand aesthetic, see BRAND-GUIDE.md)
-- Page header: "🎬 Shorts Production Pack — [parent-slug]"
+- Page header: "Shorts Production Pack — [parent-slug]"
 - One card per Short (S01, S02, S03...)
 - Each card contains:
   - Short title + target duration
@@ -314,7 +314,7 @@ After all Drive saves succeed, use `mcp__cowork__create_artifact` to create a pe
   - Copy button: YouTube title
   - Copy button: YouTube description
   - Copy button: tags
-  - Status badge toggling between "⏳ Generate in HeyGen" and "✅ Done" (click to toggle)
+  - Status badge toggling between "To do: generate in HeyGen" and "Done" (click to toggle)
 - Footer note: "All Shorts generated in HeyGen → say 'Shorts kész, töltsd fel' to upload via Claude in Chrome."
 - Save artifact `id` from response — needed for any future updates.
 
@@ -325,12 +325,12 @@ After all Drive saves succeed, use `mcp__cowork__create_artifact` to create a pe
 After the artifact is live, present this message:
 
 ```
-✅ Shorts Guide → [drive-link]
-✅ HeyGen Prompts ([N] docs) → [drive-folder-link]
-✅ Upload Pack → [drive-link]
-✅ Production Artifact live in chat
+Shorts Guide → [drive-link]
+HeyGen Prompts ([N] docs) → [drive-folder-link]
+Upload Pack → [drive-link]
+Production Artifact live in chat
 
-🎬 HeyGen Production Steps:
+HeyGen Production Steps:
 1. Go to HeyGen → New project → name it exactly:
    SHORTS | [Channel Name] | [parent-slug]
 2. Open each HeyGen Prompt doc from Drive (S01, S02, S03...)
@@ -338,7 +338,7 @@ After the artifact is live, present this message:
 4. Download each generated Short and name each file exactly:
    SHORT_[YYYY-MM-DD]_[parent-slug]_S[NN]_[seo-keyword].mp4
 
-📂 Save all downloaded Shorts to:
+Save all downloaded Shorts to:
    C:\Users\gdp\Documents\Claude\Projects\YouTube\Shorts\[parent-slug]\
 
 When all files are saved → say "Shorts kész, töltsd fel"
@@ -384,13 +384,13 @@ and I'll upload each one directly to YouTube Studio via Claude in Chrome.
 **After all Shorts uploaded — confirm to operator:**
 
 ```
-✅ [N] Shorts uploaded to YouTube!
+[N] Shorts uploaded to YouTube!
 
 S01: [YouTube Shorts URL] — "[title]"
 S02: [YouTube Shorts URL] — "[title]"
 S03: [YouTube Shorts URL] — "[title]"
 
-📌 Recommended next actions:
+Recommended next actions:
 - Pin a comment on each Short: "Full tutorial → [parent video URL]"
 - Reply to early comments within 2 hours (first-hour signals matter for Shorts)
 - Publish Shorts 1–2 days apart — not all at once

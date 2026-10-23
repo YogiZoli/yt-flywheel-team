@@ -16,7 +16,7 @@ description: SHARED SEO skill with two modes. PLAYLIST KEYWORD MODE (Layer A, in
 | Standalone, operator gives a bare topic or says "kutasd ki", no Brief Card | **Ad-hoc one-off** (§C) |
 
 ## vidIQ MCP Check (run silently, all modes)
-Try a lightweight `mcp__bab7487b-ef77-4f71-a988-c5cfd8566b9a` call. Channel ID for Zoltan Gero:
+Try a lightweight vidIQ call (any tool whose name contains `vidiq_`). Channel ID for Zoltan Gero:
 `UCqYcq0O08LNq4SWgg3IvHxg`. Available → use real volume/competition/title scores. Unavailable →
 estimation fallback silently, do not mention it.
 
@@ -87,11 +87,11 @@ Rules (non-negotiable):
 - Under 60 characters (emoji counts as 2). Primary keyword in the first half. Curiosity gap —
   do not spoil the answer. Title + thumbnail = one cohesive promise.
 
-Emoji prefix rules (checked before writing any title):
-- Cambodia video → title starts with 🇰🇭. Money / income / bootstrapping / cost-of-living /
-  revenue / financial-freedom video → title starts with 🚀. One prefix only; if both apply,
-  🇰🇭 wins. No other emoji prefixes unless the operator asks. These copy-paste correctly into
-  YouTube Studio — include them in the title text.
+Title prefix rules (checked before writing any title):
+- Read `{channel.title_prefixes}` from the config (a list of `topic` + `prefix` pairs, in
+  priority order). If the video matches a topic, the title starts with that prefix. One
+  prefix only; the first match wins. Empty list: no prefix. The prefix is part of the title
+  text so it copies into YouTube Studio.
 
 By card `type`: Evergreen → keyword-first, benefit clear. Viral → emotional hook + authority
 hack + curiosity gap. Depth → personal, specific, CTR not the priority.
@@ -145,7 +145,7 @@ fail at this" / "The 3-step system" / "Your next action".
 `create_file(title: "[YYYY-MM-DD]_Agent02_SEO_[topic-slug]", contentMimeType: "text/plain",
 parentId: "[02_SEO_Titles subfolderID]",
 textContent: "[keyword echo from card + 3 titles + description skeleton + tags + hashtags + chapters placeholder]")`.
-Confirm: `"✅ SEO doc saved → [webViewLink] | Erősítsd meg a címet, aztán Agent 03 (script)."`
+Confirm: `"SEO doc saved → [webViewLink] | Erősítsd meg a címet, aztán Agent 03 (script)."`
 **Do not paste the document into chat.**
 
 ---

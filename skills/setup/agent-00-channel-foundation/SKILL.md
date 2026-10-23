@@ -86,7 +86,7 @@ Output: Completed Avatar Card (1 page).
 
 **MANDATORY: Do NOT print the document content into chat. Write it to Drive immediately, then share only the link.**
 
-Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`):
+Execute these Drive MCP steps (the Google Drive tool, found by name (see references/config-loading.md section 4)):
 
 1. **Find subfolder:** `search_files(query: "title = '00_Foundation' and parentId = '[channelFolderID]'")`  → get subfolder ID
 
@@ -101,4 +101,4 @@ create_file(
 ```
 
 3. **Confirm to operator** using the `webViewLink` from the response:
-   `"✅ Foundation document saved → [webViewLink] | You're ready to run Agent 01 (Channel Strategist) for your first video."`
+   `"Foundation document saved → [webViewLink] | You're ready to run Agent 01 (Channel Strategist) for your first video."`

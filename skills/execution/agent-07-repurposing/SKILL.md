@@ -25,7 +25,7 @@ If invoked by an orchestrator with a `=== CONTEXT BLOCK v1/v2 ===` (see plugin
 Standalone invocation → run Pre-Flight as written.
 
 ## Pre-Flight (standalone only)
-Use Drive MCP tools directly (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`):
+Use Drive MCP tools directly (the Google Drive tool, found by name (see references/config-loading.md section 4)):
 1. **Active channel:** `search_files(query: "title = '_Active_Channel'")` → read → parse
    `[Channel Name] | [Channel Folder ID]`. If empty → invoke `channel-manager`.
 2. **Repurposing mode:** pull most recent script from `03_Scripts/`.
@@ -85,7 +85,7 @@ create_file(
   parentId: "[07_Repurposing_Briefs subfolder ID]"
 )
 ```
-3. Confirm: `"✅ Repurposing briefs saved → [webViewLink]"`
+3. Confirm: `"Repurposing briefs saved → [webViewLink]"`
 
 ---
 
@@ -151,4 +151,4 @@ Recommended new video ideas: [list]
    - Community post: `[YYYY-MM-DD]_Agent07_CommunityPost_[type]`
    - Weekly report: `[YYYY-MM-DD]_Agent07_WeeklyReport`
    - TopicLeads: read existing + append + create_file (see Topic Mining above)
-3. Confirm: `"✅ Community assets saved → [links] | Topic leads feed Agent 01 in the next strategy cycle."`
+3. Confirm: `"Community assets saved → [links] | Topic leads feed Agent 01 in the next strategy cycle."`

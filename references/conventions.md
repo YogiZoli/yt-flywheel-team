@@ -73,7 +73,7 @@ padding:12px 16px;margin-top:16px;font-size:13px;display:none}
 .urllabel{color:#22c55e;font-weight:600;margin-bottom:4px}
 .urlval{color:#fff;word-break:break-all}
 </style></head><body>
-<h2><!-- HEADER: 🎬 YT Pipeline | 🚀 Strategic Launch --></h2>
+<h2><!-- HEADER: YT Pipeline | Strategic Launch --></h2>
 <div class="ch"><!-- CHANNEL_NAME --> · <!-- DATE --></div>
 <!-- STEP ROWS: <div class="step STATE"><span class="icon">EMOJI</span>
 <span class="label">LABEL</span><span class="status">STATUS_TEXT</span></div>
@@ -82,14 +82,14 @@ padding:12px 16px;margin-top:16px;font-size:13px;display:none}
 ```
 
 Step classes: `done` / `active` / `waiting` / `skipped` / `pending`
-Status text: `"✓ kész"` / `"→ fut..."` / `"⏸ jóváhagyásra vár"` / `"—"`
+Status text: `"kész"` / `"→ fut..."` / `"jóváhagyásra vár"` / `"—"`
 Create via `mcp__cowork__create_artifact` at Step 0; update via `mcp__cowork__update_artifact` after every step.
 
 ## 3. GATE BLOCK FORMAT
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE [N] — [Gate name]
+GATE [N] — [Gate name]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [instructions]
 Jóváhagyás → "jóváhagyom" / "ok" / "mehet"

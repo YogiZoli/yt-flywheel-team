@@ -20,7 +20,7 @@ If invoked by an orchestrator with a `=== CONTEXT BLOCK v1/v2 ===` (see plugin
 Standalone invocation → run Pre-Flight as written.
 
 ## Pre-Flight (standalone only)
-Use Drive MCP tools directly (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`):
+Use Drive MCP tools directly (the Google Drive tool, found by name (see references/config-loading.md section 4)):
 1. **Active channel:** `search_files(query: "title = '_Active_Channel'")` → read → parse
    `[Channel Name] | [Channel Folder ID]`. If empty → invoke `channel-manager`.
 2. **Playlist strategy:** `search_files(query: "title contains 'PlaylistStrategy' and parentId = '[channelFolderID]'")` → read.
