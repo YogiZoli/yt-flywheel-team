@@ -1,0 +1,4 @@
+# Personal config stays local, only the example is shared
+config/*.yaml
+config/*.yml
+!config/config.example.yaml

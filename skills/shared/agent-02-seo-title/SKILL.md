@@ -1,7 +1,9 @@
 ---
 name: agent-02-seo-title
-description: SHARED SEO skill with two modes. PLAYLIST KEYWORD MODE (Layer A, invoked by playlist-strategy-orchestrator) builds the broad per-video keyword map for a whole playlist at once (overlap between videos is fine, no cannibalization check) — no titles. EXECUTION MODE (Layer B, invoked by video-production-orchestrator with BRIEF_ID) takes one Video Brief Card, runs its own tighter video-specific keyword pass on top of the playlist anchor (deliberate duplicate work — broad vs specific), then produces 3 title variants, description skeleton, tags, hashtags and a chapters placeholder. It never stops if the card has no keyword — it researches from scratch. Trigger phrases: "give me a title", "playlist kulcsszavak", "keyword map", "SEO for my video", "write the description".
+description: SHARED SEO skill with two modes. PLAYLIST KEYWORD MODE (Layer A, invoked by playlist-strategy-orchestrator) builds the broad per-video keyword map for a whole playlist at once (overlap between videos is fine, no cannibalization check) — no titles. EXECUTION MODE (Layer B, invoked by video-production-orchestrator with BRIEF_ID) takes one Video Brief Card, runs its own tighter video-specific keyword pass on top of the playlist anchor (deliberate duplicate work — broad vs specific), then produces 3 title variants, description skeleton, tags, hashtags and a chapters placeholder. It never stops if the card has no keyword — it researches from scratch. Trigger phrases: "give me a title", "playlist keywords", "keyword map", "SEO for my video", "write the description".
 ---
+
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
 
 # Agent 02 — SEO & Title (SHARED — Layer A keyword map / Layer B title work)
 **Playbook modules:** 6 (SEO, Title & Optimization).
@@ -11,13 +13,13 @@ description: SHARED SEO skill with two modes. PLAYLIST KEYWORD MODE (Layer A, in
 
 | Signal | Mode |
 |---|---|
-| Brief says "Playlist Keyword Mode", or trigger is "playlist kulcsszavak" / "keyword map" | **Playlist Keyword Mode** (§A) |
+| Brief says "Playlist Keyword Mode", or trigger is "playlist keywords" / "keyword map" | **Playlist Keyword Mode** (§A) |
 | CONTEXT BLOCK has `BRIEF_ID` set, or a single Video Brief Card is the input | **Execution Mode** (§B) |
 | Standalone, operator gives a bare topic or says "kutasd ki", no Brief Card | **Ad-hoc one-off** (§C) |
 
 ## vidIQ MCP Check (run silently, all modes)
-Try a lightweight `mcp__bab7487b-ef77-4f71-a988-c5cfd8566b9a` call. Channel ID for Zoltan Gero:
-`UCqYcq0O08LNq4SWgg3IvHxg`. Available → use real volume/competition/title scores. Unavailable →
+Try a lightweight vidIQ call (any tool whose name contains `vidiq_`). Channel ID:
+`{channel.youtube_id}` from the config. Available → use real volume/competition/title scores. Unavailable →
 estimation fallback silently, do not mention it.
 
 ## Pre-Flight (standalone only)
@@ -87,11 +89,11 @@ Rules (non-negotiable):
 - Under 60 characters (emoji counts as 2). Primary keyword in the first half. Curiosity gap —
   do not spoil the answer. Title + thumbnail = one cohesive promise.
 
-Emoji prefix rules (checked before writing any title):
-- Cambodia video → title starts with 🇰🇭. Money / income / bootstrapping / cost-of-living /
-  revenue / financial-freedom video → title starts with 🚀. One prefix only; if both apply,
-  🇰🇭 wins. No other emoji prefixes unless the operator asks. These copy-paste correctly into
-  YouTube Studio — include them in the title text.
+Title prefix rules (checked before writing any title):
+- Read `{channel.title_prefixes}` from the config (a list of `topic` + `prefix` pairs, in
+  priority order). If the video matches a topic, the title starts with that prefix. One
+  prefix only; the first match wins. Empty list: no prefix. The prefix is part of the title
+  text so it copies into YouTube Studio.
 
 By card `type`: Evergreen → keyword-first, benefit clear. Viral → emotional hook + authority
 hack + curiosity gap. Depth → personal, specific, CTR not the priority.
@@ -145,7 +147,7 @@ fail at this" / "The 3-step system" / "Your next action".
 `create_file(title: "[YYYY-MM-DD]_Agent02_SEO_[topic-slug]", contentMimeType: "text/plain",
 parentId: "[02_SEO_Titles subfolderID]",
 textContent: "[keyword echo from card + 3 titles + description skeleton + tags + hashtags + chapters placeholder]")`.
-Confirm: `"✅ SEO doc saved → [webViewLink] | Erősítsd meg a címet, aztán Agent 03 (script)."`
+Confirm: `"SEO doc saved → [webViewLink] | Confirm the title, then Agent 03 (script)."`
 **Do not paste the document into chat.**
 
 ---
@@ -153,6 +155,6 @@ Confirm: `"✅ SEO doc saved → [webViewLink] | Erősítsd meg a címet, aztán
 # §C — AD-HOC / STANDALONE (no Brief Card)
 
 Operator gave a bare topic with no Brief Card, or the `video-production-orchestrator` is on the
-`"ad-hoc videó"` path with a minimal card. This is just §B with no playlist anchor: run B0's
+`"ad-hoc video"` path with a minimal card. This is just §B with no playlist anchor: run B0's
 research from scratch off the topic, then B1-B5. Note in the output doc that there was no
 playlist keyword map behind this one.

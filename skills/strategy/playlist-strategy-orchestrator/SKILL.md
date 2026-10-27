@@ -1,13 +1,15 @@
 ---
 name: playlist-strategy-orchestrator
-description: LAYER A controller — designs a whole YouTube playlist and emits the per-video Video Brief Cards that the execution layer consumes, plus the playlist_brief.json handoff for the T2 funnel team. Runs once per playlist, plus re-plan runs after an analytics review. Triggers ONLY when the user says "playlist stratégia", "playlist strategy", "tervezd meg a playlistet", "plan the playlist", "playlist koncepció", "playlist újratervezés", "re-plan the playlist", or "playlist brief". Chain: Agent 01 (Playlist Mode) → Agent 02 (Playlist Keyword Mode) → emit PlaylistStrategy doc + one Video Brief Card per planned video + playlist_brief.json, then STOP. Does NOT build the funnel (T2: CMO orchestrator / email-list-building reads playlist_brief.json on its own) and does NOT produce any single video (video-production-orchestrator).
+description: LAYER A controller — designs a whole YouTube playlist and emits the per-video Video Brief Cards that the execution layer consumes, plus the playlist_brief.json handoff for the T2 funnel team. Runs once per playlist, plus re-plan runs after an analytics review. Triggers ONLY when the user says "playlist strategy", "plan the playlist", "playlist concept", "re-plan the playlist", or "playlist brief". Chain: Agent 01 (Playlist Mode) → Agent 02 (Playlist Keyword Mode) → emit PlaylistStrategy doc + one Video Brief Card per planned video + playlist_brief.json, then STOP. Does NOT build the funnel (T2: the funnel skill from the config reads playlist_brief.json on its own) and does NOT produce any single video (video-production-orchestrator).
 ---
+
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
 
 # Playlist Strategy Orchestrator (Layer A)
 **Role:** Channel/playlist-level decision controller. Decides the whole playlist ONCE, then
 emits the interface artifacts the execution layer runs on.
 **Never does:** funnel building, lead magnet content, a single video's SEO title / script /
-thumbnail / publish. Those are Layer B and the email-list-building plugin.
+thumbnail / publish. Those are Layer B and the funnel skill (`{integrations.funnel_skill}`).
 
 **Output = the interface (see `references/layer-interface.md`):**
 - one `PlaylistStrategy_[SeriesName]` doc (umbrella concept + ordered sequence)
@@ -34,8 +36,8 @@ for this orchestrator (Layer A operates on the whole playlist, not one card).
 
 | Mode | Trigger | What it does |
 |---|---|---|
-| **Fresh** | "playlist stratégia", "tervezd meg a playlistet" | Full run: concept → keyword map → doc + all Brief Cards |
-| **Re-plan** | "playlist újratervezés" | Reads the latest `06_Analytics_Reviews/` doc, rewrites/reorders only the `planned` Brief Cards from the current EP onward, bumps `last_replanned`. Never touches `published` cards. |
+| **Fresh** | "playlist strategy", "plan the playlist" | Full run: concept → keyword map → doc + all Brief Cards |
+| **Re-plan** | "re-plan the playlist" | Reads the latest `06_Analytics_Reviews/` doc, rewrites/reorders only the `planned` Brief Cards from the current EP onward, bumps `last_replanned`. Never touches `published` cards. |
 
 ---
 
@@ -45,7 +47,7 @@ for this orchestrator (Layer A operates on the whole playlist, not one card).
 1. **Pin file** `_Channel_Pin.txt` in the connected folder → `[Channel] | [LANG] | [Folder ID]` →
    session HARD-BOUND: use these values, write all public copy in [LANG], REFUSE "switch", do
    NOT read `_Active_Channel`.
-2. **Explicit channel in trigger** ("playlist stratégia @VoxFlow") → resolve that folder ID.
+2. **Explicit channel in trigger** ("playlist strategy @<channel>") → resolve that folder ID.
 3. **Legacy fallback:** `search_files(query: "title = '_Active_Channel'")` → parse line 1.
    Show a prominent channel badge (name + language) in the artifact and at Gate 1.
 4. Nothing resolves → invoke `channel-manager` first.
@@ -62,9 +64,9 @@ review, tell the operator and ask whether to proceed on judgement alone.
 
 ### 0d. Check existing strategy
 `search_files(query: "title contains 'PlaylistStrategy' and parentId = '[01_Strategy subfolderID]'")`.
-- **Fresh mode + strategy exists** → show it, ask: "Van már playlist stratégia: [name].
-  Új playlistet indítunk, vagy ezt tervezzük újra? → 'új' / 'újratervezés'".
-- **Re-plan mode + no strategy** → "Nincs mit újratervezni. Előbb: 'playlist stratégia'." Stop.
+- **Fresh mode + strategy exists** → show it, ask: "A playlist strategy already exists: [name].
+  Start a new playlist, or re-plan this one? → 'new' / 're-plan'".
+- **Re-plan mode + no strategy** → "Nothing to re-plan. First: 'playlist strategy'." Stop.
 
 ### 0e. Build CONTEXT BLOCK + create Status Artifact
 Resolve all subfolder IDs in one `search_files(parentId=channel)` call. Assemble the CONTEXT
@@ -72,17 +74,17 @@ BLOCK per conventions.md §1 with `BRIEF_ID: n/a`. Create the status artifact vi
 `mcp__cowork__create_artifact`, update after every step.
 
 ## STATUS ARTIFACT (HTML)
-Shared HTML base from `conventions.md` §2. Header: `🧭 Playlist Strategy`. Step rows:
+Shared HTML base from `conventions.md` §2. Header: `Playlist Strategy`. Step rows:
 
 ```html
-<h2>🧭 Playlist Strategy</h2>
+<h2>Playlist Strategy</h2>
 <div class="ch"><!-- CHANNEL_NAME --> · <!-- DATE --> · <!-- MODE: Fresh | Re-plan --></div>
-<div class="step <!-- S1 -->"><span class="icon">🧠</span>
+<div class="step <!-- S1 -->"><span class="icon"></span>
 <span class="label">S1 — Playlist Concept + Sequence (Agent 01)</span><span class="status"><!-- S1S --></span></div>
 <div class="gate">▸ Gate 1: Approve concept + video sequence</div>
-<div class="step <!-- S2 -->"><span class="icon">🔍</span>
+<div class="step <!-- S2 -->"><span class="icon"></span>
 <span class="label">S2 — Per-Video Keyword Map (Agent 02)</span><span class="status"><!-- S2S --></span></div>
-<div class="step <!-- S3 -->"><span class="icon">🗂️</span>
+<div class="step <!-- S3 -->"><span class="icon"></span>
 <span class="label">S3 — Emit PlaylistStrategy doc + Brief Cards</span><span class="status"><!-- S3S --></span></div>
 ```
 
@@ -111,15 +113,15 @@ Then:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 1 — Playlist koncepció + sorrend
+GATE 1 — Playlist concept + order
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Csatorna: [CHANNEL_NAME] ([CHANNEL_LANG])
-Playlist: [series_name] · umbrella keyword: [kw] · [N] videó
+Playlist: [series_name] · umbrella keyword: [kw] · [N] videos
 Sorrend: EP01 [topic] … EP[N] [topic]
 
-Jóváhagyás → "jóváhagyom" / "ok" / "mehet"
-Módosítás → "módosítsd: [mi változzon]" (pl. "EP03 és EP05 cserélj", "EP07 legyen Depth")
-Teljes újragenerálás → "újra"
+Approve → "approve" / "ok" / "go"
+Change → "change: [what to change]" (e.g. "swap EP03 and EP05", "EP07 should be Depth")
+Full regeneration → "redo"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -162,7 +164,7 @@ Every field comes from S1 + S2 — no blanks except genuinely optional ones.
 
 ### 3c. `playlist_brief.json` — the T1 → T2 handoff (`layer-interface.md` §7)
 Write it to `01_Strategy/` so the T2 funnel team can start independently. **Then stop — do NOT
-invoke any T2 skill.** T2 (CMO orchestrator / email-list-building) reads this file on its own.
+invoke any T2 skill.** T2 (the funnel skill in `{integrations.funnel_skill}`) reads this file on its own.
 ```
 create_file(title: "playlist_brief", contentMimeType: "application/json",
 parentId: "[01_Strategy subfolderID]", textContent:
@@ -191,24 +193,24 @@ Update artifact S3 → `done`. Then the handback.
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ PLAYLIST STRATÉGIA — KÉSZ
+PLAYLIST STRATEGY — DONE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Csatorna: [CHANNEL_NAME]
-Playlist: [series_name] — [N] videó megtervezve
+Playlist: [series_name] — [N] videos planned
 
 DRIVE:
 → PlaylistStrategy_[SeriesName]: [webViewLink]
-→ [N] Video Brief Card: Brief_[slug]_EP01 … EP[N]  (mind: status = planned)
-→ playlist_brief.json: [webViewLink]  (a T2 funnel csapat ezt olvassa)
+→ [N] Video Brief Card: Brief_[slug]_EP01 … EP[N]  (all: status = planned)
+→ playlist_brief.json: [webViewLink]  (the T2 funnel skill reads this)
 
-KÖVETKEZŐ LÉPÉS (két külön feladat, nem láncoljuk itt):
-- FUNNEL (traffic célpont): mondd "start" vagy "lead magnet"
-  → a T2 CMO orchestrator / email-list-building felveszi a playlist_brief.json-t,
-    felépíti a lead magnetet + landing oldalt, és kiírja az optin_registry.json-t
-- VIDEÓGYÁRTÁS: mondd "új videó"
-  → a video-production-orchestrator felveszi az EP01 Brief Cardot; az opt-in URL-t
-    az optin_registry.json-ból olvassa, ha a T2 már kész (ha nem, placeholderrel megy)
-- Analytics után átrendezés: "playlist újratervezés"
+NEXT STEP (two separate jobs, not chained here):
+- FUNNEL (traffic target): say "start" or "lead magnet"
+  → the T2 funnel skill (`{integrations.funnel_skill}`) picks up playlist_brief.json,
+    builds the lead magnet + landing page and writes optin_registry.json
+- VIDEO PRODUCTION: say "new video"
+  → video-production-orchestrator picks up the EP01 Brief Card; it
+    reads it from optin_registry.json if T2 is done (if not, it uses a placeholder)
+- Reorder after analytics: "re-plan the playlist"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 

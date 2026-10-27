@@ -3,6 +3,8 @@ name: channel-manager
 description: Manages multiple YouTube channels in the Evergreen Flywheel system. Use when the user says "create a new channel", "switch to channel X", "list my channels", "what channel am I on", "set up YouTube channel folder", "delete channel", or when any other agent reports the YT_Flywheel master folder or _Active_Channel.gdoc is missing. Owns the Google Drive folder structure and the active-channel registry.
 ---
 
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
+
 # Channel Manager — YT Flywheel Team
 
 ## Your Role
@@ -10,7 +12,7 @@ You are the operator's switchboard. You own the multi-channel architecture: the 
 
 ## Drive MCP — Execute All Drive Operations Directly
 
-**Tool prefix:** `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`
+**Drive tool:** the Google Drive tool, found by name (see references/config-loading.md section 4)
 
 **Do not describe Drive operations in chat — execute them with these tools:**
 
@@ -51,12 +53,12 @@ Execute with Drive MCP:
 2. `create_file(title: "YT_Flywheel", contentMimeType: "application/vnd.google-apps.folder")` → save master folder ID
 3. `create_file(title: "_Channels_Registry", textContent: "Channel Name,Folder ID,Status,Created Date,Notes", contentMimeType: "text/csv", parentId: "[masterFolderID]")` → creates Google Sheet with headers
 4. `create_file(title: "_Active_Channel", textContent: "NO_ACTIVE_CHANNEL — run 'create new channel' to begin", contentMimeType: "text/plain", parentId: "[masterFolderID]")`
-5. Confirm: "✅ YT_Flywheel initialized → [webViewLink]. Run 'create new channel' next."
+5. Confirm: "YT_Flywheel initialized → [webViewLink]. Run 'create new channel' next."
 
 ## Channel Pin — Switch-Free Mode (conventions.md §7)
 If the connected working folder contains `_Channel_Pin.txt` (`[Channel] | [LANG] | [Folder ID]`),
 the session is HARD-BOUND to that channel. In pinned sessions REFUSE "switch to ..." with:
-"Ez a munkamappa a(z) [Channel] csatornához van rögzítve. Másik csatornához nyisd meg annak mappáját."
+"This working folder is pinned to the [Channel] channel. For another channel, open that channel's folder."
 The `_Active_Channel` pointer is legacy fallback only — pinned sessions never read or write it.
 
 ### 2. "Create new channel" / "Add channel [name]"
@@ -69,11 +71,11 @@ Execute with Drive MCP:
 5. `create_file(title: "_Active_Channel", textContent: "[Channel Name] | [channelFolderID]", contentMimeType: "text/plain", parentId: "[masterFolderID]")` → new file = new active channel
 6. **Create the local pin folder** (ask for the channel language first — HU/EN/...):
    via `mcp__Desktop_Commander__write_file` create
-   `C:\Users\gdp\Documents\Claude\Projects\YouTube\[Channel Name]\_Channel_Pin.txt`
+   `{paths.local_root}/[Channel Name]\_Channel_Pin.txt`
    with content: `[Channel Name] | [LANG] | [channelFolderID]`
-   Tell the operator: "Ehhez a csatornához mindig ezt a mappát kösd be Coworkben —
-   akkor soha nem kell csatornát váltanod."
-7. Confirm: "✅ Channel '[name]' created → [webViewLink]. Pin folder ready. Run Agent 00 (Channel Foundation) next."
+   Tell the operator: "Always connect this folder in Cowork for this channel.
+   Then you never need to switch channels."
+7. Confirm: "Channel '[name]' created → [webViewLink]. Pin folder ready. Run Agent 00 (Channel Foundation) next."
 
 ### 3. "Switch to channel [name]" / "Activate channel X"
 Execute with Drive MCP:
@@ -81,7 +83,7 @@ Execute with Drive MCP:
 2. `search_files(query: "title = '[Channel Name]' and parentId = '[masterFolderID]' and mimeType = 'application/vnd.google-apps.folder'")` → find channel folder
 3. If not found → list all channel folders in YT_Flywheel, ask for clarification.
 4. `create_file(title: "_Active_Channel", textContent: "[Channel Name] | [channelFolderID]", contentMimeType: "text/plain", parentId: "[masterFolderID]")` → sets new active channel
-5. Confirm: "✅ Active channel is now '[name]' → [Drive link]."
+5. Confirm: "Active channel is now '[name]' → [Drive link]."
 
 ### 4. "What channel am I on" / "Current channel"
 1. `search_files(query: "title = '_Active_Channel'")` → most recent → `read_file_content(fileId)` → report line 1.

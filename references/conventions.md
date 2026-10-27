@@ -19,6 +19,7 @@ Agents invoked standalone (no context block) run their own Pre-Flight as written
 
 ```
 === CONTEXT BLOCK v2 ===
+CONFIG_PATH: [path of the loaded config, see config-loading.md; agents use its values]
 CHANNEL_NAME: [name]
 CHANNEL_LANG: [HU | EN | ... — from _Channel_Pin.txt; drives ALL public-facing copy language]
 CHANNEL_FOLDER_ID: [Drive folder ID]
@@ -73,7 +74,7 @@ padding:12px 16px;margin-top:16px;font-size:13px;display:none}
 .urllabel{color:#22c55e;font-weight:600;margin-bottom:4px}
 .urlval{color:#fff;word-break:break-all}
 </style></head><body>
-<h2><!-- HEADER: 🎬 YT Pipeline | 🚀 Strategic Launch --></h2>
+<h2><!-- HEADER: YT Pipeline | Strategic Launch --></h2>
 <div class="ch"><!-- CHANNEL_NAME --> · <!-- DATE --></div>
 <!-- STEP ROWS: <div class="step STATE"><span class="icon">EMOJI</span>
 <span class="label">LABEL</span><span class="status">STATUS_TEXT</span></div>
@@ -82,19 +83,19 @@ padding:12px 16px;margin-top:16px;font-size:13px;display:none}
 ```
 
 Step classes: `done` / `active` / `waiting` / `skipped` / `pending`
-Status text: `"✓ kész"` / `"→ fut..."` / `"⏸ jóváhagyásra vár"` / `"—"`
+Status text: `"done"` / `"running..."` / `"waiting for approval"` / `"skipped"`
 Create via `mcp__cowork__create_artifact` at Step 0; update via `mcp__cowork__update_artifact` after every step.
 
 ## 3. GATE BLOCK FORMAT
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE [N] — [Gate name]
+GATE [N] — [Gate name]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [instructions]
-Jóváhagyás → "jóváhagyom" / "ok" / "mehet"
-Módosítás → "módosítsd: [mi változzon]"
-Teljes újragenerálás → "újra"
+Approve → "approve" / "ok" / "go"
+Change → "change: [what to change]"
+Full regeneration → "redo"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -105,26 +106,26 @@ Never proceed past a gate without an explicit operator response.
 | Command | Action |
 |---------|--------|
 | `"skip"` / `"skip S[N]"` | Skip current/named step, keep existing Drive output |
-| `"újra"` / `"újra [N]"` | Re-run current/named step from scratch |
+| `"redo"` / `"redo [N]"` | Re-run current/named step from scratch |
 | `"hol tartunk"` | Show status artifact |
-| `"mi van még"` | List remaining steps |
-| `"állj meg"` | Pause, note current position |
-| `"manuális [N]"` | Output manual instructions instead of automating |
+| `"what is left"` | List remaining steps |
+| `"stop"` | Pause, note current position |
+| `"manual [N]"` | Output manual instructions instead of automating |
 
 ## 5. RESUME LOGIC
 
 On start, scan Drive for partial completion. Present found/missing per step, then:
 ```
-Folytatás a következő hiányzó lépéstől? → "igen"
-Elölről kezdés → "újrakezdem"
-Adott lépés újrafuttatása → "újra [N]"
+Continue from the next missing step? → "yes"
+Start over → "start over"
+Re-run a given step → "redo [N]"
 ```
 Skip already-completed steps by default. Always show what is being skipped.
 
 ## 6. ERROR HANDLING
 
 1. Surface every error explicitly — never skip silently.
-2. Present: `"[Step N] hibát jelzett: [error]. Próbáljuk újra? → 'igen' / 'átugrás'"`
+2. Present: `"[Step N] reported an error: [error]. Try again? → 'yes' / 'skip'"`
 3. On retry: re-invoke the same agent skill from its start.
 4. On skip: mark step SKIPPED (not DONE) in artifact, continue with existing Drive output.
 5. Tool-specific fallbacks: GHL MCP fails → structured brief + manual GHL UI steps.
@@ -140,13 +141,13 @@ first hit wins, run at Step 0a of every orchestrator and in every standalone age
 1. **Pin file in the connected working folder** (HIGHEST priority):
    look for `_Channel_Pin.txt` in the Cowork session's connected folder (and its root).
    Format, line 1: `[Channel Name] | [LANG] | [Channel Drive Folder ID]`
-   Example: `VoxFlow | HU | 1AbC...xyz`
+   Example: `My Channel | EN | 1AbC...xyz`
    If found → the session is HARD-BOUND to this channel:
    - All outputs go to this channel's Drive folder. All copy is written in [LANG].
    - `"switch to ..."` commands are REFUSED in this session with:
-     "Ez a munkamappa a(z) [Channel] csatornához van rögzítve. Másik csatornához nyisd meg annak mappáját."
+     "This working folder is pinned to the [Channel] channel. For another channel, open that channel's folder."
    - Do NOT read `_Active_Channel` at all.
-2. **Explicit channel in the trigger message** (e.g. "új videó @VoxFlow") → use it for this run.
+2. **Explicit channel in the trigger message** (e.g. "new video @<channel>") → use it for this run.
 3. **`_Active_Channel` pointer on Drive** (legacy fallback) → allowed, but the orchestrator MUST
    display a prominent channel badge (name + language) in the status artifact AND in the first
    gate message, so the operator always sees which channel is live.
@@ -157,6 +158,6 @@ questions, ever. Internal chat with the operator follows the operator's language
 
 Per-channel setup (one-time, channel-manager does it on "create new channel"):
 - Drive: `YT_Flywheel/[Channel]/` structure (as before)
-- Local: `C:\Users\gdp\Documents\Claude\Projects\YouTube\[Channel]\` working folder
+- Local: `{paths.local_root}/[Channel]/` working folder
   containing `_Channel_Pin.txt` — the operator connects THIS folder in Cowork sessions
   dedicated to that channel.

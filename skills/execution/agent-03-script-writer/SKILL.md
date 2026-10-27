@@ -3,36 +3,18 @@ name: agent-03-script-writer
 description: Use this agent to write YouTube video scripts using the Ownership Framework (OPEN → TEACH → OWN). Triggers when the user says "write my script", "script for my video", "Ownership Framework", "write the video", or provides a confirmed title and asks for the full script. Requires confirmed title from Agent 02 before starting. PHASE 1 outputs structure + chapters for operator approval. PHASE 2 writes the full script only after approval. Includes the Handraiser CTA Layer (GUIDE/ACTION keyword comment CTAs, default ON). Outputs save to the active channel's 03_Scripts/ folder in Google Drive.
 ---
 
-## BRAND GUIDE DIGEST — Zoltan Gero (v2)
-Brand: lásd BRAND-GUIDE.md, gép-értékek tokens.css. Kánon: git@github.com:YogiZoli/design-system.git (helyi: C:/Users/gdp/projects/design-system).
-Apply to all visual and copy output without exception.
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
 
-**COLOURS**
-Brand azure `#1E7CE8`: links, header, logo mark, dark-section headings, focus ring.
-Primary CTA: green `#0E8542` solid fill, white text (about 4.7:1), slow green pulse. The CTA is the only place green is used.
-Secondary button: azure `#1663C6` solid fill, white text (about 5.8:1).
-Page background `#F6F8FC` · surface or card `#FFFFFF` · body text `#1E2733` · muted text `#6A7688` · border `#E0E6F0`.
-Dark section or footer `#0E2038`, text on it `#FFFFFF` or `#82B0F7`.
-Thumbnails, Shorts, Reels: dark `#0E2038` or `#15355F` background, white or `#82B0F7` headline, green `#24A957` pop, max 5 words.
-Status only, kept off the brand hues: success `#0B7A3E` · warning `#E5A400` · danger `#E5484D`.
-Rules: every button is a solid fill with white text at 4.5:1 or better. Never dark text on a mid-tone fill. Never more than 3 brand colours per design unit. Never invent a colour, use the tokens.
+## BRAND GUIDE (from config)
+Step 0: load the config (`references/config-loading.md`). If `{brand.guide_path}` is set, read it
+and apply it to all visual and copy output without exception. It overrides the defaults below.
 
-**TYPOGRAPHY**
-Font: Open Sans (Google Fonts, wght 400;500;600;700;800). Fallback: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif. Data and code: Geist Mono. Base 18px.
-Display: 800, 62px (max 5 words) | H1: 700, 40px | H2: 700, 32px | H3: 700, 22px | Body: 400, 18px | CTA label: 600, 16 to 18px, white on solid.
-Rules: max 2 weights per design unit. No ALL CAPS beyond a 3-word label. No justified text. Nothing below 13px.
-
-**TONE OF VOICE**
-Pillars: Clear · Concise · Empowering · Forward-thinking · Warm but Direct.
-Sentence: 12 to 18 words avg. Paragraphs: max 3 sentences. CTA: max 8 words, active verb first.
-DO: "AI agents can run your whole content system, automatically."
-DON'T: "Leverage agentic workflows to optimise throughput." / "Just hustle harder."
-Use: AI agents · evergreen income · free traffic · flywheel · Purposeful/Peaceful/Profitable/Abundant
-Avoid: hack · trick · easy · hustle · revolutionary · very/really/basically/actually
-
-**DON'TS**
-Never dark text on a mid-tone button (white on solid, 4.5:1 or better) | Never more than 3 brand colours per unit | Never paragraphs longer than 3 sentences | Never passive voice in headlines or CTAs | Never ALL CAPS beyond a 3-word label | Never a font other than Open Sans without an explicit request | Never machine-translate Hungarian, re-voice it | Never an emoji, never a horizontal dash between words
-
+**Defaults when no brand guide is set**
+- Max 3 colours per design unit. Buttons: solid fill, white text, contrast 4.5:1 or better.
+- One sans-serif font, max 2 weights per design unit, nothing below 13px, no justified text.
+- Tone: clear, concise, direct. Sentences 12 to 18 words, paragraphs max 3 sentences.
+- CTA: max 8 words, active verb first. No passive voice in headlines or CTAs.
+- No ALL CAPS beyond a 3-word label. No hype words (hack, trick, easy, revolutionary).
 ---
 
 # Agent 03 — Script Writer (Ownership Framework · Master Script)
@@ -77,10 +59,8 @@ Use Drive MCP tools directly for all reads — do not ask the operator to paste 
 
 This is not a collection of standalone videos. The viewer who watches EP.01 is being guided, episode by episode, toward a transformation and an offer. Each script must reflect this arc.
 
-**Three playlist families (Zoltan's system):**
-- "YouTube for REAL Ownership" — catches people searching YouTube strategy; converts them to email list; introduces GHL as the real business engine. Lead Magnet: LM1b (YouTube Playbook PDF) + LM3 (YT Dream Team with GHL trial).
-- "From Freelancer to REAL Ownership" — catches freelancers, online professionals, agency owners, course creators; guides them from gig-to-gig toward the ownership OS. Lead Magnet: LM1a (Ownership Playbook PDF) + LM2 (Survey).
-- "GoHighLevel for Online Professionals" — catches people already researching GHL or arriving warm from the other two playlists; converts to GHL free trial + Snapshot. Lead Magnet: LM1a + LM3.
+**Playlist families:** read `{channel.playlist_families}` from the config (name, audience, lead magnet). If empty, use the PlaylistStrategy doc. Shape of one entry:
+- "[Family name]": who it catches, where it leads them. Lead Magnet: [LM id].
 
 **Script rules for playlist-aware writing:**
 - Opening episodes (EP 1–2): Establish the problem. Don't jump to the solution. Let the tension build. The "Next Video" CTA is the hook that pulls them to EP.02.
@@ -115,7 +95,7 @@ After Drive reads, ask the operator exactly this — one message:
 Wait for the answer. If both research/voice answers are No and the operator says OK, go straight to Phase 1 with the Handraiser default plan active.
 
 **Handraiser intake rules:**
-- Handraiser is DEFAULT ON. The block above is a reminder, not a questionnaire — "OK" / "jóváhagyom" / no objection → execute the default plan exactly, no further handraiser questions.
+- Handraiser is DEFAULT ON. The block above is a reminder, not a questionnaire — "OK" / "approve" / no objection → execute the default plan exactly, no further handraiser questions.
 - Operator edits (keywords, offer name, slots, or "no handraiser") → apply and proceed. "No handraiser" → standard single conversion CTA system, everything below unchanged.
 - Offer name persists between scripts (read from the previous script's handraiser metadata block or 09_Lead_Magnets). Ask only if none exists — NEVER invent one. Without a confirmed offer name, all ACTION slots are omitted (Slot 2 dropped, Slot 3 forced to GUIDE) and the operator is told why in the delivery message.
 
@@ -125,7 +105,7 @@ Wait for the answer. If both research/voice answers are No and the operator says
 
 **If voice notes / transcript provided:**
 - Authentic voice layer: personal angles, opinions, stories, specific language.
-- Mine it for what only Zoltan could say. Do not quote verbatim unless genuinely exceptional.
+- Mine it for what only {creator.name} could say. Do not quote verbatim unless genuinely exceptional.
 - Operator's personal stories take priority over generic filler. Always.
 
 **If both provided:**
@@ -163,7 +143,7 @@ Section 2: [Name] → Payoff: [what the viewer walks away knowing]
 Section 3: [Name] → Payoff: [what the viewer walks away knowing]
 [add sections as needed]
 
-★ Ownership CTA placement: after Section [X]
+(CTA) Ownership CTA placement: after Section [X]
    Reason: [this is the highest-value payoff — viewer is most receptive here]
    (Handraiser ON → this is Slot 2, the hot ACTION line)
 
@@ -174,7 +154,7 @@ Lead Magnet CTA: [active slot — must match playlist's designated LM]
 Next video: [specific EP.X+1 topic — not generic; this is the playlist continuation hook]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Approve? Reply "jóváhagyom" or "approved" to get the full script.
+Approve? Reply "approve" or "approved" to get the full script.
 Or reply with edits — I'll revise before writing.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -235,7 +215,7 @@ Each section follows this exact pattern — Erhart model:
 - No transitional filler between sections. No "Now let's move on to..." — just start the next section.
 - Banned transitions: "Let's dive in" / "Let's unpack" / "Great, so" / "Moving on"
 
-**The Ownership CTA Rule — applied once, after the highest-value section marked ★ in Phase 1:**
+**The Ownership CTA Rule — applied once, after the highest-value section marked (CTA) in Phase 1:**
 
 After the section where the viewer just received the most value — when they are most satisfied
 and most receptive — add one natural sentence:
@@ -249,7 +229,7 @@ Rules for the Ownership CTA:
 - Feels like a natural extension of the value just delivered, not a break from it.
 - The lead magnet name comes from the Drive 09_Lead_Magnets read.
 - Never: "Like and subscribe" / "Hit the bell" / "Leave a comment below" as CTA.
-- **Handraiser ON → the Handraiser Slot 2 line REPLACES this CTA at the ★ position. See Handraiser CTA Layer.**
+- **Handraiser ON → the Handraiser Slot 2 line REPLACES this CTA at the (CTA) position. See Handraiser CTA Layer.**
 
 ---
 
@@ -332,7 +312,7 @@ Lead-temperature CTA system. Keyword comments trigger an automated reply with a 
 - COLD keyword (default GUIDE) → opt-in page, lead magnet, email list.
 - HOT keyword (default ACTION) → short sales page, personal video + one buy button, immediate purchase.
 
-**When ON, the Handraiser slots REPLACE the standard Ownership CTA (★ position) and the
+**When ON, the Handraiser slots REPLACE the standard Ownership CTA ((CTA) position) and the
 OWN Lead Magnet CTA. Never more than 3 CTAs total per video. Nothing stacks on top.**
 
 ### The three fixed slots
@@ -418,7 +398,7 @@ pauses or rendering artefacts in the final video.
 [spoken text]
 
 [OWNERSHIP CTA — Handraiser OFF | HANDRAISER SLOT 2 — Handraiser ON:
- hot ACTION line + [SCREEN TEXT: Comment "ACTION"] — after ★ section, ~66%]
+ hot ACTION line + [SCREEN TEXT: Comment "ACTION"] — after (CTA) section, ~66%]
 
 [SECTION 3: Name]
 [spoken text]
@@ -463,7 +443,7 @@ pauses or rendering artefacts in the final video.
 - Is the CTA Slot note included in the delivery confirmation message?
 - Are invented statistics absent? All numbers grounded in source material or confirmed facts.
 - If a research doc was provided: are real facts and examples from it present in the script?
-- If voice notes were provided: is Zoltan's personal language and perspective present?
+- If voice notes were provided: is {creator.name}'s personal language and perspective present?
 - Is the credibility bridge skipped when the topic does not genuinely require it?
 - Is the handraiser metadata block appended to the script document?
 
@@ -477,7 +457,7 @@ When triggered, run in this order after the month's final script session:
 
 1. **Collaboration Report** — compare Claude's draft vs. operator's final edited version.
    What changed, and what principle does each change reflect.
-2. **Style Guide Update** — absorb learnings into the Zoltan Style Guide document
+2. **Style Guide Update** — absorb learnings into the creator style guide (`{brand.guide_path}`)
    saved in Drive, 00_Foundation folder and locally in the YouTube project folder.
 3. **Example Library Update** — add the strongest hook, section, and CTA examples
    from the month to the Example Library section at the bottom of this file.
@@ -505,7 +485,7 @@ handraiser: {
 }
 ```
 
-Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`):
+Execute these Drive MCP steps (the Google Drive tool, found by name (see references/config-loading.md section 4)):
 
 1. **Find subfolder:**
    `search_files(query: "title = '03_Scripts' and parentId = '[channelFolderID]'")`
@@ -525,7 +505,7 @@ Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f0
    ```
    Script saved → [webViewLink]
 
-   Review it. When approved, say "jóváhagyom" or "approved".
+   Review it. When approved, say "approve" or "approved".
    Next: manual ElevenLabs audio (Gate 4 in the pipeline — paste script into ElevenLabs).
 
    CTA Slot active: PDF Lead Magnet.
@@ -561,8 +541,8 @@ HeyGen video generation runs LAST in the workflow, after audio, thumbnail, and p
 
 <!-- MOVED TO AGENT 05 — DO NOT USE FROM HERE
 
-Avatar ID: bfcee432248442539191df03f922f575 | Circle Frame | Motion Engine Avatar III
-Voice ID: 99b6f9eca33e474483987860185fdc43 | Speed: min +25% faster, recommended +50%
+Avatar ID: [Foundation heygen_avatar_id] | Circle Frame | Motion Engine Avatar III
+Voice ID: [Foundation heygen_voice_id] | Speed: min +25% faster, recommended +50%
 
 Recording Rules:
 - Every clip used ONCE only. No repeats, no loops.

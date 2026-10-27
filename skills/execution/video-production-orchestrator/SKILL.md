@@ -1,7 +1,9 @@
 ---
 name: video-production-orchestrator
-description: LAYER B controller — runs the per-video pipeline end to end from an already-decided Video Brief Card to published YouTube upload. Consumes exactly ONE Brief Card (produced earlier by Layer A / playlist-strategy-orchestrator); does NO strategy, keyword, topic, angle or video-type decision at video time. Reads Drive state ONCE, builds a CONTEXT BLOCK (with BRIEF_ID), passes it to every agent. FIVE video types via Production Core adapters, in priority order (most to least used) — avatar_local, avatar_native, screen_recording, talking_head, faceless_generated — with a shared PRE phase (load card, SEO title/description, master script) and shared POST phase (thumbnail, publish, chapters, post-publish menu). Triggers ONLY when the user says "új videó", "start new video", "video pipeline", "kezdjük a videót", "run the video pipeline", "new video cycle", or "ad-hoc videó" (playlist-less single video). Core chain: load Brief Card → 02 title/desc → 03 master script + type adapter → [PRODUCTION CORE] → 04 thumbnail → 05 publish. Shorts, Repurposing, Community = post-publish only.
+description: LAYER B controller — runs the per-video pipeline end to end from an already-decided Video Brief Card to published YouTube upload. Consumes exactly ONE Brief Card (produced earlier by Layer A / playlist-strategy-orchestrator); does NO strategy, keyword, topic, angle or video-type decision at video time. Reads Drive state ONCE, builds a CONTEXT BLOCK (with BRIEF_ID), passes it to every agent. FIVE video types via Production Core adapters, in priority order (most to least used) — avatar_local, avatar_native, screen_recording, talking_head, faceless_generated — with a shared PRE phase (load card, SEO title/description, master script) and shared POST phase (thumbnail, publish, chapters, post-publish menu). Triggers ONLY when the user says "new video", "start new video", "video pipeline", "run the video pipeline", "new video cycle", or "ad-hoc video" (playlist-less single video). Core chain: load Brief Card → 02 title/desc → 03 master script + type adapter → [PRODUCTION CORE] → 04 thumbnail → 05 publish. Shorts, Repurposing, Community = post-publish only.
 ---
+
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
 
 # Video Production Orchestrator (v3 — Layer B, Brief-Card driven, 5 video types)
 **Role:** Per-video pipeline controller (LAYER B). Runs for every single video, always inside
@@ -13,7 +15,7 @@ Agent 05 publishing artifacts — zero manual coordination, zero strategy work.
 **Layer boundary (see `references/layer-interface.md`):** this orchestrator NEVER invokes
 Agent 01 and NEVER decides topic / keyword / angle / video_type / lead magnet. Those live on
 the Brief Card. If no card exists, it stops and points the operator at
-`playlist-strategy-orchestrator`, or runs the `"ad-hoc videó"` escape hatch.
+`playlist-strategy-orchestrator`, or runs the `"ad-hoc video"` escape hatch.
 
 **Architecture principle:**
 ```
@@ -29,11 +31,11 @@ one point — it never leaks into PRE or POST.
 
 | # | video_type | Production format (adapter → suffix) | Audio source | Gate 4 (production) | Gate 6 (final) |
 |---|---|---|---|---|---|
-| 1 | `avatar_local` | HeyGen Production Prompt, local build + avatar clip layered (`_HG`) | VO (cloned or standard voice), manual/API | "audio kész" | "HeyGen jóváhagyva" |
-| 2 | `avatar_native` | HeyGen Production Prompt, native Video Agent, motion graphics included (`_HG`) | VO (cloned or standard voice), manual/API | "audio kész" | "HeyGen jóváhagyva" |
-| 3 | `screen_recording` | Shot list + VO script, Tella-style capture (`_SR`) | VO OR live narration | "felvétel kész" | "vágás kész" |
-| 4 | `talking_head` | Teleprompter doc, real selfie-style mobile recording (`_TH`) | Camera mic (live) | "felvétel kész" | "vágás kész" |
-| 5 | `faceless_generated` | Generated-video script, no avatar / no voice required (`_FL`) | optional VO or none | "generálás kész" | "vágás kész" |
+| 1 | `avatar_local` | HeyGen Production Prompt, local build + avatar clip layered (`_HG`) | VO (cloned or standard voice), manual/API | "audio done" | "HeyGen approved" |
+| 2 | `avatar_native` | HeyGen Production Prompt, native Video Agent, motion graphics included (`_HG`) | VO (cloned or standard voice), manual/API | "audio done" | "HeyGen approved" |
+| 3 | `screen_recording` | Shot list + VO script, Tella-style capture (`_SR`) | VO OR live narration | "recording done" | "edit done" |
+| 4 | `talking_head` | Teleprompter doc, real selfie-style mobile recording (`_TH`) | Camera mic (live) | "recording done" | "edit done" |
+| 5 | `faceless_generated` | Generated-video script, no avatar / no voice required (`_FL`) | optional VO or none | "generation done" | "edit done" |
 
 - `avatar_local` is the primary, most-used mode. It took over the old `heygen_avatar` role and
   gate logic verbatim (VO → HeyGen render approval) — the rename `heygen_avatar → avatar_local`
@@ -77,18 +79,18 @@ GATE 1: Confirm this is the card to run (topic + VIDEO_TYPE already on it)
 [03x] TYPE ADAPTER — converts master script to production format (automatic, no gate)
   ▼
 ═══════════ PRODUCTION CORE (branch by VIDEO_TYPE) ═══════════
-  ├─ avatar_local:       [MANUAL] VO audio → GATE 4-AL: "audio kész"   (HeyGen render gate at Gate 6)
-  ├─ avatar_native:      [MANUAL] VO audio → GATE 4-AN: "audio kész"   (short-form only; HeyGen render gate at Gate 6)
-  ├─ screen_recording:   Shot list + VO script → GATE 4-SR: "felvétel kész"
-  ├─ talking_head:       Teleprompter doc → GATE 4-TH: "felvétel kész"
-  └─ faceless_generated: Generated-video script → GATE 4-FL: "generálás kész"
+  ├─ avatar_local:       [MANUAL] VO audio → GATE 4-AL: "audio done"   (HeyGen render gate at Gate 6)
+  ├─ avatar_native:      [MANUAL] VO audio → GATE 4-AN: "audio done"   (short-form only; HeyGen render gate at Gate 6)
+  ├─ screen_recording:   Shot list + VO script → GATE 4-SR: "recording done"
+  ├─ talking_head:       Teleprompter doc → GATE 4-TH: "recording done"
+  └─ faceless_generated: Generated-video script → GATE 4-FL: "generation done"
   ▼
 ════════════════ COMMON POST (type-independent) ════════════════
 [04] Agent 04 — Thumbnail brief + NB2   ← GATE 5: Approve thumbnail brief
   ▼
 [05] Agent 05 Phase 1 — Publish         ← GATE 6: type-dependent final render/edit gate
-  │    screen_recording / talking_head / faceless_generated → "vágás kész"
-  │    avatar_local / avatar_native → "HeyGen jóváhagyva"
+  │    screen_recording / talking_head / faceless_generated → "edit done"
+  │    avatar_local / avatar_native → "HeyGen approved"
   ▼
 [05b] Agent 05 Phase 2 — Chapters       ← trigger: Gate 6 confirmation
   ▼
@@ -114,7 +116,7 @@ All of those apply to this orchestrator — they are not repeated below.
 1. **Pin file:** look for `_Channel_Pin.txt` in the connected working folder. If found, parse
    `[Channel Name] | [LANG] | [Channel Folder ID]` → session is HARD-BOUND: use these values,
    write all public copy in [LANG], REFUSE "switch" commands, do NOT read `_Active_Channel`.
-2. **Explicit channel in trigger** ("új videó @VoxFlow") → resolve that channel's folder ID from
+2. **Explicit channel in trigger** ("new video @<channel>") → resolve that channel's folder ID from
    `YT_Flywheel/` and use it for this run.
 3. **Legacy fallback:** `search_files(query: "title = '_Active_Channel'")` → read → parse line 1
    `[Channel Name] | [Channel Folder ID]`. Display a prominent channel badge (name + language)
@@ -131,23 +133,23 @@ The opt-in URL is the T2 → T1 handoff (`references/layer-interface.md` §7). R
 If found → store as `ACTIVE_OPTIN_URL`, pass to Agent 05 automatically at Step 6.
 If NOT found → display warning:
 ```
-⚠️  Nincs opt-in URL (nincs optin_registry.json bejegyzés ehhez a playlisthez).
-   A funnelt a T2 csapat építi: mondd "start" vagy "lead magnet" (email-list-building / CMO orchestrator).
-   Folytatás opt-in URL nélkül? → "igen, folytatom" / "előbb funnel"
+WARNING: No opt-in URL (no optin_registry.json entry for this playlist).
+   The funnel is built by the funnel skill ({integrations.funnel_skill}): say "start" or "lead magnet".
+   Continue without an opt-in URL? → "yes, continue" / "funnel first"
 ```
-If operator says "igen, folytatom" → proceed with `ACTIVE_OPTIN_URL = null` (placeholder in descriptions).
+If operator says "yes, continue" → proceed with `ACTIVE_OPTIN_URL = null` (placeholder in descriptions).
 
 ### 0c. Resolve the Brief Card (the input — layer-interface.md §3)
 First hit wins:
-1. **Explicit in the trigger** — `"új videó EP04"` / `"új videó brief: youtube-ownership-ep04"`.
+1. **Explicit in the trigger** — `"new video EP04"` / `"new video brief: youtube-ownership-ep04"`.
 2. **Next `planned` card** — read `PlaylistStrategy_[Series]` in `01_Strategy/`, take the lowest-EP
    `Brief_*` card with `status: planned`. `search_files(parentId='[01_Strategy id]')`, read candidates.
-3. **`"ad-hoc videó"` in the trigger** → §0c-adhoc below.
+3. **`"ad-hoc video"` in the trigger** → §0c-adhoc below.
 4. **No PlaylistStrategy doc, no card, not ad-hoc** → STOP:
    ```
-   Nincs Video Brief Card ehhez a csatornához.
-   → Playlist tervezés:  "playlist stratégia"
-   → Egyszeri videó:     "ad-hoc videó"
+   No Video Brief Card for this channel.
+   → Plan a playlist:  "playlist strategy"
+   → One-off video:    "ad-hoc video"
    ```
 
 Read the resolved card. `VIDEO_TYPE` = its `video_type` (one of the 5 enum values). Store
@@ -155,8 +157,8 @@ Read the resolved card. `VIDEO_TYPE` = its `video_type` (one of the 5 enum value
 the card — do not re-derive. Set the card `status: in_production` (new file, same title).
 
 **If `VIDEO_TYPE = avatar_native`**, sanity-check length: estimate script minutes (word count ÷
-130). If likely over ~2.5 min, warn: `"avatar_native rövid tartalomra való (~2.5 perc alatt).
-Ez hosszabbnak tűnik. Váltasz avatar_local-ra? → 'igen' / 'marad'"`.
+130). If likely over ~2.5 min, warn: `"avatar_native is for short content (under ~2.5 min).
+This looks longer. Switch to avatar_local? → 'yes' / 'keep'"`.
 
 ### 0c-adhoc. Ad-hoc single video (escape hatch — layer-interface.md §4)
 Ask the operator two things: topic and video_type (one of `avatar_local` / `avatar_native` /
@@ -174,10 +176,10 @@ Check what's already done for the active channel this cycle:
 - `03_Scripts` → any approved master script? Any type-adapted output (`_TH` / `_HG` / `_SR` / `_FL`)?
 - `04_Thumbnail_Briefs` → any thumbnail brief from today?
 - `05_Publish_Checklists` → any publish checklist?
-- Local `Audio\` → any MP3 in `C:\Users\gdp\Documents\Claude\Projects\YouTube\Audio\`? (avatar_local / avatar_native / screen_recording VO only)
+- Local `Audio/` → any MP3 in `{paths.local_root}/Audio/`? (avatar_local / avatar_native / screen_recording VO only)
 
 Use `search_files(query: "parentId = '[folderID]'")` per folder, sort by `createdTime` descending.
-Mark completed steps DONE in artifact, offer skip with `"újra [N]"`.
+Mark completed steps DONE in artifact, offer skip with `"redo [N]"`.
 
 ### 0e. Build the CONTEXT BLOCK v2 (one Drive scan — no repeated reads later)
 Resolve ALL subfolder IDs in one call: `search_files(query: "parentId = '[channelFolderID]'")`.
@@ -195,32 +197,32 @@ Create immediately via `mcp__cowork__create_artifact`. Update after every step.
 
 ## PIPELINE STATUS ARTIFACT (HTML)
 Use the shared HTML base from `references/conventions.md` §2 (CSS + skeleton).
-Header: `🎬 YT Pipeline` + video type badge next to the date. The Step 4 row and Gate 6 label
+Header: `YT Pipeline` + video type badge next to the date. The Step 4 row and Gate 6 label
 render per VIDEO_TYPE (table below). Step rows:
 
 ```html
-<h2>🎬 YT Pipeline</h2>
-<div class="ch"><!-- CHANNEL_NAME --> · <!-- DATE --> · 🎞 <!-- VIDEO_TYPE_LABEL --></div>
-<div class="optin">🔗 Opt-In URL: <!-- OPTIN_URL --></div>
-<div class="step <!-- S01 -->"><span class="icon">🗂️</span>
-<span class="label">01 — Brief Card betöltve</span><span class="status"><!-- S01S --></span></div>
+<h2>YT Pipeline</h2>
+<div class="ch"><!-- CHANNEL_NAME --> · <!-- DATE --> · <!-- VIDEO_TYPE_LABEL --></div>
+<div class="optin">Opt-In URL: <!-- OPTIN_URL --></div>
+<div class="step <!-- S01 -->"><span class="icon"></span>
+<span class="label">01 — Brief Card loaded</span><span class="status"><!-- S01S --></span></div>
 <div class="gate">▸ Gate 1: Confirm this Brief Card (topic + video type already on it)</div>
-<div class="step <!-- S02 -->"><span class="icon">🔍</span>
+<div class="step <!-- S02 -->"><span class="icon"></span>
 <span class="label">02 — Title + Description (Execution Mode)</span><span class="status"><!-- S02S --></span></div>
 <div class="gate">▸ Gate 2: Confirm title</div>
-<div class="step <!-- S03 -->"><span class="icon">📝</span>
+<div class="step <!-- S03 -->"><span class="icon"></span>
 <span class="label">03 — Master Script</span><span class="status"><!-- S03S --></span></div>
 <div class="gate">▸ Gate 3: Approve master script</div>
 <div class="step <!-- S03x -->"><span class="icon"><!-- CORE_ICON --></span>
 <span class="label"><!-- CORE_LABEL --></span><span class="status"><!-- S03xS --></span></div>
 <div class="gate">▸ Gate 4: <!-- CORE_GATE_LABEL --></div>
-<div class="step <!-- S04 -->"><span class="icon">🖼️</span>
+<div class="step <!-- S04 -->"><span class="icon"></span>
 <span class="label">04 — Thumbnail Brief + Nano Banana 2</span><span class="status"><!-- S04S --></span></div>
-<div class="gate">▸ Gate 5: Brief kész → generálj Nano Banana 2-vel</div>
-<div class="step <!-- S05 -->"><span class="icon">🚀</span>
+<div class="gate">▸ Gate 5: Brief done → generate with Nano Banana 2</div>
+<div class="step <!-- S05 -->"><span class="icon"></span>
 <span class="label">05 — Publish<!-- + HeyGen Prompt, only if avatar_local / avatar_native --></span><span class="status"><!-- S05S --></span></div>
 <div class="gate">▸ Gate 6: <!-- FINAL_GATE_LABEL --></div>
-<div class="step <!-- S05b -->"><span class="icon">⏱️</span>
+<div class="step <!-- S05b -->"><span class="icon"></span>
 <span class="label">05b — Chapter Timestamps</span><span class="status"><!-- S05bS --></span></div>
 ```
 
@@ -228,11 +230,11 @@ Type-dependent slots:
 
 | VIDEO_TYPE | CORE_ICON / CORE_LABEL | CORE_GATE_LABEL | FINAL_GATE_LABEL |
 |---|---|---|---|
-| avatar_local | 🎙️ VO audio (manuális) | Generálj VO-t → "audio kész" | HeyGen render → "HeyGen jóváhagyva" |
-| avatar_native | 🎙️ VO audio (manuális, short-form) | Generálj VO-t → "audio kész" | HeyGen native render → "HeyGen jóváhagyva" |
-| screen_recording | 🖥️ Shot list + felvétel | Felvétel kész → "felvétel kész" | Vágás kész → "vágás kész" |
-| talking_head | 🎥 Teleprompter + felvétel | Felvétel kész → "felvétel kész" | Vágás kész → "vágás kész" |
-| faceless_generated | 🖼️ Generált script | Generálás kész → "generálás kész" | Vágás kész → "vágás kész" |
+| avatar_local | VO audio (manual) | Generate VO → "audio done" | HeyGen render → "HeyGen approved" |
+| avatar_native | VO audio (manual, short-form) | Generate VO → "audio done" | HeyGen native render → "HeyGen approved" |
+| screen_recording | Shot list + recording | Recording done → "recording done" | Edit done → "edit done" |
+| talking_head | Teleprompter + recording | Recording done → "recording done" | Edit done → "edit done" |
+| faceless_generated | Generated script | Generation done → "generation done" | Edit done → "edit done" |
 
 Note the `<!-- OPTIN_URL -->` slot — populate from `ACTIVE_OPTIN_URL` found in Step 0b.
 
@@ -244,28 +246,28 @@ Note the `<!-- OPTIN_URL -->` slot — populate from `ACTIVE_OPTIN_URL` found in
 The card was already resolved and read at Step 0c. Nothing is decided here. Display its key
 fields for confirmation:
 ```
-📋 Brief Card: [brief_id]
+Brief Card: [brief_id]
    Playlist: [playlist] · [EP X of Y] · [arc]
-   Téma: [topic]
-   Keyword (playlist anchor): [primary_keyword] ([search_intent]) · szög: [angle]
-   (a 02 lépés ezen felül futtat egy videó-specifikus, szűkebb kulcsszókutatást)
-   Videó típus: [video_type]
+   Topic: [topic]
+   Keyword (playlist anchor): [primary_keyword] ([search_intent]) · angle: [angle]
+   (step 02 also runs a narrower, video-specific keyword research)
+   Video type: [video_type]
    CTA lead magnet: [cta_lead_magnet]
 ```
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 1 — Ez a Brief Card fusson?
+GATE 1 — Ez a Brief Card fusson?
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Jóváhagyás → "jóváhagyom" / "ok" / "mehet"
-Másik kártya → "brief: [brief_id]" / "EP[NN]"
-Ez stratégiai hiba (rossz téma/szög/típus/lead magnet) → "újratervezés"
-   → megnyitod: playlist-strategy-orchestrator, ez a pipeline áll
+Approve → "approve" / "ok" / "go"
+Another card → "brief: [brief_id]" / "EP[NN]"
+This is a strategy error (wrong topic/angle/type/lead magnet) → "re-plan"
+   → opens playlist-strategy-orchestrator, this pipeline stops
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 The card's `topic` / `primary_keyword` / `angle` / `video_type` are NOT editable here. A wrong
-card is a Layer A problem: send the operator to `playlist-strategy-orchestrator` ("playlist
-újratervezés"). The only exception is the ad-hoc card built at Step 0c-adhoc, which the operator
+card is a Layer A problem: send the operator to `playlist-strategy-orchestrator` ("re-plan the
+playlist"). The only exception is the ad-hoc card built at Step 0c-adhoc, which the operator
 just defined. Do NOT proceed to Agent 02 until Gate 1 is confirmed.
 
 ---
@@ -280,11 +282,11 @@ not touch `topic` / `angle` / `video_type` / `cta_lead_magnet`.
 After the SEO doc is on Drive, update artifact (02 → `waiting`):
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 2 — Cím megerősítése
+GATE 2 — Confirm the title
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Melyik cím? → A / B / C
-Saját verzió → "cím: [szöveg]"
-Kihagyás (A opció) → "skip"
+Which title? → A / B / C
+Own version → "title: [text]"
+Skip (option A) → "skip"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -307,12 +309,12 @@ type-independent.
 After script is written to Drive AND displayed in chat, update artifact (03 → `waiting`):
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 3 — Master script jóváhagyás
+GATE 3 — Approve the master script
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Jóváhagyás → "jóváhagyom" / "ok" / "mehet"
-Módosítás → "módosítsd: [rész] → [változtatás]"
-Teljes újragenerálás → "újra"
-Típusváltás még lehetséges → "típus: [avatar_local | avatar_native | screen_recording | talking_head | faceless_generated]"
+Approve → "approve" / "ok" / "go"
+Change → "change: [part] → [change]"
+Full regeneration → "redo"
+Type change still possible → "type: [avatar_local | avatar_native | screen_recording | talking_head | faceless_generated]"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 **This is the most critical gate.** Do NOT proceed until explicit script approval.
@@ -340,7 +342,7 @@ Immediately after Gate 3 approval, convert the master script to the production f
   ask the operator once. Store as `SR_AUDIO_MODE`.
 
 **Adapter: talking_head → Teleprompter doc** (suffix `_TH`)
-- Strip all `[VISUAL:]` / `[SCREEN:]` markers into a separate "Rendezői jegyzet" appendix.
+- Strip all `[VISUAL:]` / `[SCREEN:]` markers into a separate "Director notes" appendix.
 - Format spoken text in large-readable paragraphs, natural pause breaks (— / …).
 - Add per-section retake markers (`● TAKE [n]`) for section-by-section recording.
 
@@ -359,12 +361,12 @@ Immediately after Gate 3 approval, convert the master script to the production f
 ### 4-AL · avatar_local (manual VO audio — API fallback built in)
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 4 — VO Audio (manuális)
+GATE 4 — VO Audio (manual)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-A clean script Drive-on (…_HG) → másold be a hang-generátorba (ElevenLabs vagy egyéb).
-Generáld le az MP3-at a csatorna hangjával (klónozott vagy standard — lásd Foundation voice_source).
+The clean script is on Drive (…_HG) → paste it into the voice generator (ElevenLabs or other).
+Generate the MP3 with the channel voice (cloned or standard, see Foundation voice_source).
 Mentsd ide: YouTube\Audio\
-Ha kész → "audio kész" / "mehet" / "ok"
+When done → "audio done" / "go" / "ok"
 Ha ElevenLabs API-t akarsz helyette → "11labs api"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -375,31 +377,31 @@ Ha ElevenLabs API-t akarsz helyette → "11labs api"
    `[VOICE_ID]` = the channel's `elevenlabs_voice_id` from the Foundation doc (or the Brief
    Card's `voice_id` override). If the Foundation has no voice id, ask the operator for it once —
    do NOT assume a fixed voice. Model `eleven_turbo_v2_5`. API key from
-   `C:\Users\gdp\Documents\Claude\Projects\YouTube\.config\elevenlabs.env`.
-   Save MP3 + `_align.json` to `C:\Users\gdp\Documents\Claude\Projects\YouTube\Audio\`,
+   `{paths.secrets_env}`.
+   Save MP3 + `_align.json` to `{paths.local_root}/Audio/`,
    naming: `[YYYY-MM-DD]_Audio_[title-slug]_[voice-slug].mp3`.
-3. Generate SRT: run `C:\Users\gdp\Documents\Claude\Projects\YouTube\Scripts\generate_srt.py`
+3. Generate SRT: run `{paths.scripts}/generate_srt.py`
    with the align file (offset 0; for >2500-char scripts split at sentence boundaries and
    chain offsets from each part's "Last seconds" value).
 4. Present MP3 + SRT `computer://` links for approval, then continue to Gate 4 confirmation.
 
 ### 4-AN · avatar_native (short-form / Shorts only — identical gate to 4-AL)
-Same as 4-AL. Extra reminder in the gate text: `⚠️ avatar_native: tartsd < 2.5 perc alatt
-(~50 HeyGen credit). Ha hosszabb lenne → válts avatar_local-ra.` VO audio generated the same
+Same as 4-AL. Extra reminder in the gate text: `WARNING: avatar_native: tartsd < 2.5 perc alatt
+(~50 HeyGen credit). If longer → switch to avatar_local.` VO audio generated the same
 way (Foundation voice, or "11labs api").
 
 ### 4-SR · screen_recording
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 4 — Képernyőfelvétel
+GATE 4 — Screen recording
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Shot list + VO script Drive-on (…_SR).
-Audio mód: [SR_AUDIO_MODE]
-• live: vedd fel a narrációt felvétel közben
-• elevenlabs_vo: → "11labs api" vagy manuális generálás (mint az avatar_local ág), majd szinkron vágáskor
-1. Menj végig a shot listán sorban
-2. Nyersanyag mentése a szokásos projektmappába
-Ha kész → "felvétel kész"
+Audio mode: [SR_AUDIO_MODE]
+• live: record the narration while recording
+• elevenlabs_vo: → "11labs api" or manual generation (like the avatar_local branch), then sync in the edit
+1. Go through the shot list in order
+2. Save the raw footage to the usual project folder
+When done → "recording done"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 If `SR_AUDIO_MODE = elevenlabs_vo`, the "11labs api" fallback from 4-AL is available identically.
@@ -407,27 +409,27 @@ If `SR_AUDIO_MODE = elevenlabs_vo`, the "11labs api" fallback from 4-AL is avail
 ### 4-TH · talking_head
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 4 — Felvétel (TalkingHead)
+GATE 4 — Recording (TalkingHead)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Teleprompter doc Drive-on (…_TH).
-1. Nyisd meg teleprompter appban / második monitoron
-2. Vedd fel szekciónként (● TAKE markerek), mobil selfie stílus
-3. Nyersanyag mentése a szokásos projektmappába
-Ha kész → "felvétel kész"
+1. Open it in a teleprompter app / on a second monitor
+2. Record section by section (● TAKE markers), mobile selfie style
+3. Save the raw footage to the usual project folder
+When done → "recording done"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
-No audio sub-step — hang a felvételből jön. Update artifact (03x → `waiting`), wait for confirmation.
+No audio sub-step. The audio comes from the recording. Update artifact (03x → `waiting`), wait for confirmation.
 
 ### 4-FL · faceless_generated (generated output review — no camera, no avatar)
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 4 — Generált videó
+GATE 4 — Generated video
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Generated-video script Drive-on (…_FL).
-1. Vidd be a shot-leírásokat a videó-generátorba (a csatorna választott eszköze)
-2. Ha van VO: generáld le a Foundation voice_source szerint (vagy "11labs api"), vagy hagyd szöveg-a-képen módban
-3. Nyersanyag / generált klipek mentése a szokásos projektmappába
-Ha kész → "generálás kész" / "felvétel kész"
+1. Put the shot descriptions into the video generator (the channel's chosen tool)
+2. If there is VO: generate it per Foundation voice_source (or "11labs api"), or keep text-on-screen mode
+3. Save the raw footage / generated clips to the usual project folder
+When done → "generation done" / "recording done"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -442,15 +444,15 @@ Invoke `agent-04-thumbnail`. It writes the brief to Drive and outputs the Nano B
 Agent 04 does NOT auto-call Canva MCP. Update artifact (04 → `waiting`):
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 5 — Thumbnail brief kész
+GATE 5 — Thumbnail brief done
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Brief + Nano Banana 2 prompt Drive-on.
 → Nyisd meg Nano Banana 2-t
-→ Ha a csatornának van személyes arc-brandje: töltsd fel a csatorna arc-fotóját
+→ If the channel has a personal face brand: upload the channel face photo ({brand.face_photo})
    (avatar_local / avatar_native / talking_head). faceless_generated → nincs arc.
-→ Illeszd be a promptot → generálj
-Jóváhagyás → "thumbnail ok" / "ok" / "mehet"
-Canva kell → "canva" (akkor Agent 04 meghívja)
+→ Paste the prompt → generate
+Approve → "thumbnail ok" / "ok" / "go"
+Need Canva → "canva" (then Agent 04 calls it)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 Do NOT proceed to Agent 05 until thumbnail is confirmed. "canva" → Agent 04 invokes Canva MCP
@@ -462,8 +464,8 @@ Do NOT proceed to Agent 05 until thumbnail is confirmed. "canva" → Agent 04 in
 Invoke `agent-05-launch-publish` Phase 1 in full. Pass VIDEO_TYPE in the CONTEXT BLOCK.
 
 **Opt-in URL injection:** Pass `ACTIVE_OPTIN_URL` explicitly:
-> "Az opt-in URL: [ACTIVE_OPTIN_URL] — ezt ágyazd be a YouTube description CTA blokkba
-> és a Publishing Artifact minden releváns mezőjébe."
+> "The opt-in URL: [ACTIVE_OPTIN_URL]. Put it in the YouTube description CTA block
+> and in every relevant field of the Publishing Artifact."
 
 If `ACTIVE_OPTIN_URL` is null: Agent 05 inserts `[OPT-IN URL — FUNNEL STILL PENDING]` placeholder.
 
@@ -482,29 +484,29 @@ After Publishing Artifact is created, update artifact (05 → `waiting`). Gate 6
 **avatar_local / avatar_native:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 6 — HeyGen render
+GATE 6 — HeyGen render
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Publishing Artifact kész. HeyGen Prompt mentve Drive-ra.
-1. Nyisd meg a HeyGen promptot Drive-ból
+Publishing Artifact done. HeyGen Prompt saved to Drive.
+1. Open the HeyGen prompt from Drive
 2. Illeszd be HeyGen Video Agent-be → renderelj
-   (avatar_native: natív, rövid; avatar_local: lokális build + avatar-klip rárétegezve)
-3. Nézd meg a videót
-4. Ha rendben: "HeyGen jóváhagyva"
-5. Ha script módosítás kell: "újra script [változtatás]"
+   (avatar_native: native, short; avatar_local: local build + avatar clip layered on top)
+3. Watch the video
+4. If it is fine: "HeyGen approved"
+5. If the script needs a change: "redo script [change]"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
-Accept: "HeyGen jóváhagyva" / "heygen ok" / "videó kész" / "approved".
+Accept: "HeyGen approved" / "heygen ok" / "video done" / "approved".
 
 **screen_recording / talking_head / faceless_generated:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏸ GATE 6 — Vágás / végleges videó
+GATE 6 — Edit / final video
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Publishing Artifact kész. Editing checklist mentve Drive-ra.
-1. Vágd meg a nyersanyagot a checklist szerint
-2. Nézd át a végleges exportot
-3. Ha rendben: "vágás kész" / "videó kész"
-4. Ha újra kell venni egy szekciót: "retake: [szekció]"
+Publishing Artifact done. Editing checklist saved to Drive.
+1. Edit the raw footage per the checklist
+2. Review the final export
+3. If it is fine: "edit done" / "video done"
+4. If a section needs a retake: "retake: [section]"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -519,15 +521,15 @@ playlist, tick its row `brief: published` in `PlaylistStrategy_[Series]`.
 Then present the **Post-Publish Menu**:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ PIPELINE KÉSZ
+PIPELINE DONE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [S] Shorts    — 03c: script + production brief + YouTube upload
 [R] Repurpose — 07: email snippet, LinkedIn, clip brief
 [C] Community — 07: pinned comment, Community tab posts
 [E] Email     — 09: conversion audit, CTA script check
 [M] Captions  — 05b: 25 language SRT translation + YouTube upload (free, ~3 min)
-→ Betű(k): pl. "S M" = Shorts + Multilingual Captions
-→ "kész" = lezárás
+→ Letter(s): e.g. "S M" = Shorts + Multilingual Captions
+→ "done" = close
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 Note: for `screen_recording` / `talking_head` / `faceless_generated` the [S] Shorts option
@@ -541,7 +543,7 @@ VIDEO_TYPE to Agent 03c.
 **[S] Shorts — Agent 03c:** Invoke `agent-03c-shorts-producer` with VIDEO_TYPE.
 `avatar_local` / `avatar_native` → HeyGen 9:16 briefs. `screen_recording` / `talking_head` /
 `faceless_generated` → timestamped clip-cut briefs from the published long-form. Operator
-produces the Shorts, then "Shorts kész, töltsd fel".
+produces the Shorts, then "Shorts done, upload".
 
 **[R] Repurposing — Agent 07:** Invoke `agent-07-repurposing` in Repurposing mode. Outputs email
 snippet brief + LinkedIn post brief to `07_Repurposing_Briefs/`. (Shorts belong exclusively to 03c.)
@@ -563,7 +565,7 @@ no VO align file.)
 
 ## RESUME LOGIC · GLOBAL COMMANDS · ERROR HANDLING
 Per `references/conventions.md` §4–§6. One addition:
-- Global command `"típus: [enum value]"` — allowed up to Gate 3 (inclusive). After Gate 3
+- Global command `"type: [enum value]"` — allowed up to Gate 3 (inclusive). After Gate 3
   approval, a type change requires re-running the adapter: warn operator, re-run Step 3x,
   invalidate Gate 4+. Switching TO `avatar_native` also re-checks the length guard from Step 0c.
 
@@ -580,19 +582,19 @@ through the Production Cores asynchronously. Each video resumes independently at
 
 ## OPERATOR EXPERIENCE SUMMARY
 ```
-"új videó"  (vagy "új videó EP04" / "ad-hoc videó")
-→ Artifact megjelenik · opt-in URL: ✓ · típus badge (a Brief Cardból)
-→ 01 Brief Card betöltve → Gate 1: "jóváhagyom" (a téma + típus már a kártyán van)
-→ Agent 02 Execution Mode fut → Gate 2: "B" (cím)
-→ Agent 03 fut → Gate 3: "jóváhagyom" (master script) → adapter automatikusan fut
+"new video"  (or "new video EP04" / "ad-hoc video")
+→ Artifact megjelenik · opt-in URL: ok · type badge (from the Brief Card)
+→ 01 Brief Card loaded → Gate 1: "approve" (topic + type are already on the card)
+→ Agent 02 Execution Mode runs → Gate 2: "B" (title)
+→ Agent 03 runs → Gate 3: "approve" (master script) → adapter runs automatically
 → PRODUCTION CORE:
-   avatar_local / avatar_native: VO audio → "audio kész"
-   screen_recording:             shot list → "felvétel kész"
-   talking_head:                 teleprompter → "felvétel kész"
-   faceless_generated:           generált script → "generálás kész"
-→ Agent 04 fut → Gate 5: Nano Banana 2 brief → "thumbnail ok"
-→ Agent 05 fut → Gate 6: "HeyGen jóváhagyva" VAGY "vágás kész"
-→ Phase 2 kész → Post-publish menu → "S" / "R" / "C" / "E" / "M" → "kész"
+   avatar_local / avatar_native: VO audio → "audio done"
+   screen_recording:             shot list → "recording done"
+   talking_head:                 teleprompter → "recording done"
+   faceless_generated:           generated script → "generation done"
+→ Agent 04 runs → Gate 5: Nano Banana 2 brief → "thumbnail ok"
+→ Agent 05 runs → Gate 6: "HeyGen approved" OR "edit done"
+→ Phase 2 done → Post-publish menu → "S" / "R" / "C" / "E" / "M" → "done"
 
-Összes operátori input egy teljes videó ciklushoz: 7-8 rövid válasz — típustól függetlenül.
+Total operator input for one full video cycle: 7 to 8 short replies, for every video type.
 ```

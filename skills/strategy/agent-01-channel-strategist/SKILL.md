@@ -3,6 +3,8 @@ name: agent-01-channel-strategist
 description: LAYER A (Playlist Strategy) — the strategic brain that decides playlist concept, positioning, sequencing, and per-video framing. Use for content strategy, playlist planning, "what should I make next", "give me video ideas", channel growth direction, video-type selection, and post-analytics re-planning. Primary mode is Playlist Mode (invoked by playlist-strategy-orchestrator). Standalone it runs Single-Video Re-plan mode: it inserts/updates ONE video in the playlist sequence and emits a Video Brief Card with status:planned. It never runs inside a video production pipeline — the execution layer consumes the Brief Card it produced earlier. Outputs to the active channel's 01_Strategy/ folder.
 ---
 
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
+
 # Agent 01 — Channel Strategist (LAYER A)
 **Layer:** Playlist Strategy. **Playbook modules:** 2 (Flywheel), 4 (Video Types), 8.2 (Breakthrough Protocol).
 **Reads:** `references/layer-interface.md` (Brief Card v1 + PlaylistStrategy v1 schemas).
@@ -10,7 +12,7 @@ description: LAYER A (Playlist Strategy) — the strategic brain that decides pl
 **What this agent is NOT:** it is not step 1 of a video pipeline. The Video Production
 Orchestrator does NOT invoke it. By the time a video is produced, Agent 01 has already done
 its job — the Brief Card exists. If a video run finds no Brief Card, the fix is to run
-`playlist-strategy-orchestrator` (or the operator uses `"ad-hoc videó"`), not to call Agent 01
+`playlist-strategy-orchestrator` (or the operator uses `"ad-hoc video"`), not to call Agent 01
 mid-pipeline.
 
 ## Context Block Protocol
@@ -19,7 +21,7 @@ Pre-Flight Drive reads it covers. `BRIEF_ID` is `n/a` for this agent — Layer A
 whole playlist. Standalone → run Pre-Flight as written.
 
 ## Pre-Flight (standalone only)
-Drive MCP directly (prefix `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`), do not ask the operator:
+Drive MCP directly (the Google Drive tool, found by name (see references/config-loading.md section 4)), do not ask the operator:
 1. **`_Active_Channel`** → parse `[Channel Name] | [Channel Folder ID]`. Empty → invoke `channel-manager`.
 2. **Foundation:** `00_Foundation` subfolder → most recent doc → Avatar Card + Hero Story + niche.
 3. **Existing strategy:** `01_Strategy/` → any `PlaylistStrategy_*` doc + all `Brief_*` cards. Read them.
@@ -119,7 +121,7 @@ estimated shelf life. Bias toward whatever balances the type mix and honours pro
 **MANDATORY:** write to Drive, share only links.
 
 Confirm:
-`"✅ Playlist frissítve → [PlaylistStrategy link] | Új Brief Card: [brief_id] (status: planned) → [link]. A video-production-orchestrator felveszi, amikor 'új videó'-t mondasz."`
+`"Playlist updated → [PlaylistStrategy link] | New Brief Card: [brief_id] (status: planned) → [link]. video-production-orchestrator picks it up when you say 'new video'."`
 
 ---
 

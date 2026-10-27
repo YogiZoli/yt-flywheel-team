@@ -1,0 +1,53 @@
+# YT Flywheel Team: example config
+#
+# Copy this file to ONE of these places and fill in your own values.
+# The agents use the first one they find:
+#   1. the path in the environment variable YT_FLYWHEEL_CONFIG
+#   2. ~/.yt-flywheel/config.yaml            (recommended, outside every repo)
+#   3. config/config.yaml inside this repo   (ignored by git)
+#
+# Never commit your real config. See config/README.md.
+
+version: 1
+
+creator:
+  name: "Your Name"                 # used in credits, signatures and examples
+  language: en                      # language the agents reply in
+
+playbook:
+  doc_id: ""                        # Google Doc id of your playbook; empty = search Drive by title
+  title: "YouTube Evergreen Flywheel Playbook"
+
+paths:
+  local_root: "~/YouTube"           # Shorts/, Audio/, Scripts/ live under this folder
+  secrets_env: "~/YouTube/.config/elevenlabs.env"
+  scripts: "~/YouTube/Scripts"
+
+drive:
+  master_folder_name: "YT_Flywheel" # found by name, no folder id needed
+  master_doc_id: ""                 # optional
+
+brand:
+  guide_path: ""                    # path or URL to your brand guide; empty = generic rules
+  repo: ""                          # optional design-system repo
+  face_photo: ""                    # photo used in thumbnail prompts (agent 04)
+
+integrations:
+  funnel_skill: ""                  # e.g. "email-list-building:cmo-orchestrator"; empty = skip funnel steps
+  video_build_skill: ""             # empty = the built-in video-production-orchestrator
+
+channels:
+  default: main                     # key from the list below
+  list:
+    main:
+      name: "My Channel"
+      youtube_id: "UCxxxxxxxxxxxxxxxxxxxxxx"
+      language: en
+      drive_folder_name: "My Channel"
+      title_prefixes: []            # e.g. [{topic: "money, income", prefix: "$"}]
+
+triggers:
+  # Extra phrases in your own language. Key = your phrase, value = the English command.
+  # Example:
+  #   "new video please": "new video"
+  aliases: {}

@@ -1,7 +1,9 @@
 ---
 name: agent-05-launch-publish
-description: Use this agent when ready to upload a video to YouTube. Triggers when the user says "ready to upload", "publish my video", "upload checklist", "launch my channel", "60 day plan", or "6 week plan". Also handles end screen, Cards, captions checklist, HeyGen Production Prompt, Publishing Artifact with copy buttons, and chapter finalization. Phase 2 triggers on "HeyGen jóváhagyva" or equivalent to finalize chapter timestamps. Outputs save to the active channel's 05_Publish_Checklists/ folder in Google Drive.
+description: Use this agent when ready to upload a video to YouTube. Triggers when the user says "ready to upload", "publish my video", "upload checklist", "launch my channel", "60 day plan", or "6 week plan". Also handles end screen, Cards, captions checklist, HeyGen Production Prompt, Publishing Artifact with copy buttons, and chapter finalization. Phase 2 triggers on "HeyGen approved" or equivalent to finalize chapter timestamps. Outputs save to the active channel's 05_Publish_Checklists/ folder in Google Drive.
 ---
+
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
 
 # Agent 05 — Launch & Publish
 **Phase:** Pre-Publishing + HeyGen Production (two-phase workflow)
@@ -31,11 +33,11 @@ Structure:
 - **Opening paragraph** (lines 1-3): hook that works as standalone preview. First 150 characters are critical — must compel click without "in this video" or emojis. Match the title's promise exactly.
 - **Lead magnet line:** `→ [Lead Magnet Name]: [link]` — always second, before anything else
 - **Chapters section:** `CHAPTERS` header + draft timestamps (generated in Step 3 below)
-- **About paragraph:** 2-3 sentences about Zoltan + channel subscribe CTA
+- **About paragraph:** 2-3 sentences about {creator.name} + channel subscribe CTA
 - **3 hashtags:** at the very end of description (use exact hashtags from Agent 02)
 
 ### Step 2: Generate Tags
-**MAXIMIZE to ~500 characters** — YouTube's hard limit. Do NOT use only 6-8 tags; fill the full allowance. Combine: primary keyword, long-tail variations, location-specific phrases, broader category terms, year (e.g. "cambodia 2025"), channel/brand name (Zoltan Gero), synonyms, and alternative phrasings. Count characters as you build the list and stop just under 500. The operator pastes all tags at once into YouTube Studio (deletes old tags → Ctrl+V → done). Always display the char count in the artifact badge (e.g. "498 / 500").
+**MAXIMIZE to ~500 characters** — YouTube's hard limit. Do NOT use only 6-8 tags; fill the full allowance. Combine: primary keyword, long-tail variations, location-specific phrases, broader category terms, year (e.g. "[topic] 2026"), channel/brand name ({channel.name}), synonyms, and alternative phrasings. Count characters as you build the list and stop just under 500. The operator pastes all tags at once into YouTube Studio (deletes old tags → Ctrl+V → done). Always display the char count in the artifact badge (e.g. "498 / 500").
 
 ### Step 3: Generate Draft Chapters
 Derive chapter timestamps directly from the script sections:
@@ -115,7 +117,7 @@ Before creating the artifact, collect the following — do NOT ask the operator 
 
 **Cards — two cards required:**
 - Card 1: Playlist card — target = the playlist this video belongs to (from the Video Brief Card). Timestamp = ~20% of estimated video length.
-- Card 2: Video card — target = most recently published video on the channel. Use `mcp__bab7487b-ef77-4f71-a988-c5cfd8566b9a__vidiq_channel_videos` to get the channel's latest video title and URL. If this is the first video on the channel, set Card 2 target to BLANK and note it in the artifact.
+- Card 2: Video card — target = most recently published video on the channel. Use the vidIQ `vidiq_channel_videos` tool (found by name) to get the channel's latest video title and URL. If this is the first video on the channel, set Card 2 target to BLANK and note it in the artifact.
 
 **End Screen — two elements (last 20 seconds of video):**
 - End Screen 1: Subscribe button (always present)
@@ -133,22 +135,22 @@ Use `mcp__cowork__create_artifact` to create a persistent HTML page with all pub
 
 **HTML requirements:**
 - Clean layout: page background `#F6F8FC`, body text `#1E2733`, card surface `#FFFFFF` with `1px #E0E6F0` border (brand v2, see BRAND-GUIDE.md)
-- Page header: "📋 Publishing Pack — [video title]"
+- Page header: "Publishing Pack — [video title]"
 - 10 content sections. Sections 1–4 and 6–9 each have:
   - Bold section label
   - Content in a `<pre>` or `<div>` block with monospace font and light grey background
-  - **Copy button** — use a ROBUST two-method approach: try `navigator.clipboard.writeText()` first; if it fails or is unavailable, fall back to creating a hidden `<textarea>`, selecting its content, and calling `document.execCommand('copy')`. This ensures the button works in all environments without requiring the user to press Ctrl+C. Button briefly shows "✓ Copied!" (green) for 1.5 seconds after click, then resets to "Copy".
+  - **Copy button** — use a ROBUST two-method approach: try `navigator.clipboard.writeText()` first; if it fails or is unavailable, fall back to creating a hidden `<textarea>`, selecting its content, and calling `document.execCommand('copy')`. This ensures the button works in all environments without requiring the user to press Ctrl+C. Button briefly shows "Copied!" (green) for 1.5 seconds after click, then resets to "Copy".
 - Section 5 (SETTINGS) is a visual-only reminder block — amber/yellow tint, no copy button.
 - **Sections in order:**
-  1. **TITLE** — the YouTube video title. Apply emoji prefix rule (from Agent 02): 🇰🇭 for Cambodia videos, 🚀 for money/income/bootstrapping videos. The emoji must be part of the title text so it copies correctly.
+  1. **TITLE** — the YouTube video title. Apply the title prefix rule from Agent 02 (`{channel.title_prefixes}` in the config). The prefix must be part of the title text so it copies correctly.
   2. **DESCRIPTION** — full description text including chapters (chapters show [DRAFT] inline)
   3. **TAGS** — comma-separated list, paste-ready for YouTube Studio. Display a live character counter badge next to the section label (e.g. "498 / 500" in green). Tags MUST be maximized to ~500 characters. Operator workflow: delete all existing tags in YouTube Studio → paste all tags with one Ctrl+V.
   4. **HASHTAGS** — 3 hashtags on one line
   5. **SETTINGS** — styled as a checklist reminder block (amber/yellow background tint, no copy button):
      ```
-     ☑ Not made for kids — select "No, it's not made for kids"
-     ☑ AI-generated content disclosure — check the AI content box
-     ☑ Visibility — set to Unlisted until ready to publish
+     [ ] Not made for kids — select "No, it's not made for kids"
+     [ ] AI-generated content disclosure — check the AI content box
+     [ ] Visibility — set to Unlisted until ready to publish
      ```
   6. **PLAYLIST** — exact playlist name to add this video to (paste into YouTube Studio playlist field)
   7. **CARDS** — paste-ready reference block (added in YouTube Studio → Video Details → Cards):
@@ -163,35 +165,35 @@ Use `mcp__cowork__create_artifact` to create a persistent HTML page with all pub
      ```
   9. **THUMBNAIL** — Google Drive link to thumbnail image exported from Canva (Agent 04 output). Display as a clickable link inside the copy block. If placeholder, show the placeholder text in italics with a distinct orange border on the block.
   10. **CHAPTERS (DRAFT)** — timestamps only, with a visible amber badge `[DRAFT]` next to the section header
-  11. **DESIGN BRIEF** — the full thumbnail brief from Agent 04 (read from `04_Thumbnail_Briefs` subfolder). Styled with a distinct purple/lavender border and background so it stands out. Scrollable if long (max-height ~320px with overflow-y: auto). Has its own Copy button. Label: "🎨 Design Brief" with sub-label "Nano Banana / Canva". This allows the operator to copy the full design brief instantly without searching Google Drive.
+  11. **DESIGN BRIEF** — the full thumbnail brief from Agent 04 (read from `04_Thumbnail_Briefs` subfolder). Styled with a distinct purple/lavender border and background so it stands out. Scrollable if long (max-height ~320px with overflow-y: auto). Has its own Copy button. Label: "Design Brief" with sub-label "Nano Banana / Canva". This allows the operator to copy the full design brief instantly without searching Google Drive.
 
-  12. **POST-PUBLISH ACTIONS** — shown at the bottom of the artifact after the video is published. Dark background section (#111), header "🚀 Post-Publish Menu", subtext "All optional — run in any order after the video is live." Five action buttons in a row, each styled as a pill/chip. On click, each button copies a trigger phrase to clipboard so the operator can paste it into chat:
-      - **[S] Shorts** → copies `"shortokat is kérem"` | grey chip
+  12. **POST-PUBLISH ACTIONS** — shown at the bottom of the artifact after the video is published. Dark background section (#111), header "Post-Publish Menu", subtext "All optional — run in any order after the video is live." Five action buttons in a row, each styled as a pill/chip. On click, each button copies a trigger phrase to clipboard so the operator can paste it into chat:
+      - **[S] Shorts** → copies `"make the Shorts"` | grey chip
       - **[R] Repurpose** → copies `"repurpose"` | grey chip
       - **[C] Community** → copies `"community post"` | grey chip
       - **[E] Email/Funnel** → copies `"conversion audit"` | grey chip
-      - **[M] Captions** → copies `"felirat fordítás"` | green chip (highest SEO ROI — visually distinguished)
-      Below the buttons: small text — "💡 [M] Captions = 25 language SRT upload. Free. ~3 min. Biggest SEO boost."
+      - **[M] Captions** → copies `"translate captions"` | green chip (highest SEO ROI — visually distinguished)
+      Below the buttons: small text — "[M] Captions = 25 language SRT upload. Free. ~3 min. Biggest SEO boost."
 
-- Footer: small grey text — "Chapters are estimates (130 wpm). After HeyGen video approval, say 'HeyGen jóváhagyva' to finalize."
+- Footer: small grey text — "Chapters are estimates (130 wpm). After HeyGen video approval, say 'HeyGen approved' to finalize."
 - **Save the artifact `id`** from the tool response — required for Phase 2 update.
 
 ### Step 7: Generate HeyGen Production Prompt
 
 After the Publishing Artifact is live, convert the script (fetched in Pre-Flight) into HeyGen marker format. Save to Drive.
 
-#### Standing HeyGen Settings (v4 — Zoltan Gero)
+#### Standing HeyGen Settings (v4, from config and Foundation doc)
 
 **Avatar:**
 - Avatar ID: from the channel Foundation doc `heygen_avatar_id` (the channel's own avatar, a
-  standard HeyGen avatar, or a client's uploaded avatar — never hardcode a person). Current
-  channel default / example: `bfcee432248442539191df03f922f575`.
+  standard HeyGen avatar, or a client's uploaded avatar — never hardcode a person). No default
+  ID in the plugin.
 - Frame: Circle Frame applied throughout
 - Engine: Motion Engine Avatar III, Unlimited Engine
 - Fallback: Do NOT substitute silently. Flag immediately and wait for instruction.
 
 **Voice:**
-- Voice ID: from Foundation `heygen_voice_id` (cloned or standard). Example: `99b6f9eca33e474483987860185fdc43`.
+- Voice ID: from Foundation `heygen_voice_id` (cloned or standard).
 - Speed: Minimum +25% faster than default, recommended +50% faster. Mandatory, entire video, no exceptions.
 - Fallback: substitute free voice matching the channel's voice profile, flag which.
 
@@ -216,7 +218,7 @@ After the Publishing Artifact is live, convert the script (fetched in Pre-Flight
 
 ```
 # HeyGen Video Agent — Video Prompt
-### For: Zoltan Gero | YouTube Teaching & Tutorial Videos
+### For: {creator.name} | {channel.name}
 Template v4.0 | Changes: [brief note on what changed from previous version]
 
 ---
@@ -235,12 +237,12 @@ Estimate total video credits before generating.
 - Voice Speed: FASTER than default. Minimum +25% faster, recommended +50% faster. Mandatory, entire video.
 ---
 ## SECTION 2, AVATAR
-- Avatar ID: from Foundation `heygen_avatar_id` (own / standard HeyGen / client upload). Example: bfcee432248442539191df03f922f575
+- Avatar ID: from Foundation `heygen_avatar_id` (own / standard HeyGen / client upload)
 - Frame: Circle Frame applied throughout every avatar appearance
 - Engine: Motion Engine Avatar III, Unlimited Engine
 - Fallback rule: Do NOT substitute silently. Flag immediately.
 ## SECTION 3, VOICE
-- Voice ID: from Foundation `heygen_voice_id`. Example: 99b6f9eca33e474483987860185fdc43
+- Voice ID: from Foundation `heygen_voice_id`
 - Speed: +50% faster than default (minimum +25%). Applies to entire video. No exceptions.
 - Fallback rule: substitute free voice matching the channel's voice profile, flag which one was used.
 ```
@@ -269,13 +271,13 @@ Save HeyGen prompt to Drive root (`parentId: 0AG9wJnPFjzalUk9PVA`).
 File naming: `[YYYY-MM-DD]_HeyGen_[title-slug]_Video[ep-number]_v1`
 
 **Phase 1 completion message to operator:**
-`"✅ Publishing Artifact live in chat — all copy buttons ready | ✅ HeyGen prompt saved → [heygen-link] | Paste the HeyGen document into HeyGen Video Agent and start generation. Come back when you've watched and approved the final video: say 'HeyGen jóváhagyva' + any chapter timing corrections. | ✅ Checklist saved → [checklist-link]"`
+`"Publishing Artifact live in chat — all copy buttons ready | HeyGen prompt saved → [heygen-link] | Paste the HeyGen document into HeyGen Video Agent and start generation. Come back when you've watched and approved the final video: say 'HeyGen approved' + any chapter timing corrections. | Checklist saved → [checklist-link]"`
 
 ---
 
 ## PHASE 2: Chapters Finalization (Post-HeyGen Approval)
 
-**Trigger:** Operator says "HeyGen jóváhagyva", "approved", "chapters ok", "jóváhagytam", "mehet a chapters", or any equivalent confirmation the final HeyGen video has been watched and approved.
+**Trigger:** Operator says "HeyGen approved", "approved", "chapters ok", or any equivalent confirmation the final HeyGen video has been watched and approved.
 
 Steps:
 1. Ask: "Any chapter timestamp corrections? Or should I confirm the draft estimates as-is?" (Keep it short — one question.)
@@ -285,8 +287,8 @@ Steps:
    - Replace CHAPTERS section content with finalized timestamps
    - Remove the amber [DRAFT] badge from the chapters header
    - Update the DESCRIPTION section to include the finalized chapters (replace the draft placeholder)
-5. Confirm: `"✅ Chapters finalized. Publishing Artifact updated."`
-6. **Automatically invoke Agent 05b** — do NOT wait for operator to type "felirat fordítás".
+5. Confirm: `"Chapters finalized. Publishing Artifact updated."`
+6. **Automatically invoke Agent 05b** — do NOT wait for operator to type "translate captions".
    Say: `"▶ Starting Agent 05b — Multilingual Captions (25 languages, free, ~3 min)..."`
    Then invoke `agent-05b-multilingual-captions` skill immediately.
    Pass: active channel folder ID, English SRT location (from Captions/ subfolder), video ID (ask once if not yet provided).
@@ -305,7 +307,7 @@ Steps:
 1. Copy video URL and share with known ideal viewers (personal message, not broadcast)
 2. Add video link to email signature if not already present
 3. Pass video URL to Agent 07 (Post-Publish Content — Repurposing [R] + Community [C] modes)
-4. **Multilingual captions (SEO boost):** Say "felirat fordítás" or "M" to trigger Agent 05b.
+4. **Multilingual captions (SEO boost):** Say "translate captions" or "M" to trigger Agent 05b.
    Translates English SRT to 25 languages, uploads to YouTube. Free, ~3 min. Zero storage impact.
 
 ---
@@ -345,7 +347,7 @@ Metrics to collect: Views per video, Average retention %, CTR % (by traffic sour
 
 ## Captions Workflow
 
-**Philosophy:** Always use the HeyGen-generated caption file — it is more accurate than YouTube auto-captions, especially for Zoltan's European accent, AI/tech vocabulary, and AI-cloned voice. Upload it as the English closed caption track on YouTube.
+**Philosophy:** Always use the HeyGen-generated caption file — it is more accurate than YouTube auto-captions, especially for non-native accents, AI/tech vocabulary, and AI-cloned voice. Upload it as the English closed caption track on YouTube.
 
 ### Naming Convention
 `[title-slug]_ENG_cc_timestamps.srt`
@@ -391,7 +393,7 @@ Captions live in a dedicated subfolder inside the active channel folder:
 
 **MANDATORY: Do NOT print checklist content into chat. Write to Drive immediately, then share only the link.**
 
-Execute these Drive MCP steps (tool prefix: `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`):
+Execute these Drive MCP steps (the Google Drive tool, found by name (see references/config-loading.md section 4)):
 
 1. **Find subfolder:** `search_files(query: "title = '05_Publish_Checklists' and parentId = '[channelFolderID]'")`  → get subfolder ID
 

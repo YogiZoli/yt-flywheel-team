@@ -1,7 +1,9 @@
 ---
 name: agent-05b-multilingual-captions
-description: Post-publish multilingual caption generator. Translates English SRT to 25 languages using free Google Translate (no API key, no paid service), saves all SRTs to Drive, uploads to YouTube as subtitle tracks. Triggers after video is published. Phrases: "fordítsd le a feliratot", "multilingual captions", "05b", "caption fordítás", "felirat fordítás", "sub upload", "subtitle upload", "translate captions", "25 nyelv", "fordítás felirat".
+description: Post-publish multilingual caption generator. Translates English SRT to 25 languages using free Google Translate (no API key, no paid service), saves all SRTs to Drive, uploads to YouTube as subtitle tracks. Triggers after video is published. Phrases: "multilingual captions", "05b", "translate captions", "sub upload", "subtitle upload", "25 languages".
 ---
+
+**Step 0. Load config:** follow `references/config-loading.md` (skip if a CONTEXT BLOCK is passed in). `{...}` values below come from that config.
 
 # Agent 05b — Multilingual Caption Generator & Uploader
 **Phase:** Post-publish (runs after Agent 05 Phase 2 is complete)
@@ -36,8 +38,8 @@ Use Drive MCP tools directly — do not ask operator to provide these:
 
 3. **Get video title slug:** Parse from the SRT filename (everything before `_ENG_cc_timestamps`)
 
-4. **Get YouTube video ID:** Ask operator: "Kérem illessze be a YouTube videó URL-jét
-   (pl. https://youtube.com/watch?v=XXXXXXXXXXX)" — extract the `v=` parameter.
+4. **Get YouTube video ID:** Ask operator: "Please paste the YouTube video URL
+   (e.g. https://youtube.com/watch?v=XXXXXXXXXXX)" — extract the `v=` parameter.
 
 ---
 
@@ -123,10 +125,10 @@ errors  = []
 for g_code, yt_code, name in LANGUAGES:
     try:
         results[yt_code] = {"name": name, "srt": translate_srt(SRT_CONTENT, g_code)}
-        print(f"✅ {name} ({yt_code})")
+        print(f"OK {name} ({yt_code})")
     except Exception as e:
-        errors.append(f"❌ {name}: {e}")
-        print(f"❌ {name}: {e}")
+        errors.append(f"FAILED {name}: {e}")
+        print(f"FAILED {name}: {e}")
 
 print(f"\nDone: {len(results)}/25 languages")
 if errors:
@@ -155,7 +157,7 @@ Examples:
 - `ghl-agency-setup_pt-BR_sub_timestamps.srt`
 - `ghl-agency-setup_km_sub_timestamps.srt`
 
-Use Drive MCP (tool prefix `mcp__4dfc969f-edaf-4938-b2b2-5a86f07b939f`) for each language:
+Use Drive MCP (the Google Drive tool, found by name (see references/config-loading.md section 4)) for each language:
 ```
 create_file(
   title: "[title-slug]_[yt-code]_sub_timestamps.srt",
@@ -212,13 +214,13 @@ If automated upload fails:
 2. Print this message:
 
 ```
-⚠️ Automatikus YouTube upload nem sikerült — de minden fájl kész a Drive-on.
+WARNING: Automatic YouTube upload failed, but all files are ready on Drive.
 
-Manual upload (kb. 5 perc az összes nyelvhez):
-YouTube Studio → Videók → kattints a videóra → "Feliratok" tab
-→ minden nyelvnél: "ADD LANGUAGE" → Upload file → select SRT from Drive → Save
+Manual upload (about 5 minutes for all languages):
+YouTube Studio → Content → click the video → "Subtitles" tab
+→ for each language: "ADD LANGUAGE" → Upload file → select SRT from Drive → Save
 
-Drive mappa (25 SRT fájl): [CAPTIONS_FOLDER_LINK]
+Drive folder (25 SRT files): [CAPTIONS_FOLDER_LINK]
 ```
 
 ---
@@ -228,17 +230,17 @@ Drive mappa (25 SRT fájl): [CAPTIONS_FOLDER_LINK]
 After all steps complete, print to chat:
 
 ```
-✅ Agent 05b — Multilingual Captions Complete
+Agent 05b — Multilingual Captions Complete
 Video: [title] | ID: [video_id]
 
 Translated & saved to Drive: [N]/25 → [Captions folder link]
-YouTube upload: [✅ Automated | ⚠️ Manual — Drive folder shared above]
+YouTube upload: [Automated | Manual — Drive folder shared above]
 
-Tier 1 (10):  Spanish ✅ | Portuguese BR ✅ | German ✅ | French ✅ | Italian ✅
-              Vietnamese ✅ | Thai ✅ | Khmer ✅ | Filipino ✅ | Malay ✅
-Tier 2 (5):   Indonesian ✅ | Dutch ✅ | Polish ✅ | Turkish ✅ | Hindi ✅
-Tier 3 (10):  Japanese ✅ | Korean ✅ | Arabic ✅ | Russian ✅ | Chinese ✅
-              Ukrainian ✅ | Czech ✅ | Swedish ✅ | Greek ✅ | Romanian ✅
+Tier 1 (10):  Spanish ok | Portuguese BR ok | German ok | French ok | Italian ok
+              Vietnamese ok | Thai ok | Khmer ok | Filipino ok | Malay ok
+Tier 2 (5):   Indonesian ok | Dutch ok | Polish ok | Turkish ok | Hindi ok
+Tier 3 (10):  Japanese ok | Korean ok | Arabic ok | Russian ok | Chinese ok
+              Ukrainian ok | Czech ok | Swedish ok | Greek ok | Romanian ok
 
 SEO impact: Video now indexed in 25 languages on YouTube search.
 Cost: $0.00
@@ -266,6 +268,6 @@ Agent 05b is one of three optional post-publish steps (all run independently, in
 
 | Agent | What it does | Trigger phrase |
 |-------|-------------|----------------|
-| **05b** | Multilingual captions — 25 languages, free | "felirat fordítás" / "05b" |
+| **05b** | Multilingual captions — 25 languages, free | "translate captions" / "05b" |
 | 03c | YouTube Shorts — 3-5 clips from long-form | "shortok" |
 | 07  | Repurposing briefs — Reels, LinkedIn, email | "repurpose" |
